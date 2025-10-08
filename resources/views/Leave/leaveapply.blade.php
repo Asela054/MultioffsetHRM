@@ -561,15 +561,15 @@
 
         $('#employee').change(function () {
             var _token = $('input[name="_token"]').val();
-            var leavetype = $('#leavetype').val();
+            
             var emp_id = $('#employee').val();
             var status = $('#employee option:selected').data('id');
 
-            if (leavetype != '' && emp_id != '') {
+            if (emp_id != '') {
                 $.ajax({
                     url: "getEmployeeLeaveStatus",
                     method: "POST",
-                    data: {status: status, emp_id: emp_id, leavetype: leavetype, _token: _token},
+                    data: {status: status, emp_id: emp_id, _token: _token},
                     success: function (data) {
 
                         $('#leave_msg').html('');

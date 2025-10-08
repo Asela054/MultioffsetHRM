@@ -3066,7 +3066,7 @@ class AttendanceController extends Controller
     }
     public function ot_check(Request $request)
     {
-        $permission = Auth::user()->can('ot-approve');
+        $permission = Auth::user()->can('ot-check');
         if(!$permission){
             abort(403);
         }
@@ -3079,7 +3079,7 @@ class AttendanceController extends Controller
 
     public function get_ot_details(Request $request)
     {
-        $permission = Auth::user()->can('ot-approve');
+        $permission = Auth::user()->can('ot-check');
         if(!$permission){
             return response()->json(['error' => 'UnAuthorized'], 401);
         }

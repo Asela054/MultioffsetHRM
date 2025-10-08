@@ -49,7 +49,7 @@
           @can('attendance-incomplete-data-list')
             <li><a class="dropdown-item" href="{{ route('incomplete_attendances')}}">Incomplete Attendances</a></li>
           @endcan
-           @can('ot-approve')
+           @can('ot-check')
             <li><a class="dropdown-item" href="{{ route('ot_check')}}">OT Check</a></li>
           @endcan
           @can('ot-approve')

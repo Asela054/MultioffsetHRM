@@ -27,9 +27,8 @@ class RoleController extends Controller
             abort(403);
         }
 
-        $roles = Role::orderBy('id','DESC')->paginate(5);
-        return view('roles.index',compact('roles'))
-            ->with('i', ($request->input('page', 1) - 1) * 5);
+        $roles = Role::orderBy('id','desc')->get();
+        return view('roles.index',compact('roles'));
     }
 
     public function create()

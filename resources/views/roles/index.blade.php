@@ -30,22 +30,22 @@
 
                         <div class="col-12 table-responsive">
 
-                            <table class="table table-bordered">
+                            <table class="table table-striped table-bordered table-sm small" id="roletable">
                                 <tr>
                                     <th>No</th>
                                     <th>Name</th>
                                     <th width="280px">Action</th>
                                 </tr>
-                                @foreach ($roles as $key => $role)
+                                @foreach ($roles as $role)
                                     <tr>
-                                        <td>{{ ++$i }}</td>
+                                        <td>{{ $role->id }}</td>
                                         <td>{{ $role->name }}</td>
                                         <td>
                                             <a class="btn btn-info btn-sm" href="{{ route('roles.show',$role->id) }}"><i class="fa fa-eye"></i></a>
-{{--                                            @can('role-edit')--}}
+                                            @can('role-edit')
                                                 <a class="btn btn-primary btn-sm" href="{{ route('roles.edit',$role->id) }}"><i class="fa fa-pencil-alt"></i></a>
-{{--                                            @endcan--}}
-                                            @can('role-delete')
+                                            @endcan
+                                                @can('role-delete')
                                                 @if($role->id != 1)
                                                     <form method="POST" action="{{ route('roles.destroy', $role->id) }}" id="delete_form" style="display:inline">
                                                         {{ csrf_field() }}
@@ -70,11 +70,18 @@
 
 @section('script')
     <script>
+        $(document).ready(function () {
+        $('#jobtable').DataTable();
+    });
         $(document).ready(function(){
+
+             
 
             $('#administrator_menu_link').addClass('active');
             $('#administrator_menu_link_icon').addClass('active');
             $('#roles_link').addClass('navbtnactive');
+
+            $('#roletable').DataTable();
 
         });
     </script>
