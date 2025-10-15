@@ -215,11 +215,15 @@
                                     ot_data_html += '<td><i class="fa fa-check text-success"></i></td>';
                                 }
 
+                                var date = new Date(obj.date);
+                            var options = { weekday: 'long' }; // "long" gives full name (Monday, Tuesday, etc.)
+                            var day_name = date.toLocaleDateString('en-US', options);
+
                                 ot_data_html += '<td>' + obj.emp_id + '</td>';
-                                ot_data_html += '<td>' + obj.emp_auto_id + '</td>';
+                                ot_data_html += '<td>' + obj.emp_etfno + '</td>';
                                 ot_data_html += '<td>' + obj.emp_name_with_initial + '</td>';
                                 ot_data_html += '<td>' + obj.date + '</td>';
-                                ot_data_html += '<td>' + obj.shift_name + '</td>';
+                                ot_data_html += '<td>' + day_name + '</td>';
                                 ot_data_html += '<td>' + from_input + '</td>';
                                 ot_data_html += '<td>' + to_input + '</td>';
                                 ot_data_html += '<td>' + hours_input + '</td>';
