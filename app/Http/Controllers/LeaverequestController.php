@@ -173,7 +173,7 @@ class LeaverequestController extends Controller
         if (request()->ajax()){
         $data = DB::table('leave_request')
         ->join('employees as emp', 'leave_request.emp_id', '=', 'emp.emp_id')
-        ->join('employees as cemp', 'leave_request.emp_id', '=', 'cemp.emp_id')
+        ->join('employees as cemp', 'leave_request.covering_employee', '=', 'cemp.emp_id')
         ->select('leave_request.*','emp.emp_name_with_initial as emp_name','cemp.emp_name_with_initial as covering_employee_name')
         ->where('leave_request.id', $id)
         ->get(); 

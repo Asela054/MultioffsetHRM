@@ -216,7 +216,7 @@
                                 }
 
                                 ot_data_html += '<td>' + obj.emp_id + '</td>';
-                                ot_data_html += '<td>' + obj.emp_auto_id + '</td>';
+                                ot_data_html += '<td>' + obj.emp_etfno + '</td>';
                                 ot_data_html += '<td>' + obj.emp_name_with_initial + '</td>';
                                 ot_data_html += '<td>' + obj.date + '</td>';
                                 ot_data_html += '<td>' + obj.shift_name + '</td>';

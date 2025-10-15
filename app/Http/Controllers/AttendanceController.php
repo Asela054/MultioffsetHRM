@@ -3178,41 +3178,7 @@ class AttendanceController extends Controller
 
     }
 
-    public function ot_check_post(Request $request)
-    {
-        $permission = Auth::user()->can('ot-approve');
-        if(!$permission){
-            return response()->json(['error' => 'UnAuthorized'], 401);
-        }
-
-        $checked = $request->ot_data;
-        $checkedby = Auth::user()->id;
-        foreach ($checked as $ch) {
-
-            $data = array(
-                'emp_id' => $ch['emp_id'],
-                'date' => $ch['date'],
-                'from' => $ch['from'],
-                'to' => $ch['to'],
-                'hours' => $ch['hours'],
-                //'one_point_five_hours' => $ch['one_point_five_hours'],
-                'double_hours' => $ch['double_hours'],
-                'is_holiday' => $ch['is_holiday'],
-                'checked' => 1,
-                'checked_by' => $checkedby,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            );
-
-            OtApproved::query()->insert($data);
-
-        }
-
-        return response()->json(['success' => 'OT Details Checked']);
-
-    }
-
-     public function get_checked_ot_details(Request $request)
+    public function get_checked_ot_details(Request $request)
         {
             $permission = Auth::user()->can('ot-approve');
             if (!$permission) {
@@ -3230,6 +3196,7 @@ class AttendanceController extends Controller
 
             $sql = "SELECT oa.*, 
                         employees.emp_id,
+                        employees.emp_etfno,
                         employees.emp_shift,
                         employees.id as emp_auto_id,
                         employees.emp_name_with_initial,
@@ -3287,6 +3254,42 @@ class AttendanceController extends Controller
             return response()->json(['ot_data' => $ot_data]);
         }
 
+
+    public function ot_check_post(Request $request)
+    {
+        $permission = Auth::user()->can('ot-approve');
+        if(!$permission){
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $checked = $request->ot_data;
+        $checkedby = Auth::user()->id;
+        foreach ($checked as $ch) {
+
+            $data = array(
+                'emp_id' => $ch['emp_id'],
+                'date' => $ch['date'],
+                'from' => $ch['from'],
+                'to' => $ch['to'],
+                'hours' => $ch['hours'],
+                //'one_point_five_hours' => $ch['one_point_five_hours'],
+                'double_hours' => $ch['double_hours'],
+                'is_holiday' => $ch['is_holiday'],
+                'checked' => 1,
+                'checked_by' => $checkedby,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            );
+
+            OtApproved::query()->insert($data);
+
+        }
+
+        return response()->json(['success' => 'OT Details Checked']);
+
+    }
+
+     
 
 
     public function ot_approve_post(Request $request)
