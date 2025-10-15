@@ -100,12 +100,12 @@ require('ssp.customized.class.php' );
 		$location = $_POST['location'];
 		$sql .= " AND `e`.`emp_location` = '$location'";
 	}
-
-	// if (!empty($_POST['from_date']) && !empty($_POST['to_date'])) {
-	// 	$from_date = $_POST['from_date'];
-	// 	$to_date = $_POST['to_date'];
-	// 	$sql .= " AND `leaves`.`leave_from` BETWEEN '$from_date' AND '$to_date'";
-	// }
+	
+	if (!empty($_POST['from_date']) && !empty($_POST['to_date'])) {
+		$from_date = $_POST['from_date'];
+		$to_date = $_POST['to_date'];
+		$sql .= " AND `leaves`.`leave_from` BETWEEN '$from_date' AND '$to_date'";
+	}
 	
 	$joinQuery = "FROM ($sql) AS `u`";
 	$extraWhere = "";

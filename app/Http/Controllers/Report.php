@@ -641,17 +641,17 @@ class Report extends Controller
                 foreach ($period as $date) {
                     $f_date = $date->format('Y-m-d');
 
-                    $sql = " SELECT *, Max(attendances.timestamp) as lasttimestamp FROM attendances WHERE uid = '".$record->emp_id."' AND deleted_at IS NULL ";
+                    $sql = " SELECT *, Min(attendances.timestamp) as firsttimestamp, Max(attendances.timestamp) as lasttimestamp FROM attendances WHERE uid = '".$record->emp_id."' AND deleted_at IS NULL ";
                     $sql.= 'AND date LIKE "'.$f_date.'%" ';
 
                     $sql.= 'GROUP BY uid, date ';
                     $sql.= 'ORDER BY date DESC ';
-
+                    
                     $attendances = DB::select($sql);
 
                     if(!empty($attendances)) {
                         $to = \Carbon\Carbon::parse($attendances[0]->lasttimestamp);
-                        $from = \Carbon\Carbon::parse($attendances[0]->timestamp);
+                        $from = \Carbon\Carbon::parse($attendances[0]->firsttimestamp);
 
                         //diff in minutes and convert to hours
                         $diff_in_minutes = $to->diffInMinutes($from);
@@ -661,7 +661,7 @@ class Report extends Controller
                         $diff_in_hours = number_format((float)$diff_in_hours, 2, '.', '');
                         $workhours = $diff_in_hours;
                         $rec_date =  Carbon::parse($attendances[0]->date)->toDateString();
-                        $first_time_stamp = $attendances[0]->timestamp;
+                        $first_time_stamp = $attendances[0]->firsttimestamp;
                         $last_time_stamp = '';
 
 
@@ -766,7 +766,7 @@ class Report extends Controller
                         // }
 
 
-                        if($attendances[0]->timestamp != $attendances[0]->lasttimestamp){
+                        if($attendances[0]->firsttimestamp != $attendances[0]->lasttimestamp){
                             $last_time_stamp = $attendances[0]->lasttimestamp;
                         }
                         $first_time_stamp = \Carbon\Carbon::parse($first_time_stamp)->format('H:i');
@@ -1070,6 +1070,7 @@ class Report extends Controller
                     $f_date = $date->format('Y-m-d');
 
                     $sql = " SELECT *,
+                    Min(attendances.timestamp) as firsttimestamp,
                     Max(attendances.timestamp) as lasttimestamp
                     FROM attendances WHERE uid = '".$record->emp_id."' AND deleted_at IS NULL ";
 
@@ -1083,15 +1084,15 @@ class Report extends Controller
                     if(!EMPTY($attendances)) {
 
                         $to = \Carbon\Carbon::parse($attendances[0]->lasttimestamp);
-                        $from = \Carbon\Carbon::parse($attendances[0]->timestamp);
+                        $from = \Carbon\Carbon::parse($attendances[0]->firsttimestamp);
 
                         $workhours = gmdate("H:i:s", $to->diffInSeconds($from));
                         $rec_date =  Carbon::parse($attendances[0]->date)->toDateString();
 
-                        $first_time_stamp = $attendances[0]->timestamp;
+                        $first_time_stamp = $attendances[0]->firsttimestamp;
                         $last_time_stamp = '';
 
-                        if($attendances[0]->timestamp != $attendances[0]->lasttimestamp){
+                        if($attendances[0]->firsttimestamp != $attendances[0]->lasttimestamp){
                             $last_time_stamp = $attendances[0]->lasttimestamp;
                         }
 
@@ -1144,15 +1145,15 @@ class Report extends Controller
                 foreach ($attendances as $attendance) {
 
                     $to = \Carbon\Carbon::parse($attendance->lasttimestamp);
-                    $from = \Carbon\Carbon::parse($attendance->timestamp);
+                    $from = \Carbon\Carbon::parse($attendance->firsttimestamp);
 
                     $workhours = gmdate("H:i:s", $to->diffInSeconds($from));
                     $rec_date =  Carbon::parse($attendance->date)->toDateString();
 
-                    $first_time_stamp = $attendance->timestamp;
+                    $first_time_stamp = $attendance->firsttimestamp;
                     $last_time_stamp = '';
 
-                    if($attendance->timestamp != $attendance->lasttimestamp){
+                    if($attendance->firsttimestamp != $attendance->lasttimestamp){
                         $last_time_stamp = $attendance->lasttimestamp;
                     }
 

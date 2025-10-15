@@ -294,8 +294,9 @@
                     [5, "desc"]
                 ]
             });
-             var searchPattern = userDepartmentNames.join('|');
-             empTable.column(2).search(searchPattern, true, false).draw();
+
+            // var searchPattern = userDepartmentNames.join('|');
+            // empTable.column(2).search(searchPattern, true, false).draw();
         }
 
         let company = $('#company_f').val();
