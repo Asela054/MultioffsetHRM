@@ -164,6 +164,7 @@ class HomeController extends Controller
         )
         ->where('attendances.date', '=', $today)
         ->where('attendances.location', $companyId)
+        ->where('attendances.deleted_at', null)
         ->havingRaw('MIN(attendances.timestamp) < ?', [$today . ' ' . $late_times->time_from])
         ->groupBy('attendances.date','attendances.uid')
         ->get();

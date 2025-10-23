@@ -3509,7 +3509,13 @@ class AttendanceController extends Controller
         $date = date('Y-m-d', strtotime($date_time));
 
         //delete attendance
-        $status = Attendance::query()->where('uid', $uid)->whereDate('date', $date)->delete();
+       // $status = Attendance::query()->where('uid', $uid)->whereDate('date', $date)->delete();
+
+       $status = Attendance::query()
+        ->where('uid', $uid)
+        ->whereDate('date', $date)
+        ->update(['deleted_at' => now()]);
+
 
         return response()->json([
             'success' => true,

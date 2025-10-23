@@ -31,7 +31,9 @@
                                         <select required class="form-control form-control-sm @if ($errors->has('relationship')) border-danger-soft @endif"
                                                 id="relationship" name="relationship">
                                             <option @if(old('relationship') == '') selected @endif value="">Select</option>
+                                            <option @if(old('relationship') == 'Father') selected @endif value="Father">Father</option>
                                             <option @if(old('relationship') == 'Son') selected @endif value="Son">Son</option>
+                                            <option @if(old('relationship') == 'Mother') selected @endif value="Mother">Mother</option>
                                             <option @if(old('relationship') == 'Daughter') selected @endif value="Daughter">Daughter</option>
                                             <option @if(old('relationship') == 'Wife') selected @endif value="Wife">Wife</option>
                                             <option @if(old('relationship') == 'Husband') selected @endif value="Husband">Husband</option>
@@ -124,7 +126,9 @@
                                         <label class="small font-weight-bold text-dark">Relationship</label>
                                         <select class="form-control form-control-sm"
                                                 id="edit_relationship" name="relationship">
-                                            <option >Select</option>
+                                            <option >Select</option>                                            
+                                            <option value="Father">Father</option>
+                                            <option  value="Mother">Mother</option>
                                             <option value="Son">Son</option>
                                             <option value="Daughter">Daughter</option>
                                             <option value="Wife">Wife</option>

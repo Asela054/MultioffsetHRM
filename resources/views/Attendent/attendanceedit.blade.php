@@ -611,16 +611,6 @@
                     processing: true,
                     serverSide: true,
                     ajax: {
-                        
-                        // "url": "{!! route('attendance_list_for_edit') !!}",
-                        // "data": {'company':company_f.val(),
-                        //     'location': location_f.val(),
-                        //     'department':department_f.val(),
-                        //     'employee':employee_f.val(),
-                        //     'from_date': $('#from_date').val(),
-                        //     'to_date': $('#to_date').val(),
-                        // },
-
                         url: scripturl + "/attendance_list_for_edit.php",
                         type: "POST",
                         data: {
@@ -650,8 +640,8 @@
                             "name": "first_time_stamp",
                         },
                         {
-                            "data": "last_time_stamp",
-                            "name": "last_time_stamp",
+                            "data": "formatted_date",
+                            "name": "formatted_date",
                             "render": function(data, type, row) {
                                 if (!data || data === '' || data === null) {
                                     return '00:00';
@@ -675,7 +665,7 @@
                             "searchable": false,
                             "render": function(data, type, full) {
                                 var uid = full['uid'];
-                                var date = full['date'];
+                                var date = full['formatted_date'];
                                 var emp_name_with_initial = full['emp_name_with_initial'];
                                 var button = '';
 
