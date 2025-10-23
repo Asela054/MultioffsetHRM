@@ -33,7 +33,7 @@
                         <!-- Today -->
                         <div class="row text-center justify-content-center align-items-center">
                             <div class="col-3 row-label"><h5 class="d-block d-md-none vertical-text">Today</h5><h1 class="d-none d-md-block">Today</h1></div>
-                            <div class="col-3 status-box bg-attendance"><h1 class="text-success"> <a href="#" id="attendancebtn" class="no-underline"> {{$todaycount}} </a></h1></div>
+                            <div class="col-3 status-box bg-attendance"><h1 class="text-success"> <a href="#" id="attendancebtn" class="no-underline"> {{$todaycount-$todaylatecount}} </a></h1></div>
                             <div class="col-3 status-box bg-late"><h1 class="text-warning"><a href="#" id="lateattendancebtn" class="no-underline"> {{$todaylatecount}} </a></h1></div>
                             <div class="col-3 status-box bg-absent"><h1 class="text-danger"><a href="#" id="absentbtn" class="no-underline"> {{$empcount-$todaycount}} </a></h1></div>
                         </div>
@@ -41,7 +41,7 @@
                         <!-- Yesterday -->
                         <div class="row text-center justify-content-center align-items-center">
                             <div class="col-3 row-label"><h5 class="d-block d-md-none vertical-text">Yesterday</h5><h1 class="d-none d-md-block">Yesterday</h1></div>
-                            <div class="col-3 status-box bg-attendance"><h1 class="text-success"><a href="#" id="yesterdayattendancebtn" class="no-underline"> {{$yesterdaycount}} </a></h1></div>
+                            <div class="col-3 status-box bg-attendance"><h1 class="text-success"><a href="#" id="yesterdayattendancebtn" class="no-underline"> {{$yesterdaycount-$yesterdaylatecount}} </a></h1></div>
                             <div class="col-3 status-box bg-late"><h1 class="text-warning"><a href="#" id="yesterdaylateattendancebtn" class="no-underline"> {{$yesterdaylatecount}} </a></h1></div>
                             <div class="col-3 status-box bg-absent"><h1 class="text-danger"><a href="#" id="yesterdayabsentbtn" class="no-underline"> {{$empcount-$yesterdaycount}}</a></h1></div>
                         </div>

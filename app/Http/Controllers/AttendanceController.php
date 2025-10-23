@@ -1464,10 +1464,10 @@ class AttendanceController extends Controller
 
                 } else {
                     $employee = DB::table('employees')
-                        ->join('branches', 'employees.emp_location', '=', 'branches.id')
-                        ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
-                        ->select('fingerprint_devices.sno', 'fingerprint_devices.location')
-                        ->groupBy('fingerprint_devices.location')
+                        // ->join('branches', 'employees.emp_location', '=', 'branches.id')
+                        // ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
+                        ->select('employees.emp_location')
+                        // ->groupBy('fingerprint_devices.location')
                         ->where('employees.emp_id', $emp_id)
                         ->first();
 
@@ -1478,9 +1478,9 @@ class AttendanceController extends Controller
                         'timestamp' => $full_time_out,
                         'date' => $full_date,
                         'approved' => 0,
-                        'type' => 255,
-                        'devicesno' => $employee->sno,
-                        'location' => $employee->location
+                        // 'type' => 255,
+                        // 'devicesno' => $employee->sno,
+                        'location' => $employee->emp_location
                     );
                     $id = DB::table('attendances')->insert($data);
 
