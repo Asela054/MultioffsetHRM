@@ -219,7 +219,7 @@
                                         }
                                         ot_data_html += '<td>' + obj.emp_id + '</td>';
                                         ot_data_html += '<td>' + obj.etf_no + '</td>';
-                                        ot_data_html += '<td>' + obj.name + '</td>';
+                                        ot_data_html += '<td>' + obj.name + ' - ' + key.calling_name + '</td>';
                                         ot_data_html += '<td>' + obj.date + '</td>';
                                         ot_data_html += '<td>' + obj.day_name + '</td>';
                                         ot_data_html += '<td>' + from_input + '</td>';

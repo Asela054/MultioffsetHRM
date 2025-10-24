@@ -289,7 +289,15 @@
 
                         columns: [
                             { data: 'emp_id' },
-                            { data: 'emp_name_with_initial' },
+                            { 
+                                // data: 'emp_name_with_initial' 
+                                "targets": -1,
+                                "className": '',
+                                "data": null,
+                                "render": function (data, type, full) {
+                                    return full['emp_name_with_initial'] + ' - ' + full['calling_name'];
+                                }
+                            },
                             { data: 'date' },
                             { data: 'from' ,
                                 render: function(data, type, row) {

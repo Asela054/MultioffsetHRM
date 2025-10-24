@@ -3257,7 +3257,7 @@ class AttendanceController extends Controller
 
     public function ot_check_post(Request $request)
     {
-        $permission = Auth::user()->can('ot-approve');
+        $permission = Auth::user()->can('ot-check');
         if(!$permission){
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
