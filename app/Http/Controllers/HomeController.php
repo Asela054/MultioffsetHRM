@@ -50,7 +50,7 @@ class HomeController extends Controller
         ->where('date', $today)
         ->where('location', $companyId)
         ->where('deleted_at', NULL)
-        ->havingRaw('MIN(attendances.timestamp) <= ?', [$today . ' ' . $late_times->time_from])
+        ->havingRaw('MIN(attendances.timestamp) < ?', [$today . ' ' . $late_times->time_from])
         ->groupBy('date', 'uid')
         ->get()
         ->count();
@@ -270,6 +270,7 @@ class HomeController extends Controller
         )
         ->where('attendances.date', '=', $today)
         ->where('attendances.location', $companyId)
+        ->where('attendances.deleted_at', null)
         // ->where('attendances.timestamp','>=', $today. ' ' . $late_times->time_from)
         ->havingRaw('MIN(attendances.timestamp) >= ?', [$today . ' ' . $late_times->time_from])
         ->groupBy('attendances.date','attendances.uid')
@@ -433,7 +434,7 @@ class HomeController extends Controller
 
     }
 
-//--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
     // yesterday attendance part
 
     public function department_yesterdayattendance(){
@@ -462,6 +463,7 @@ class HomeController extends Controller
         )
         ->where('attendances.date', '=', $yesterdayDate)
         ->where('attendances.location', $companyId)
+        ->where('attendances.deleted_at', null)
         ->groupBy('attendances.date','attendances.uid')
         ->havingRaw('MIN(attendances.timestamp) < ?', [$yesterdayDate . ' ' . $late_times->time_from])
         ->get();
@@ -556,6 +558,7 @@ class HomeController extends Controller
         )
         ->where('attendances.date', '=', $yesterdayDate)
         ->where('attendances.location', $companyId)
+        ->where('attendances.deleted_at', null)
         ->havingRaw('MIN(attendances.timestamp) >= ?', [$yesterdayDate . ' ' . $late_times->time_from])
         ->groupBy('attendances.date','attendances.uid')
         ->get();
@@ -697,7 +700,7 @@ class HomeController extends Controller
             }
         }
 
-
+        
             $htmlTables = '';
 
                 foreach ($employeesByDepartment as $departmentName => $employees) {
@@ -725,74 +728,74 @@ class HomeController extends Controller
 
     }
 
-//----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
 
- public function getAttendentChart(Request $request)
-{
-    $companyId = Session::get('company_id');
-    $branchId = Session::get('company_branch_id');
+    public function getAttendentChart(Request $request)
+    {
+        $companyId = Session::get('company_id');
+        $branchId = Session::get('company_branch_id');
 
-    // Generate last 30 dates from today (including today)
-   
+        // Generate last 30 dates from today (including today)
+    
 
- // Generate last 30 dates directly as a single SQL UNION string (no Carbon loop)
-$datesQuery = collect(range(0, 29))->map(function ($i) {
-    $date = \Carbon\Carbon::today()->subDays($i)->toDateString();
-    return "SELECT DATE('$date') AS date";
-})->implode(" UNION ALL ");
+        // Generate last 30 dates directly as a single SQL UNION string (no Carbon loop)
+        $datesQuery = collect(range(0, 29))->map(function ($i) {
+            $date = \Carbon\Carbon::today()->subDays($i)->toDateString();
+            return "SELECT DATE('$date') AS date";
+        })->implode(" UNION ALL ");
 
-// Main SQL
-$sql = "
-SELECT 
-    d.date,
-    COUNT(DISTINCT a.uid) AS count
-FROM 
-    (
-        $datesQuery
-    ) AS d
-JOIN employees e 
-    ON e.deleted = 0 
-    AND e.emp_company = :companyId 
-    AND e.emp_location = :branchId
-LEFT JOIN attendances a 
-    ON a.uid = e.emp_id 
-    AND a.date = d.date
-GROUP BY d.date
-ORDER BY d.date ASC
-";
+        // Main SQL
+        $sql = "
+        SELECT 
+            d.date,
+            COUNT(DISTINCT a.uid) AS count
+        FROM 
+            (
+                $datesQuery
+            ) AS d
+        JOIN employees e 
+            ON e.deleted = 0 
+            AND e.emp_company = :companyId 
+            AND e.emp_location = :branchId
+        LEFT JOIN attendances a 
+            ON a.uid = e.emp_id 
+            AND a.date = d.date
+        GROUP BY d.date
+        ORDER BY d.date ASC
+        ";
 
-// Execute the query with bindings
-$data = DB::select($sql, [
-    'companyId' => $companyId,
-    'branchId' => $branchId,
-]);
-
-
-
-    return response()->json($data);
-}
+        // Execute the query with bindings
+        $data = DB::select($sql, [
+            'companyId' => $companyId,
+            'branchId' => $branchId,
+        ]);
 
 
-// public function getAttendentChart(Request $request)
-//     {
-//         $companyId = Session::get('company_id');
-//         $companyName = Session::get('company_name');
-//         $companyBranchId = Session::get('company_branch_id');
-//         $companyBranchName = Session::get('company_branch_name');
 
-//         $data = DB::table('attendances')
-//             ->join('employees', 'attendances.uid', '=', 'employees.emp_id')
-//             ->select('attendances.date', DB::raw('COUNT(DISTINCT attendances.uid) as count'))
-//             ->where('employees.deleted', 0)
-//             ->where('employees.emp_company', $companyId)
-//             ->groupBy('attendances.date')
-//             ->limit(30)
-//             ->orderBy('attendances.date', 'desc')
-//             ->get();
+        return response()->json($data);
+    }
 
-//         return response()->json($data);
 
-//     }
+    // public function getAttendentChart(Request $request)
+    //     {
+    //         $companyId = Session::get('company_id');
+    //         $companyName = Session::get('company_name');
+    //         $companyBranchId = Session::get('company_branch_id');
+    //         $companyBranchName = Session::get('company_branch_name');
+
+    //         $data = DB::table('attendances')
+    //             ->join('employees', 'attendances.uid', '=', 'employees.emp_id')
+    //             ->select('attendances.date', DB::raw('COUNT(DISTINCT attendances.uid) as count'))
+    //             ->where('employees.deleted', 0)
+    //             ->where('employees.emp_company', $companyId)
+    //             ->groupBy('attendances.date')
+    //             ->limit(30)
+    //             ->orderBy('attendances.date', 'desc')
+    //             ->get();
+
+    //         return response()->json($data);
+
+    //     }
 
 
     public function dashboard_attend_update(Request $request)
@@ -845,91 +848,91 @@ $data = DB::select($sql, [
     }
 
     // --------------------------------------------------------------------------------------------------------------
-public function emp_work_days(Request $request) {
-    $emp_working_days = $request->input('emp_working_days'); // Get filter value from request
-    $today = Carbon::now(); // Current date
-    $companyId = Session::get('company_id');
+    public function emp_work_days(Request $request) {
+        $emp_working_days = $request->input('emp_working_days'); // Get filter value from request
+        $today = Carbon::now(); // Current date
+        $companyId = Session::get('company_id');
 
-    // Fetch department data
-    $departmentdata = DB::table('departments')
-        ->select('id', 'name')
-        ->get()
-        ->toArray();
+        // Fetch department data
+        $departmentdata = DB::table('departments')
+            ->select('id', 'name')
+            ->get()
+            ->toArray();
 
-    // Fetch employees
-    $employeedata = DB::table('employees')
-        ->select('employees.emp_id', 'employees.emp_name_with_initial', 'employees.emp_department', 'employees.emp_join_date')
-        ->where('deleted', 0)
-        ->where('is_resigned', 0)
-        ->where('emp_company', $companyId)
-        ->get();
+        // Fetch employees
+        $employeedata = DB::table('employees')
+            ->select('employees.emp_id', 'employees.emp_name_with_initial', 'employees.emp_department', 'employees.emp_join_date')
+            ->where('deleted', 0)
+            ->where('is_resigned', 0)
+            ->where('emp_company', $companyId)
+            ->get();
 
-    // Filter employees based on working days
-    $filteredEmployees = [];
-    foreach ($employeedata as $employee) {
-        if (!empty($employee->emp_join_date)) {
-            $joinDate = Carbon::parse($employee->emp_join_date);
-            $workingDays = $today->diffInDays($joinDate); // Calculate working days
+        // Filter employees based on working days
+        $filteredEmployees = [];
+        foreach ($employeedata as $employee) {
+            if (!empty($employee->emp_join_date)) {
+                $joinDate = Carbon::parse($employee->emp_join_date);
+                $workingDays = $today->diffInDays($joinDate); // Calculate working days
 
-            if ($workingDays >= $emp_working_days) { // Filter based on selected working days
-                $filteredEmployees[] = [
-                    'emp_id' => $employee->emp_id,
-                    'emp_name_with_initial' => $employee->emp_name_with_initial,
-                    'emp_department' => $employee->emp_department,
-                    // 'workDays' => $workingDays // Pass calculated working days
-                ];
+                if ($workingDays >= $emp_working_days) { // Filter based on selected working days
+                    $filteredEmployees[] = [
+                        'emp_id' => $employee->emp_id,
+                        'emp_name_with_initial' => $employee->emp_name_with_initial,
+                        'emp_department' => $employee->emp_department,
+                        // 'workDays' => $workingDays // Pass calculated working days
+                    ];
+                }
             }
         }
-    }
 
-    // Group by department
-    $departmentMap = [];
-    foreach ($departmentdata as $department) {
-        $departmentMap[$department->id] = $department->name;
-    }
+        // Group by department
+        $departmentMap = [];
+        foreach ($departmentdata as $department) {
+            $departmentMap[$department->id] = $department->name;
+        }
 
-    $employeesByDepartment = [];
-    foreach ($filteredEmployees as $employee) {
-        $departmentId = $employee['emp_department'];
+        $employeesByDepartment = [];
+        foreach ($filteredEmployees as $employee) {
+            $departmentId = $employee['emp_department'];
 
-        if (isset($departmentMap[$departmentId])) {
-            $departmentName = $departmentMap[$departmentId];
-            if (!isset($employeesByDepartment[$departmentName])) {
-                $employeesByDepartment[$departmentName] = [];
+            if (isset($departmentMap[$departmentId])) {
+                $departmentName = $departmentMap[$departmentId];
+                if (!isset($employeesByDepartment[$departmentName])) {
+                    $employeesByDepartment[$departmentName] = [];
+                }
+
+                $employeesByDepartment[$departmentName][] = $employee;
+            }
+        }
+
+        // Generate HTML table
+        $htmlTables = '';
+        foreach ($employeesByDepartment as $departmentName => $employees) {
+            $count = 1;
+            $htmlTables .= '<table class="table table-striped table-bordered table-sm small">';
+            $htmlTables .= '<h5>' . $departmentName . '</h5>';
+            $htmlTables .= '<tr><th>#</th><th>Employee ID</th><th>Employee Name</th></tr>';
+
+            foreach ($employees as $employee) {
+                $htmlTables .= '<tr>';
+                $htmlTables .= '<td>' . $count . '</td>';
+                $htmlTables .= '<td>' . $employee['emp_id'] . '</td>';
+                $htmlTables .= '<td>' . $employee['emp_name_with_initial'] . '</td>';
+                $htmlTables .= '</tr>';
+
+                $count++;
             }
 
-            $employeesByDepartment[$departmentName][] = $employee;
-        }
-    }
-
-    // Generate HTML table
-    $htmlTables = '';
-    foreach ($employeesByDepartment as $departmentName => $employees) {
-        $count = 1;
-        $htmlTables .= '<table class="table table-striped table-bordered table-sm small">';
-        $htmlTables .= '<h5>' . $departmentName . '</h5>';
-        $htmlTables .= '<tr><th>#</th><th>Employee ID</th><th>Employee Name</th></tr>';
-
-        foreach ($employees as $employee) {
-            $htmlTables .= '<tr>';
-            $htmlTables .= '<td>' . $count . '</td>';
-            $htmlTables .= '<td>' . $employee['emp_id'] . '</td>';
-            $htmlTables .= '<td>' . $employee['emp_name_with_initial'] . '</td>';
-            $htmlTables .= '</tr>';
-
-            $count++;
+            $htmlTables .= '</table>';
+            $htmlTables .= '<hr style="border-top: 1px solid black;">';
         }
 
-        $htmlTables .= '</table>';
-        $htmlTables .= '<hr style="border-top: 1px solid black;">';
+        return response()->json([
+            'result' => $htmlTables
+        ]);
     }
 
-    return response()->json([
-        'result' => $htmlTables
-    ]);
-}
-
-// --------------------------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------------------------
 
 
     public function today_birthday() {
@@ -1180,5 +1183,5 @@ public function emp_work_days(Request $request) {
     }
 
 
-//----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
 }

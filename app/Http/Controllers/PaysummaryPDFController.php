@@ -178,7 +178,7 @@ class PaysummaryPDFController extends Controller
 
             $paymonth_name = Carbon::createFromFormat('Y-m-d', $payment_period_fr)->format('F Y');
 
-	        $department = DB::select("SELECT name FROM departments WHERE id = ?", [$request->rpt_location_id]);
+	        $department = DB::select("SELECT name FROM departments WHERE id = ?", [$request->rpt_department_id]);
             $department_name = $department[0]->name ?? null;
 
             $data = [

@@ -1286,10 +1286,10 @@ class AttendanceController extends Controller
                     
 
                     $employee = DB::table('employees')
-                        ->join('branches', 'employees.emp_location', '=', 'branches.id')
-                        ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
-                        ->select('fingerprint_devices.sno', 'fingerprint_devices.location', 'employees.emp_id', 'employees.emp_name_with_initial')
-                        ->groupBy('fingerprint_devices.location')
+                        // ->join('branches', 'employees.emp_location', '=', 'branches.id')
+                        // ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
+                        ->select('employees.emp_location', 'employees.emp_id', 'employees.emp_name_with_initial')
+                        // ->groupBy('fingerprint_devices.location')
                         ->where('employees.emp_id', $cr['uid'])
                         ->first();
 
@@ -1301,19 +1301,18 @@ class AttendanceController extends Controller
                         'date' => $cr['date'],
                         'approved' => 0,
                         'type' => 255,
-                        'devicesno' => $employee->sno,
+                        // 'devicesno' => $employee->sno,
                         'location' => $employee->location
                     );
                     $id = DB::table('attendances')->insert($data);
 
                 } else {
-
                     $attendance = Attendance::where('uid', $cr['uid'])
                         ->where('date', $cr['date'])
                         ->where('timestamp', $cr['existing_time_stamp'])->first();
 
                     $prev_timestamp = $attendance->timestamp;
-
+                    
                     // $attendance->emp_id = $cr['uid'];
                     // $attendance->timestamp = $cr['time_stamp'];
                     $attendance->edit_status = '1';
@@ -3257,7 +3256,7 @@ class AttendanceController extends Controller
 
     public function ot_check_post(Request $request)
     {
-        $permission = Auth::user()->can('ot-approve');
+        $permission = Auth::user()->can('ot-check');
         if(!$permission){
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
@@ -3495,6 +3494,36 @@ class AttendanceController extends Controller
             'success' => true,
             'msg' => 'Deleted']);
     }
+    //CHecked OT delete
+    public function ot_checked_delete(Request $request)
+    {
+        $permission = Auth::user()->can('ot-delete');
+        if(!$permission){
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $otdate = $request->get('otdate');
+        $empid = $request->get('empid');
+
+        $checkOTInfo = OtApproved::query()
+            ->select('id', 'approved')
+            ->where('emp_id', $empid)
+            ->where('date', $otdate)
+            ->first();
+
+        if($checkOTInfo->approved == 1){
+            return response()->json([
+                'success' => false,
+                'msg' => 'Approved OT cannot be deleted']);
+        }
+        else{
+            $id = $checkOTInfo->id;
+            OtApproved::query()->where('id', $id)->delete();
+            return response()->json([
+                'success' => true,
+                'msg' => 'Deleted']);
+        }       
+    }
 
     //delete
     public function delete(Request $request)
@@ -3514,7 +3543,7 @@ class AttendanceController extends Controller
        $status = Attendance::query()
         ->where('uid', $uid)
         ->whereDate('date', $date)
-        ->update(['deleted_at' => now()]);
+        ->update(['deleted_at' => Carbon::now()]);
 
 
         return response()->json([

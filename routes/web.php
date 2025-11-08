@@ -416,6 +416,8 @@ Route::get('/ot_approved_list_monthly', 'AttendanceController@ot_approved_list_m
 
 //ot_approved_delete post
 Route::post('/ot_approved_delete', 'AttendanceController@ot_approved_delete')->name('ot_approved_delete');
+//ot_check_delete post
+Route::post('/ot_checked_delete', 'AttendanceController@ot_checked_delete')->name('ot_checked_delete');
 
 
 Route::get('no_pay_report', 'Report@no_pay_report')->name('no_pay_report');

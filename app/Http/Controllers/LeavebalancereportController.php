@@ -46,6 +46,7 @@ class LeavebalancereportController extends Controller
         })
         ->where('payroll_profiles.payroll_process_type_id', '=',1)
         ->where('employees.deleted', '=',0)
+        ->where('employees.is_resigned', '=',0)
         ->orderBy('employees.id')
         ->get();
         

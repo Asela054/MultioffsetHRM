@@ -407,6 +407,10 @@ class Attendance extends Model
             ->where('id', $emp->emp_shift)
             ->first();
 
+        $timeFromLate = DB::table('late_types')
+                ->latest('id') 
+                ->value('time_from'); 
+
         if($date_period == 0){
 
             $date = $record_date;
@@ -430,6 +434,7 @@ class Attendance extends Model
 
             $shift_start =  Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$shift_start_);
             $shift_end = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$shift_end_);
+            $lateTimeFrom = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$timeFromLate);
 
             //date format is YYYY-MM-DD
             
@@ -491,6 +496,10 @@ class Attendance extends Model
                     $ot_hours = 0;
                     $double_ot_hours = 0;
                     $double_ot_hours = round($ot_minutes / 60, 2);
+                    $shiftofftimediff = $shift_end->diffInMinutes($ot_to);
+                    if($shiftofftimediff > 30 && $lateTimeFrom < $ot_from){
+                        $double_ot_hours = $double_ot_hours - 0.5;
+                    }
                     $total_ot_hours_double += $double_ot_hours;
 
                     $ob = array(
@@ -560,6 +569,10 @@ class Attendance extends Model
                             $ot_hours = 0;
                             $one_point_five_ot_hours = 0;
                             $ot_hours = round($ot_minutes / 60, 2);
+                            $shiftofftimediff = $shift_end->diffInMinutes($ot_to);
+                            if($shiftofftimediff > 30 && $lateTimeFrom < $ot_from){
+                                $ot_hours = $ot_hours - 0.5;
+                            }
                             $total_ot_hours += $ot_hours;
 
                             $ob = array(
@@ -628,6 +641,10 @@ class Attendance extends Model
                             $ot_hours = 0;
                             $one_point_five_ot_hours = 0;
                             $one_point_five_ot_hours = round($ot_minutes / 60, 2);
+                            $shiftofftimediff = $shift_end->diffInMinutes($ot_to);
+                            if($shiftofftimediff > 30 && $lateTimeFrom < $ot_from){
+                                $one_point_five_ot_hours = $one_point_five_ot_hours - 0.5;
+                            }
                             $total_ot_hours_one_point_five += $one_point_five_ot_hours;
 
                             $ob = array(
@@ -696,6 +713,10 @@ class Attendance extends Model
                             $ot_hours = 0;
                             $double_ot_hours = 0;
                             $double_ot_hours = round($ot_minutes / 60, 2);
+                            $shiftofftimediff = $shift_end->diffInMinutes($ot_to);
+                            if($shiftofftimediff > 30 && $lateTimeFrom < $ot_from){
+                                $double_ot_hours = $double_ot_hours - 0.5;
+                            }
                             $total_ot_hours_double += $double_ot_hours;
 
                             $ob = array(
@@ -889,6 +910,10 @@ class Attendance extends Model
                         $ot_hours = 0;
                         $double_ot_hours = 0;
                         $double_ot_hours = round($ot_minutes / 60, 2);
+                        $shiftofftimediff = $shift_end->diffInMinutes($ot_to);
+                        if($shiftofftimediff > 30 && $lateTimeFrom < $ot_from){
+                            $double_ot_hours = $double_ot_hours - 0.5;
+                        }
                         $total_ot_hours_double += $double_ot_hours;
 
                         $ob = array(

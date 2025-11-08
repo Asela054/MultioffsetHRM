@@ -289,55 +289,93 @@
                          {
                             "data": 'firsttimestamp',
                             "name": 'firsttimestamp',
-                            render: function (data, type, row) {
-                                let firstTime = row['firsttimestamp'] ? row['firsttimestamp'] : '';
-                                return type === 'display' ?
-                                    `<input type="datetime-local" class="form-control form-control-sm time_in" 
-                                        data-id="${row['id']}" 
-                                        data-uid="${row['uid']}" 
-                                        data-date="${row['date']}" 
-                                        data-dept_id="${row['dept_id']}" 
-                                        data-time_type="first_time" 
-                                        data-timestamp="${row['firsttimestamp'] || ''}" 
-                                        value="${firstTime}" 
-                                        placeholder="YYYY-MM-DD HH:MM" />`
-                                    : data;
+                            // render: function (data, type, row) {
+                            //     let firstTime = row['firsttimestamp'] ? row['firsttimestamp'] : '';
+                            //     return type === 'display' ?
+                            //         `<input type="datetime-local" class="form-control form-control-sm time_in" 
+                            //             data-id="${row['id']}" 
+                            //             data-uid="${row['uid']}" 
+                            //             data-date="${row['date']}" 
+                            //             data-dept_id="${row['dept_id']}" 
+                            //             data-time_type="first_time" 
+                            //             data-timestamp="${row['firsttimestamp'] || ''}" 
+                            //             value="${firstTime}" 
+                            //             placeholder="YYYY-MM-DD HH:MM" />`
+                            //         : data;
+                            // }
+                            "render": function (data, type, row) {
+                                if (type === 'display' && data) {
+                                    const date = new Date(data);
+                                    if (!isNaN(date)) {
+                                        const formattedTime = date.toLocaleString('en-US', {
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit', 
+                                            minute: '2-digit',
+                                            hour12: true       // Crucial for displaying AM/PM
+                                        });
+
+                                        return formattedTime;
+                                    }
+                                }
+                                
+                                return data; 
                             }
                         },
                         {
                             data: 'lasttimestamp',
-                            render: function (data, type, row) {
-                                let lastTime = row['lasttimestamp'] ? row['lasttimestamp'] : '';
-                                if (row['lasttimestamp'] !== row['firsttimestamp'] && row['lasttimestamp'] !== null) {
-                                    return type === 'display' ?
-                                        `<input type="datetime-local" class="form-control form-control-sm time_out" 
-                                            data-id="${row['id']}" 
-                                            data-uid="${row['uid']}" 
-                                            data-date="${row['date']}" 
-                                            data-dept_id="${row['dept_id']}" 
-                                            data-time_type="last_time" 
-                                            data-timestamp="${row['lasttimestamp'] || ''}" 
-                                            value="${lastTime}" 
-                                            placeholder="YYYY-MM-DD HH:MM" />`
-                                        : data;
-                                } else {
-                                    return type === 'display' ?
-                                        `<input type="datetime-local" class="form-control form-control-sm time_out" 
-                                            data-id="${row['id']}" 
-                                            data-uid="${row['uid']}" 
-                                            data-date="${row['date']}" 
-                                            data-dept_id="${row['dept_id']}" 
-                                            data-time_type="last_time" 
-                                            data-timestamp="" 
-                                            value="" 
-                                            placeholder="YYYY-MM-DD HH:MM" />`
-                                        : data;
+                            // render: function (data, type, row) {
+                            //     let lastTime = row['lasttimestamp'] ? row['lasttimestamp'] : '';
+                            //     if (row['lasttimestamp'] !== row['firsttimestamp'] && row['lasttimestamp'] !== null) {
+                            //         return type === 'display' ?
+                            //             `<input type="datetime-local" class="form-control form-control-sm time_out" 
+                            //                 data-id="${row['id']}" 
+                            //                 data-uid="${row['uid']}" 
+                            //                 data-date="${row['date']}" 
+                            //                 data-dept_id="${row['dept_id']}" 
+                            //                 data-time_type="last_time" 
+                            //                 data-timestamp="${row['lasttimestamp'] || ''}" 
+                            //                 value="${lastTime}" 
+                            //                 placeholder="YYYY-MM-DD HH:MM" />`
+                            //             : data;
+                            //     } else {
+                            //         return type === 'display' ?
+                            //             `<input type="datetime-local" class="form-control form-control-sm time_out" 
+                            //                 data-id="${row['id']}" 
+                            //                 data-uid="${row['uid']}" 
+                            //                 data-date="${row['date']}" 
+                            //                 data-dept_id="${row['dept_id']}" 
+                            //                 data-time_type="last_time" 
+                            //                 data-timestamp="" 
+                            //                 value="" 
+                            //                 placeholder="YYYY-MM-DD HH:MM" />`
+                            //             : data;
+                            //     }
+                            // }
+                            "render": function (data, type, row) {
+                                if (type === 'display' && data) {
+                                    const date = new Date(data);
+                                    if (!isNaN(date)) {
+                                        const formattedTime = date.toLocaleString('en-US', {
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit', 
+                                            minute: '2-digit',
+                                            hour12: true       // Crucial for displaying AM/PM
+                                        });
+
+                                        return formattedTime;
+                                    }
                                 }
+                                
+                                return data; 
                             }
                         }
                     ],
                     "bDestroy": true,
-                    "order": [[ 6, "desc" ]],
+                    "order": [[ 5, "desc" ]],
 
                     "drawCallback": function( settings ) {
                         check_changed_text_boxes();
