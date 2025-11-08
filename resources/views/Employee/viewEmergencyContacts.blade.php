@@ -32,8 +32,8 @@
                                                 id="relationship" name="relationship">
                                             <option @if(old('relationship') == '') selected @endif value="">Select</option>
                                             <option @if(old('relationship') == 'Father') selected @endif value="Father">Father</option>
-                                            <option @if(old('relationship') == 'Son') selected @endif value="Son">Son</option>
                                             <option @if(old('relationship') == 'Mother') selected @endif value="Mother">Mother</option>
+                                            <option @if(old('relationship') == 'Son') selected @endif value="Son">Son</option>
                                             <option @if(old('relationship') == 'Daughter') selected @endif value="Daughter">Daughter</option>
                                             <option @if(old('relationship') == 'Wife') selected @endif value="Wife">Wife</option>
                                             <option @if(old('relationship') == 'Husband') selected @endif value="Husband">Husband</option>

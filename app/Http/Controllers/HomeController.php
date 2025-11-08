@@ -270,6 +270,7 @@ class HomeController extends Controller
         )
         ->where('attendances.date', '=', $today)
         ->where('attendances.location', $companyId)
+        ->where('attendances.deleted_at', null)
         // ->where('attendances.timestamp','>=', $today. ' ' . $late_times->time_from)
         ->havingRaw('MIN(attendances.timestamp) >= ?', [$today . ' ' . $late_times->time_from])
         ->groupBy('attendances.date','attendances.uid')
@@ -462,6 +463,7 @@ class HomeController extends Controller
         )
         ->where('attendances.date', '=', $yesterdayDate)
         ->where('attendances.location', $companyId)
+        ->where('attendances.deleted_at', null)
         ->groupBy('attendances.date','attendances.uid')
         ->havingRaw('MIN(attendances.timestamp) < ?', [$yesterdayDate . ' ' . $late_times->time_from])
         ->get();
@@ -556,6 +558,7 @@ class HomeController extends Controller
         )
         ->where('attendances.date', '=', $yesterdayDate)
         ->where('attendances.location', $companyId)
+        ->where('attendances.deleted_at', null)
         ->havingRaw('MIN(attendances.timestamp) >= ?', [$yesterdayDate . ' ' . $late_times->time_from])
         ->groupBy('attendances.date','attendances.uid')
         ->get();

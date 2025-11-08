@@ -20,13 +20,21 @@ $sql="SELECT
         THEN a.timestamp 
         ELSE NULL 
     END) AS firsttimestamp,
-    MAX(CASE 
-        WHEN TIME(a.timestamp) BETWEEN 
-            SUBTIME(st.offduty_time, '02:00:00') AND 
-            ADDTIME(st.offduty_time, '06:00:00')
-        THEN a.timestamp 
-        ELSE NULL 
-    END) AS lasttimestamp
+    -- CASE 
+    --     WHEN COUNT(DISTINCT a.timestamp) = 1 
+    --     THEN NULL
+    --     ELSE MAX(CASE 
+    --             WHEN TIME(a.timestamp) BETWEEN 
+    --                 SUBTIME(st.offduty_time, '02:00:00') AND 
+    --                 ADDTIME(st.offduty_time, '06:00:00')
+    --             THEN a.timestamp 
+    --             ELSE NULL 
+    --         END)
+    -- END AS lasttimestamp
+    (CASE 
+        WHEN Min(a.timestamp) = Max(a.timestamp) THEN ''  
+        ELSE Max(a.timestamp)
+        END) AS lasttimestamp
 FROM 
     attendances a
 JOIN 
@@ -39,7 +47,6 @@ JOIN
     shift_types st ON e.emp_shift = st.id
 WHERE 
     $where
-
 GROUP BY 
     a.date, 
     e.emp_id, 

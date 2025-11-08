@@ -83,6 +83,10 @@
 
     <script>
         $(document).ready(function () {
+            var canDeleteEmployee = false;
+            @can('ot-delete')
+                canDeleteEmployee = true;
+            @endcan
 
             $('#attendant_menu_link').addClass('active');
             $('#attendant_menu_link_icon').addClass('active');
@@ -195,6 +199,7 @@
                             ot_data_html += '<th>OT Time</th>';
                             ot_data_html += '<th>D/OT Time</th>';
                             ot_data_html += '<th>Is Holiday</th>';
+                            ot_data_html += '<th>Action</th>';
                             ot_data_html += '</tr>';
                             ot_data_html += '</thead>';
                             ot_data_html += '<tbody>';
@@ -227,6 +232,14 @@
                                         ot_data_html += '<td>' + hours_input + '</td>';
                                         ot_data_html += '<td>' + double_hours_input + '</td>';
                                         ot_data_html += '<td>' + is_holiday + '</td>';
+                                        ot_data_html += '<td class="text-right">';
+                                        if (canDeleteEmployee && is_approved) {
+                                            ot_data_html += '<a href="javascript:void(0)" data-toggle="tooltip" data-otdate="' + obj.date + '" data-empid="' + obj.emp_id + '" data-original-title="Delete" class="delete_btn btn btn-danger btn-sm"><i class="fa fa-trash"></i> </a>';
+                                        }
+                                        else {
+                                            ot_data_html += '';
+                                        }
+                                        ot_data_html += '</td>';
                                         ot_data_html += '</tr>';
                                     }
                                 });
@@ -358,6 +371,56 @@
 
             });
 
+            $(document).on('click','.delete_btn',function(e){
+                e.preventDefault();
+                let empid = $(this).data('empid');
+                let otdate = $(this).data('otdate');
+                let btn = $(this);
+
+                if(confirm("Are you sure you want to delete this?")){
+
+                    btn.attr('disabled',true);
+                    btn.html('<i class="fa fa-spinner fa-spin"></i>');
+
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    });
+                    $.ajax({
+                        url: "{{url('/ot_checked_delete')}}",
+                        type: "POST",
+                        data: {
+                            'empid': empid,
+                            'otdate': otdate
+                        },
+                        success: function (data) {
+                            if(data.success==true){
+                                btn.attr('disabled',false);
+                                btn.html('<i class="fa fa-trash"></i>');
+                                $('.info_msg').html('<div class="alert alert-success">'+data.msg+'</div>');
+                                load_table();
+                            }else{
+                                btn.attr('disabled',false);
+                                btn.html('<i class="fa fa-trash"></i>');
+                                $('.info_msg').html('<div class="alert alert-danger">'+data.msg+'</div>');
+                            }
+                        },
+                        error: function (data) {
+                            btn.attr('disabled',false);
+                            btn.html('<i class="fa fa-trash"></i>');
+                            console.log(data);
+                        }
+
+                    });
+
+                }
+                else{
+                    return false;
+                }
+
+
+            });
         });
 
     </script>
