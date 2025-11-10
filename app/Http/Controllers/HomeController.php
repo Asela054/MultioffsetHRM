@@ -352,6 +352,7 @@ class HomeController extends Controller
         ->select('employees.emp_id', 'employees.emp_name_with_initial','employees.emp_department') 
         ->where('date', '=', $today)
         ->where('location', $companyId)
+        ->where('attendances.deleted_at', null)
         ->groupBy('attendances.date','attendances.uid')
         ->get();
 
@@ -646,6 +647,7 @@ class HomeController extends Controller
         ->select('employees.emp_id', 'employees.emp_name_with_initial','employees.emp_department') 
         ->where('date', '=', $yesterdayDate)
         ->where('location', $companyId)
+        ->where('attendances.deleted_at', null)
         ->groupBy('attendances.date','attendances.uid')
         ->get();
 

@@ -497,7 +497,7 @@ class Attendance extends Model
                     $double_ot_hours = 0;
                     $double_ot_hours = round($ot_minutes / 60, 2);
                     $shiftofftimediff = $shift_end->diffInMinutes($ot_to);
-                    if($shiftofftimediff > 30 && $lateTimeFrom < $ot_from){
+                    if($shiftofftimediff < 30 && $lateTimeFrom < $ot_from){
                         $double_ot_hours = $double_ot_hours - 0.5;
                     }
                     $total_ot_hours_double += $double_ot_hours;
@@ -570,7 +570,7 @@ class Attendance extends Model
                             $one_point_five_ot_hours = 0;
                             $ot_hours = round($ot_minutes / 60, 2);
                             $shiftofftimediff = $shift_end->diffInMinutes($ot_to);
-                            if($shiftofftimediff > 30 && $lateTimeFrom < $ot_from){
+                            if($shiftofftimediff < 30 && $lateTimeFrom < $ot_from){
                                 $ot_hours = $ot_hours - 0.5;
                             }
                             $total_ot_hours += $ot_hours;
@@ -642,7 +642,7 @@ class Attendance extends Model
                             $one_point_five_ot_hours = 0;
                             $one_point_five_ot_hours = round($ot_minutes / 60, 2);
                             $shiftofftimediff = $shift_end->diffInMinutes($ot_to);
-                            if($shiftofftimediff > 30 && $lateTimeFrom < $ot_from){
+                            if($shiftofftimediff < 30 && $lateTimeFrom < $ot_from){
                                 $one_point_five_ot_hours = $one_point_five_ot_hours - 0.5;
                             }
                             $total_ot_hours_one_point_five += $one_point_five_ot_hours;
@@ -714,7 +714,7 @@ class Attendance extends Model
                             $double_ot_hours = 0;
                             $double_ot_hours = round($ot_minutes / 60, 2);
                             $shiftofftimediff = $shift_end->diffInMinutes($ot_to);
-                            if($shiftofftimediff > 30 && $lateTimeFrom < $ot_from){
+                            if($shiftofftimediff < 30 && $lateTimeFrom < $ot_from){
                                 $double_ot_hours = $double_ot_hours - 0.5;
                             }
                             $total_ot_hours_double += $double_ot_hours;
@@ -2001,6 +2001,7 @@ class Attendance extends Model
                     DB::raw('SUM(double_hours) as total_double_hours')
                 )
                 ->where('date', $record_date->format('Y-m-d')) 
+                ->where('approved', 1)
                 ->where('emp_id', $emp_id) 
                 ->first();
             // dd($otdatalist);    

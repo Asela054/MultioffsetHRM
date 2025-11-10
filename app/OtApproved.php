@@ -24,6 +24,7 @@ class OtApproved extends Model
     {
         $ot_hours = OtApproved::where('emp_id', $emp_id)
                             ->where('date', 'like', $month.'%')
+                            ->where('approved', 1)
                             ->sum('hours');
         return $ot_hours;
     }
@@ -32,6 +33,7 @@ class OtApproved extends Model
     {
         $double_ot_hours = OtApproved::where('emp_id', $emp_id)
                             ->where('date', 'like', $month.'%')
+                            ->where('approved', 1)
                             ->sum('double_hours');
         return $double_ot_hours;
     }

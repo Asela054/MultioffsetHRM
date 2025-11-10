@@ -84,7 +84,7 @@
     <script>
         $(document).ready(function () {
             var canDeleteEmployee = false;
-            @can('ot-delete')
+            @can('ot-check-delete')
                 canDeleteEmployee = true;
             @endcan
 
