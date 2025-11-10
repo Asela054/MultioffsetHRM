@@ -3497,7 +3497,7 @@ class AttendanceController extends Controller
     //CHecked OT delete
     public function ot_checked_delete(Request $request)
     {
-        $permission = Auth::user()->can('ot-delete');
+        $permission = Auth::user()->can('ot-check-delete');
         if(!$permission){
             return response()->json(['error' => 'UnAuthorized'], 401);
         }
