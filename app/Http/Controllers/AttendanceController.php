@@ -722,7 +722,9 @@ class AttendanceController extends Controller
                 ['date', '=', $request->date],
                 ['uid', '=', $request->id],
 
-            ])->get();
+            ])
+            ->where('attendances.deleted_at', null)
+            ->get();
 
 
         return response()->json($data);
@@ -1402,10 +1404,10 @@ class AttendanceController extends Controller
 
                 } else {
                     $employee = DB::table('employees')
-                        ->join('branches', 'employees.emp_location', '=', 'branches.id')
-                        ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
-                        ->select('fingerprint_devices.sno', 'fingerprint_devices.location')
-                        ->groupBy('fingerprint_devices.location')
+                        // ->join('branches', 'employees.emp_location', '=', 'branches.id')
+                        // ->join('fingerprint_devices', 'branches.id', '=', 'fingerprint_devices.location')
+                        ->select('employees.emp_location')
+                        // ->groupBy('fingerprint_devices.location')
                         ->where('employees.emp_id', $emp_id)
                         ->first();
 
@@ -1417,8 +1419,8 @@ class AttendanceController extends Controller
                         'date' => $full_date,
                         'approved' => 0,
                         'type' => 255,
-                        'devicesno' => $employee->sno,
-                        'location' => $employee->location
+                        // 'devicesno' => $employee->sno,
+                        'location' => $employee->emp_location
                     );
                     $id = DB::table('attendances')->insert($data);
 
@@ -3109,11 +3111,11 @@ class AttendanceController extends Controller
                 branches.location as b_location,
                 departments.name as dept_name
                 FROM `attendances`  as `at1`
-                join `employees` on `employees`.`emp_id` = `at1`.`uid`
+                left join `employees` on `employees`.`emp_id` = `at1`.`uid`
                 left join shift_types ON employees.emp_shift = shift_types.id
                 left join branches ON at1.location = branches.id
                 left join departments ON employees.emp_department = departments.id
-                WHERE 1 = 1";
+                WHERE 1 = 1 AND `at1`.`deleted_at` IS NULL";
 
         if ($department != '') {
             $sql .= " AND employees.emp_department = '$department'";
@@ -3144,7 +3146,7 @@ class AttendanceController extends Controller
 
         $attendance_data = DB::select($sql);
 
-        //dd($sql);
+        // dd($sql);
 
         $ot_data = array();
 
