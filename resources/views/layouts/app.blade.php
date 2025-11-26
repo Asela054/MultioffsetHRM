@@ -15,6 +15,7 @@
     <link href="{{ url('/css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet"/>
     <link href="{{ url('/css/full_calendar.min.css') }}" rel="stylesheet"/>
     <link href="{{ url('/css/font/flaticon.css') }}" rel="stylesheet"/>
+    <link rel="stylesheet" href="{{ url('/css/fontawesome/css/all.min.css') }}">
 
     <link href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css" rel="stylesheet"/>
 <!--link href="{{ asset('css/app.css') }}" rel="stylesheet"-->
@@ -27,6 +28,146 @@
     <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.dataTables.min.css" rel="stylesheet"/>
 
     <style> 
+        .calendar {
+            width: 310px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+            /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); */
+        }
+        @media (max-width: 575.98px) {
+            .calendar {
+                width: 310px;
+                border-radius: 6px;
+                overflow: hidden;
+                background: #fff;
+                /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); */
+            }
+        }
+
+        /* Header */
+        .calendar-header {
+            background: #1AC6D9;
+            color: white;
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .calendar-header .year {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        .calendar-header .date {
+            font-size: 30px;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        /* Month navigation */
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            font-weight: bold;
+        }
+
+        .calendar-nav button {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* Calendar grid */
+        .calendar-body {
+            padding: 0 10px 15px;
+        }
+
+        .calendar-body table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        .calendar-body table thead {
+            background-color: #fff;
+        }
+
+        .calendar-body th {
+            color: #666;
+            font-weight: normal;
+            padding: 8px 0;
+        }
+
+        .calendar-body td {
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 50%;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .calendar-body td:hover {
+            background: #eee;
+        }
+
+        .selected {
+            background: #1AC6D9;
+            color: white !important;
+            border-radius: 50%;
+        }
+
+        /* Event Dots */
+        td .dot-container {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 2px;
+        }
+
+        td .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        /* Event List Section */
+        .event-list {
+            padding: 10px 20px 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .event-list h2 {
+            font-size: 18px;
+            color: #5d4697;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .event-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .event-item .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .no-events {
+            color: #999;
+            font-style: italic;
+            font-size: 14px;
+        }
+
         .no-underline {
             text-decoration: none;
             color: inherit; 
@@ -85,11 +226,12 @@
   <body class="nav-fixed">
     <div id="app">
         <nav class="topnav navbar navbar-expand shadow navbar-light topnavbarcolor" id="sidenavAccordion">
-            <a class="navbar-brand d-none d-sm-block" href="{{ url('/home') }}" style="color: white">
-                {{ session('company_name') }}
+            <a class="navbar-brand" href="{{ url('/home') }}" style="color: white">
+                <img class="img-fluid" src="{{ url('/images/toplogo.png') }}" alt="Employee Photo"/>
             </a>
             <button class="btn btn-icon btn-transparent-dark order-1 order-lg-0 mr-lg-2" id="sidebarToggle" href="#"><i class="fas fa-bars text-light"></i></button>
-            @include('layouts.breadcrumblist')
+            {{--@include('layouts.breadcrumblist')--}}
+            <span class="text-light d-none d-sm-block">{{ session('company_name') }}</span>
             <ul class="navbar-nav align-items-center ml-auto">
                 @if (Auth::guest())
                     <li class="nav-item dropdown no-caret mr-3 dropdown-user"><a href="{{ route('login') }}">Login</a></li>
@@ -100,24 +242,46 @@
                         <a href="https://aws.erav.lk/multioffsetpay" title="Goto Payroll System"
                            class="text-decoration-none text-dark"><i class="fas fa-book"></i>&nbsp;Payroll</a>
                     </li> --}}
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <span class="fw-500 text-primary text-white"><?= date("l") ?></span>
                         &nbsp;&nbsp;<span class="text-primary text-white"><?= date("jS \of F Y") ?></span>
                         <span id="clock" onload="showTime()"></span>
-                    </li>&nbsp;&nbsp;&nbsp;&nbsp;
-
+                    </li>&nbsp;&nbsp;&nbsp;&nbsp; -->
+                    <!-- <h3 class="text-light mt-1 mx-2">{{ session('company_name') }}</h3> -->
                     <li class="nav-item dropdown no-caret mr-3 dropdown-user">
                         <a class="btn btn-icon btn-transparent-dark dropdown-toggle" id="navbarDropdownUserImage"
                            href="javascript:void(0);" role="button" data-toggle="dropdown" aria-haspopup="true"
                            aria-expanded="false">
                            <!-- <img class="img-fluid" src="/images/{{ \App\EmployeePicture::where(['emp_id' =>  $empid=Auth::user()->emp_id ])->pluck('emp_pic_filename')->first() }}"/> -->
-                           <img class="img-fluid" src="{{url('/images/user-profile.png')}}"/>
+                            @php 
+                                $id = Auth::user()->emp_id;
+
+                                $employeePicture = \App\EmployeePicture::join('employees', 'employee_pictures.emp_id', '=', 'employees.id')
+                                    ->where('employees.emp_id', $id)
+                                    ->select('employee_pictures.emp_pic_filename')
+                                    ->first();
+                                    
+                                $imagePath = '';
+                                
+                                if ($employeePicture && file_exists(public_path("images/{$employeePicture->emp_pic_filename}"))) {
+                                    $imagePath = asset("images/{$employeePicture->emp_pic_filename}");
+                                } else {
+                                    $employeeGender = \App\Employee::where('emp_id', $id)->pluck('emp_gender')->first();
+                                    if(empty($employeeGender)){
+                                        $employeeGender = "Male";
+                                    }
+                                    $imagePath = $employeeGender == "Male" 
+                                        ? asset("images/man.png") 
+                                        : asset("images/girl.png");
+                                }
+                            @endphp
+                           <img class="img-fluid" src="{{ $imagePath }}"/>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right border-0 shadow animated--fade-in-up"
                              aria-labelledby="navbarDropdownUserImage">
                             <h6 class="dropdown-header d-flex align-items-center">
                                 <img class="dropdown-user-img"
-                                     src="{{url('/images/user-profile.png')}}"/>
+                                     src="{{ $imagePath }}"/>
                                 <div class="dropdown-user-details">
                                     <div class="dropdown-user-details-name"> {{ Auth::user()->name }}</div>
                                     <div class="dropdown-user-details-email">{{ Auth::user()->email }}</div>
