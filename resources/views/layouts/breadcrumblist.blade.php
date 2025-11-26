@@ -63,7 +63,11 @@
       <li class="breadcrumb-item"><a href="{{ route('corporatedashboard')}}" class="breadcrumb-link breadcumpfont">Organization</a></li>
       <li class="breadcrumb-item"><a href="{{ route('MonthWorkHour')}}" class="breadcrumb-link breadcumpfont">Monthly Work Hours</a></li>
     </ol>
-
+  @elseif(request()->route()->getName() == 'payrollchartaccount')
+      <ol class="breadcrumb custom-breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('corporatedashboard')}}" class="breadcrumb-link breadcumpfont">Organization</a></li>
+        <li class="breadcrumb-item"><a href="{{route('payrollchartaccount')}}" class="breadcrumb-link breadcumpfont">Payroll Chart of Accounts</a></li>
+      </ol>
 
     {{-- employee breadcrump list --}}
 
