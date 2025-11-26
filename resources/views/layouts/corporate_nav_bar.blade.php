@@ -16,6 +16,9 @@
         @can('job-category-list')
         <a role="button" class="btn navbtncolor" href="{{ url('/JobCategory') }}" id="jobcategorylink">Job Category <span class="caret"></span></a>
         @endcan
+         @can('Payroll-Accounts-list')
+        <a role="button" class="btn navbtncolor" href="{{ route('payrollchartaccount')}}" id="chartaccountslink">Payroll Chart of Accounts<span class="caret"></span></a>
+        @endcan
         {{-- @can('work-category-list')
         <a role="button" class="btn navbtncolor" href="{{ url('/workCategoryList') }}" id="work_category_link">Work Category <span class="caret"></span></a>
         @endcan
