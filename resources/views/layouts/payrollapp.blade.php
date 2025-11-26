@@ -10,11 +10,12 @@
     <title><?= (isset($page_stitle)) ? $page_stitle : ' Multi Offset Printers - By Erav Technology' ?>
     </title>
     <!-- Styles -->
-    <link href="{{ url('/public/css/styles.css') }}" rel="stylesheet"/>
-    <link href="{{ url('/public/css/custom_styles.css') }}" rel="stylesheet"/>
-    <link href="{{ url('/public/css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet"/>
-    <link href="{{ url('/public/css/full_calendar.min.css') }}" rel="stylesheet"/>
-    <link href="{{ url('/public/css/font/flaticon.css') }}" rel="stylesheet"/>
+    <link href="{{ url('/css/styles.css') }}" rel="stylesheet"/>
+    <link href="{{ url('/css/custom_styles.css') }}" rel="stylesheet"/>
+    <link href="{{ url('/css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet"/>
+    <link href="{{ url('/css/full_calendar.min.css') }}" rel="stylesheet"/>
+    <link href="{{ url('/css/font/flaticon.css') }}" rel="stylesheet"/>
+    <link rel="stylesheet" href="{{ url('/css/fontawesome/css/all.min.css') }}">
 
     <link href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css" rel="stylesheet"/>
 <!--link href="{{ asset('css/app.css') }}" rel="stylesheet"-->
@@ -26,8 +27,8 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
     <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.dataTables.min.css" rel="stylesheet"/>
     
-    <link href="{{ url('/public/payroll/css/payroll_styles.css') }}" rel="stylesheet" />
-    <link href="{{ url('/public/payroll/jqchosen/chosen.css') }}" rel="stylesheet" />
+    <link href="{{ url('/payroll/css/payroll_styles.css') }}" rel="stylesheet" />
+    <link href="{{ url('/payroll/jqchosen/chosen.css') }}" rel="stylesheet" />
 
     <style> 
         .no-underline {
@@ -89,10 +90,10 @@
     <div id="app">
         <nav class="topnav navbar navbar-expand shadow navbar-light topnavbarcolor" id="sidenavAccordion">
             <a class="navbar-brand d-none d-sm-block" href="{{ url('/home') }}" style="color: white">
-                {{ session('company_name') }}
+                <img class="img-fluid" src="{{ url('/images/toplogo.png') }}" alt="Employee Photo"/>
             </a>
             <button class="btn btn-icon btn-transparent-dark order-1 order-lg-0 mr-lg-2" id="sidebarToggle" href="#"><i class="fas fa-bars text-light"></i></button>
-            @include('layouts.breadcrumblist')
+            {{-- @include('layouts.breadcrumblist') --}}
             <ul class="navbar-nav align-items-center ml-auto">
                 @if (Auth::guest())
                     <li class="nav-item dropdown no-caret mr-3 dropdown-user"><a href="{{ route('login') }}">Login</a></li>
@@ -114,13 +115,35 @@
                            href="javascript:void(0);" role="button" data-toggle="dropdown" aria-haspopup="true"
                            aria-expanded="false">
                            <!-- <img class="img-fluid" src="/images/{{ \App\EmployeePicture::where(['emp_id' =>  $empid=Auth::user()->emp_id ])->pluck('emp_pic_filename')->first() }}"/> -->
-                           <img class="img-fluid" src="{{url('/public/images/user-profile.png')}}"/>
+                        @php 
+                            $id = Auth::user()->emp_id;
+
+                            $employeePicture = \App\EmployeePicture::join('employees', 'employee_pictures.emp_id', '=', 'employees.id')
+                                ->where('employees.emp_id', $id)
+                                ->select('employee_pictures.emp_pic_filename')
+                                ->first();
+                                
+                            $imagePath = '';
+                            
+                            if ($employeePicture && file_exists(public_path("images/{$employeePicture->emp_pic_filename}"))) {
+                                $imagePath = asset("images/{$employeePicture->emp_pic_filename}");
+                            } else {
+                                $employeeGender = \App\Employee::where('emp_id', $id)->pluck('emp_gender')->first();
+                                if(empty($employeeGender)){
+                                    $employeeGender = "Male";
+                                }
+                                $imagePath = $employeeGender == "Male" 
+                                    ? asset("images/man.png") 
+                                    : asset("images/girl.png");
+                            }
+                        @endphp
+                           <img class="img-fluid" src="{{ $imagePath }}"/>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right border-0 shadow animated--fade-in-up"
                              aria-labelledby="navbarDropdownUserImage">
                             <h6 class="dropdown-header d-flex align-items-center">
                                 <img class="dropdown-user-img"
-                                     src="{{url('/public/images/user-profile.png')}}"/>
+                                     src="{{ $imagePath }}"/>
                                 <div class="dropdown-user-details">
                                     <div class="dropdown-user-details-name"> {{ Auth::user()->name }}</div>
                                     <div class="dropdown-user-details-email">{{ Auth::user()->email }}</div>
@@ -172,14 +195,14 @@
         </div>
     </div>
 <!-- Scripts -->
-<script src="{{ url('/public/js/app.js') }}"></script>
-<script src="{{ url('/public/js/jquery-3.4.1.min.js') }}"></script>
-<script src="{{ url('/public/js/jquery.dataTables.min.js') }}"></script>
-<script src="{{ url('/public/js/dataTables.bootstrap4.min.js') }}"></script>
-<script src="{{ url('/public/js/bootstrap.bundle.min.js') }}"></script>
-<script src="{{ url('/public/js/scripts.js') }}"></script>
-<script src="{{ url('/public/js/moment.js') }}"></script>
-<script src="{{ url('/public/js/bootstrap-datetimepicker.js') }}"></script>
+<script src="{{ url('/js/app.js') }}"></script>
+<script src="{{ url('/js/jquery-3.4.1.min.js') }}"></script>
+<script src="{{ url('/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ url('/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ url('/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url('/js/scripts.js') }}"></script>
+<script src="{{ url('/js/moment.js') }}"></script>
+<script src="{{ url('/js/bootstrap-datetimepicker.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
 
 <!--script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
@@ -191,8 +214,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.24.1/feather.min.js" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-core.min.js" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/plugins/autoloader/prism-autoloader.min.js" crossorigin="anonymous"></script-->
-{{-- <script src="{{ asset('/public/js/scripts.js') }}"></script> --}}
-{{--    <script src="{{ asset('/public/js/bootstrap-datetimepicker.js') }}"></script>--}}
+{{-- <script src="{{ asset('/js/scripts.js') }}"></script> --}}
+{{--    <script src="{{ asset('/js/bootstrap-datetimepicker.js') }}"></script>--}}
 
 
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -204,11 +227,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 
-<script src="{{ asset('/public/payroll/jqchosen/chosen.jquery.js') }}"></script>
-<script src="{{ asset('/public/payroll/js/payroll_scripts.js') }}"></script>
+<script src="{{ asset('/payroll/jqchosen/chosen.jquery.js') }}"></script>
+<script src="{{ asset('/payroll/js/payroll_scripts.js') }}"></script>
 <script>
     $(document).ready(function(){
-        window.scripturl = '{{ url('/public/scripts') }}';
+        window.scripturl = '{{ url('/scripts') }}';
 });
 </script>
 
