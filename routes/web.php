@@ -902,3 +902,14 @@ Route::get('/getdashboard_thismonth_birthday', 'HomeController@thismonth_birthda
 // daily attendace cheking Report controller routes
 Route::get('/dailyattendacecheking' ,'DailyattendacereportController@index')->name('dailyattendacecheking');
 Route::post('/dailyattendacechekingreport' ,'DailyattendacereportController@generatedailyattendacereport')->name('dailyattendacechekingreport');
+
+
+// Payroll chart of account controller routes
+Route::get('/payrollchartaccount' ,'PayrollchartAccountController@index')->name('payrollchartaccount');
+Route::post('/payrollchartaccountcreate' ,'PayrollchartAccountController@store')->name('payrollchartaccountcreate');
+Route::post('/payrollchartaccountedit' ,'PayrollchartAccountController@edit')->name('payrollchartaccountedit');
+Route::post('/payrollchartaccountupdate' ,'PayrollchartAccountController@update')->name('payrollchartaccountupdate');
+Route::post('/payrollchartaccountdelete' ,'PayrollchartAccountController@delete')->name('payrollchartaccountdelete');
+
+
+// Route::get('/get-accounts', 'PayrollchartAccountController@getAllAccounts')->name('getchartsaccounts');
