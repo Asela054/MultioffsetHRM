@@ -20,7 +20,9 @@ class PayrollchartAccountController extends Controller
     {
         $user = auth()->user();
         $permission = $user->can('Payroll-Accounts-list');
-
+        $company_id = session('company_id');
+        $company_branch_id = session('company_branch_id');
+        
         if(!$permission) {
             abort(403);
         }
@@ -38,25 +40,8 @@ class PayrollchartAccountController extends Controller
             )
             ->get();
 
-         $accounts = DB::select("
-            SELECT 
-                tbl_account.idtbl_account AS accountid, 
-                tbl_account.accountno, 
-                tbl_account.accountname, 
-                '1' AS acctype 
-            FROM tbl_account 
-            WHERE tbl_account.status = 1
-
-            UNION ALL
-
-            SELECT 
-                tbl_account_detail.idtbl_account_detail AS accountid, 
-                tbl_account_detail.accountno, 
-                tbl_account_detail.accountname, 
-                '2' AS acctype 
-            FROM tbl_account_detail 
-            WHERE tbl_account_detail.status = 1
-            ORDER BY accountname");
+        $accounts = DB::select("SELECT `tbl_account`.`idtbl_account` AS `accountid`, `tbl_account`.`accountno`, `tbl_account`.`accountname`, '1' AS `acctype` FROM `tbl_account` LEFT JOIN `tbl_account_allocation` ON `tbl_account_allocation`.`tbl_account_idtbl_account`=`tbl_account`.`idtbl_account` LEFT JOIN `tbl_account_detail` ON `tbl_account_detail`.`tbl_account_idtbl_account`=`tbl_account`.`idtbl_account` WHERE `tbl_account`.`status`=? AND `tbl_account_allocation`.`status`=? AND `tbl_account_allocation`.`companybank`=? AND `tbl_account_allocation`.`branchcompanybank`=? AND `tbl_account_detail`.`tbl_account_idtbl_account` IS NULL UNION ALL SELECT `tbl_account_detail`.`idtbl_account_detail` AS `accountid`, `tbl_account_detail`.`accountno`, `tbl_account_detail`.`accountname`, '2' AS `acctype` FROM `tbl_account_detail` LEFT JOIN `tbl_account_allocation` ON `tbl_account_allocation`.`tbl_account_detail_idtbl_account_detail`=`tbl_account_detail`.`idtbl_account_detail` WHERE `tbl_account_detail`.`status`=? AND `tbl_account_allocation`.`status`=? AND `tbl_account_allocation`.`companybank`=? AND `tbl_account_allocation`.`branchcompanybank`=?",
+        [1, 1, $company_id, $company_branch_id, 1, 1, $company_id, $company_branch_id]);
 
 
         return view('Organization.payrollaccounts', compact('payrollaccounts','accounts'));
