@@ -37,8 +37,8 @@ class HomeController extends Controller
         $companyBranchId = Session::get('company_branch_id');
         $companyBranchName = Session::get('company_branch_name');
         $late_times = DB::table('late_types')->where('id', 2)->first();
-        $user = Auth::user();
-        $departments = $user->departments;
+        // $user = Auth::user();
+        // $departments = $user->departments;
 
          $today = Carbon::now()->format('Y-m-d');
          $empcount = DB::table('employees')->where('deleted', 0)->where('is_resigned', 0)->where('emp_company', $companyId)->count();
@@ -134,8 +134,72 @@ class HomeController extends Controller
         ->whereMonth('emp_birthday', $currentMonth)
         ->count();
 
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
 
-        return view('home',compact('empcount','todaycount','todaylatecount','yesterdaycount','yesterdaylatecount','todayBirthdayCount','thisweekBirthdayCount','thismonthBirthdayCount'));
+        $leavedatalist = DB::table('leaves')
+            ->leftJoin('leave_types', 'leave_types.id', '=', 'leaves.leave_type')
+            ->leftJoin('employees', 'employees.emp_id', '=', 'leaves.emp_id')
+            ->leftJoin('employee_pictures', 'employee_pictures.emp_id', '=', 'employees.emp_id')
+            ->leftJoin('departments', 'departments.id', '=', 'employees.emp_department')
+            ->whereMonth('leaves.leave_from', $currentMonth)
+            ->whereYear('leaves.leave_from', $currentYear)
+            ->where('leaves.status', 'Approved')
+            ->select(
+                'employees.emp_id',
+                'leave_types.leave_type',
+                'leaves.leave_from',
+                'leaves.leave_to',
+                'leaves.no_of_days',
+                'leaves.reson',
+                'employees.emp_name_with_initial',
+                'employee_pictures.emp_pic_filename',
+                'departments.name as department'
+            )
+            ->orderBy('leaves.leave_from', 'DESC')
+            ->get();
+
+        $employeesbday = DB::table('employees')
+            ->select('emp_name_with_initial', 'emp_birthday')
+            ->where('is_resigned', 0)
+            ->where('deleted', 0)
+            ->whereNotNull('emp_birthday')
+            ->get();
+
+        $holidays = DB::table('holidays')
+            ->select('holiday_name', 'date')
+            ->get();
+
+        $currentYear = Carbon::now()->year;
+
+        // Process birthdays
+        $birthdayEvents = $employeesbday->map(function ($employee) use ($currentYear) {
+            // Format the birthday to "mm-dd-yyyy" format
+            $birthdayDate = \Carbon\Carbon::parse($employee->emp_birthday);
+            
+            return [
+                'date' => $birthdayDate->format('m-d') . '-' . $currentYear,
+                'name' => $employee->emp_name_with_initial . "'s Birthday",
+                'color' => '#ff69b4' // You can customize colors as needed
+            ];
+        })->toArray();
+
+        // Process holidays
+        $holidayEvents = $holidays->map(function ($holiday) {
+            // Format the holiday date to match the same format (mm-dd-yyyy)
+            $holidayDate = \Carbon\Carbon::parse($holiday->date)->format('m-d-Y');
+            
+            return [
+                'date' => $holidayDate,
+                'name' => $holiday->holiday_name,
+                'color' => '#5d4697' // Different color for holidays
+            ];
+        })->toArray();
+
+        $events = array_merge($birthdayEvents, $holidayEvents);
+
+
+        return view('home',compact('empcount','todaycount','todaylatecount','yesterdaycount','yesterdaylatecount','todayBirthdayCount','thisweekBirthdayCount','thismonthBirthdayCount', 'leavedatalist', 'events'));
     }
 
     public function department_attendance(){

@@ -66,6 +66,9 @@
                                     <th>Casual Total</th>
                                     <th>Casual Taken</th>
                                     <th>Casual Available</th>
+                                    <th>Medical Total</th>
+                                    <th>Medical Taken</th>
+                                    <th>Medical Available</th>
                                 </tr>
                                 </thead>
 
@@ -188,7 +191,10 @@
                         { data: 'available_no_of_annual_leaves', name: 'available_no_of_annual_leaves' },
                         { data: 'total_no_of_casual_leaves', name: 'total_no_of_casual_leaves' },
                         { data: 'total_taken_casual_leaves', name: 'total_taken_casual_leaves' },
-                        { data: 'available_no_of_casual_leaves', name: 'available_no_of_casual_leaves' }
+                        { data: 'available_no_of_casual_leaves', name: 'available_no_of_casual_leaves' },
+                        { data: 'total_no_of_medical_leaves', name: 'total_no_of_medical_leaves' },
+                        { data: 'total_taken_medical_leaves', name: 'total_taken_medical_leaves' },
+                        { data: 'available_no_of_medical_leaves', name: 'available_no_of_medical_leaves' }
                     ],
                     "bDestroy": true,
                     "order": [
