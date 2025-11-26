@@ -164,6 +164,8 @@ $(document).ready(function(){
     $('#chartaccountslink').addClass('navbtnactive');
 
     $('#dataTable').DataTable();
+    $('#creditacc').select2({ width: '100%' });
+    $('#debitacc').select2({ width: '100%' });
 
     //  $('#creditacc').select2({ width: '100%' });
 
