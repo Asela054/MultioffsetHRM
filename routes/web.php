@@ -913,3 +913,13 @@ Route::post('/payrollchartaccountdelete' ,'PayrollchartAccountController@delete'
 
 
 // Route::get('/get-accounts', 'PayrollchartAccountController@getAllAccounts')->name('getchartsaccounts');
+
+Route::get('/clear-cache', function() {
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    Artisan::call('config:cache');
+    Artisan::call('view:clear');
+    Artisan::call('route:clear');
+    
+    return "Cache cleared successfully!";
+});
