@@ -2331,6 +2331,7 @@ class Report extends Controller
                 left join branches ON employees.emp_location = branches.id 
                 left join departments ON employees.emp_department = departments.id 
                 WHERE employees.deleted = 0  
+                AND employees.is_resigned = 0
                 ';
 
         if($department != ''){
