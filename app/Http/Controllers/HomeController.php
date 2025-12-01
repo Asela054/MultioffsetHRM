@@ -145,6 +145,7 @@ class HomeController extends Controller
             ->whereMonth('leaves.leave_from', $currentMonth)
             ->whereYear('leaves.leave_from', $currentYear)
             ->where('leaves.status', 'Approved')
+            ->where('employees.emp_company', $companyId)
             ->select(
                 'employees.emp_id',
                 'leave_types.leave_type',
@@ -164,6 +165,7 @@ class HomeController extends Controller
             ->where('is_resigned', 0)
             ->where('deleted', 0)
             ->whereNotNull('emp_birthday')
+            ->where('emp_company', $companyId)
             ->get();
 
         $holidays = DB::table('holidays')
@@ -803,42 +805,114 @@ class HomeController extends Controller
 
         // Generate last 30 dates from today (including today)
     
+        // // Generate last 30 dates directly as a single SQL UNION string (no Carbon loop)
+        // $datesQuery = collect(range(0, 29))->map(function ($i) {
+        //     $date = \Carbon\Carbon::today()->subDays($i)->toDateString();
+        //     return "SELECT DATE('$date') AS date";
+        // })->implode(" UNION ALL ");
 
-        // Generate last 30 dates directly as a single SQL UNION string (no Carbon loop)
-        $datesQuery = collect(range(0, 29))->map(function ($i) {
-            $date = \Carbon\Carbon::today()->subDays($i)->toDateString();
-            return "SELECT DATE('$date') AS date";
-        })->implode(" UNION ALL ");
+        // // Main SQL
+        // $sql = "
+        // SELECT 
+        //     d.date,
+        //     COUNT(DISTINCT a.uid) AS count
+        // FROM 
+        //     (
+        //         $datesQuery
+        //     ) AS d
+        // JOIN employees e 
+        //     ON e.deleted = 0 
+        //     AND e.emp_company = :companyId 
+        //     AND e.emp_location = :branchId
+        // LEFT JOIN attendances a 
+        //     ON a.uid = e.emp_id 
+        //     AND a.date = d.date
+        // GROUP BY d.date
+        // ORDER BY d.date ASC
+        // ";
 
-        // Main SQL
+        // // Execute the query with bindings
+        // $data = DB::select($sql, [
+        //     'companyId' => $companyId,
+        //     'branchId' => $branchId,
+        // ]);
+        
         $sql = "
-        SELECT 
-            d.date,
-            COUNT(DISTINCT a.uid) AS count
-        FROM 
+            SELECT
+            A.report_date,
+            COALESCE(A.active_employee_count, 0) AS active_employee_count,
+            COALESCE(P.unique_employees_present, 0) AS unique_employees_present,
+            COALESCE(A.active_employee_count, 0) - COALESCE(P.unique_employees_present, 0) AS absent_count
+        FROM
             (
-                $datesQuery
-            ) AS d
-        JOIN employees e 
-            ON e.deleted = 0 
-            AND e.emp_company = :companyId 
-            AND e.emp_location = :branchId
-        LEFT JOIN attendances a 
-            ON a.uid = e.emp_id 
-            AND a.date = d.date
-        GROUP BY d.date
-        ORDER BY d.date ASC
+                SELECT
+                    ds.date_value AS report_date,
+                    -- Count of unique National IDs (which are not NULL/empty)
+                    COUNT(DISTINCT CASE WHEN e.emp_national_id IS NOT NULL AND e.emp_national_id != '' THEN e.emp_national_id END) 
+                    +
+                    -- Count of records where the National ID is missing (counted by their unique primary key ID)
+                    COUNT(DISTINCT CASE WHEN e.emp_national_id IS NULL OR e.emp_national_id = '' THEN e.id END)
+                    AS active_employee_count
+                FROM
+                    (
+                        -- DateSeries
+                        SELECT 
+                            DATE(CURRENT_DATE() - INTERVAL (A.a + (10 * B.a)) DAY) AS date_value
+                        FROM 
+                            (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS A
+                        JOIN 
+                            (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2) AS B 
+                        WHERE 
+                            (A.a + (10 * B.a)) < 30
+                    ) AS ds
+                LEFT JOIN
+                    employees e ON
+                        e.emp_join_date <= ds.date_value
+                        AND (e.resignation_date IS NULL OR e.resignation_date > ds.date_value)
+                        AND e.emp_company = ? -- Binding 1
+                        AND e.emp_location = ? -- Binding 2
+                        AND e.deleted = 0
+                GROUP BY
+                    ds.date_value
+            ) AS A
+        LEFT JOIN
+            (
+                SELECT
+                    ds.date_value AS report_date,
+                    COUNT(DISTINCT a.uid) AS unique_employees_present
+                FROM
+                    (
+                        -- DateSeries
+                        SELECT 
+                            DATE(CURRENT_DATE() - INTERVAL (A.a + (10 * B.a)) DAY) AS date_value
+                        FROM 
+                            (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS A
+                        JOIN 
+                            (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2) AS B 
+                        WHERE 
+                            (A.a + (10 * B.a)) < 30
+                    ) AS ds
+                LEFT JOIN
+                    attendances a ON
+                        a.date = ds.date_value
+                        AND a.location = ? -- Binding 3
+                        AND a.deleted_at IS NULL
+                GROUP BY
+                    ds.date_value
+            ) AS P ON A.report_date = P.report_date
+        ORDER BY
+            A.report_date DESC;
         ";
+        
+        $bindings = [
+            $companyId, // For e.emp_company
+            $branchId,   // For e.emp_location
+            $companyId    // For a.location
+        ];
 
-        // Execute the query with bindings
-        $data = DB::select($sql, [
-            'companyId' => $companyId,
-            'branchId' => $branchId,
-        ]);
+        $reportData = DB::select($sql, $bindings);
 
-
-
-        return response()->json($data);
+        return $reportData;
     }
 
 

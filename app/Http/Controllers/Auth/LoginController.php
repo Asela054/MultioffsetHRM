@@ -108,6 +108,15 @@ class LoginController extends Controller
             // Optionally preserve specific session values
             // $company = Session::get('company_id'); // if you want to save before flush
 
+            $companyData = [
+                'company_id', 'company_name', 'company_branch_id', 
+                'company_branch_name', 'company_address', 'company_mobile', 'company_land'
+            ];
+            
+            foreach ($companyData as $key) {
+                Session::forget($key);
+            }
+
             // Clear session
             $request->session()->invalidate();
             $request->session()->regenerateToken();
@@ -115,7 +124,7 @@ class LoginController extends Controller
             // Optional: re-store specific values
             // Session::put('company_id', $company);
 
-          return redirect()->route('home');
+            return redirect()->route('home');
         }
 
 }

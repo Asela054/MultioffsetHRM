@@ -18,7 +18,7 @@
                                     <li class="list-group-item d-flex bd-highlight list-group-item-primary"><i class="fa-light fa-users mr-2"></i>TOTAL EMPLOYEE <span class="ml-auto">{{$empcount}}</span></li>
                                     <li class="list-group-item d-flex bd-highlight list-group-item-success pointer" id="attendancebtn"><i class="fa-light fa-calendar-week mr-2"></i>ATTENDANCE <span class="ml-auto">{{$todaycount}}</span></li>
                                     <li class="list-group-item d-flex bd-highlight list-group-item-warning pointer" id="lateattendancebtn"><i class="fa-light fa-business-time mr-2"></i>LATE <span class="ml-auto">{{$todaylatecount}}</span></li>
-                                    <li class="list-group-item d-flex bd-highlight list-group-item-danger pointer" id="absentbtn"><i class="fa-light fa-calendar-xmark mr-2"></i>ABSENT <span class="ml-auto">{{$empcount-$todaycount}}</span></li>
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-danger pointer" id="absentbtn"><i class="fa-light fa-calendar-xmark mr-2"></i>ABSENT <span class="ml-auto">{{$empcount-($todaycount+$todaylatecount)}}</span></li>
                                 </ul>
                             </div>
                             <h5 class="title-style my-3"><span>YESTERDAY ATTENDANCE</span></h5>
@@ -27,7 +27,7 @@
                                     <li class="list-group-item d-flex bd-highlight list-group-item-primary"><i class="fa-light fa-users mr-2"></i>TOTAL EMPLOYEE <span class="ml-auto">{{$empcount}}</span></li>
                                     <li class="list-group-item d-flex bd-highlight list-group-item-success pointer" id="yesterdayattendancebtn"><i class="fa-light fa-calendar-week mr-2"></i>ATTENDANCE <span class="ml-auto">{{$yesterdaycount}}</span></li>
                                     <li class="list-group-item d-flex bd-highlight list-group-item-warning pointer" id="yesterdaylateattendancebtn"><i class="fa-light fa-business-time mr-2"></i>LATE <span class="ml-auto">{{$yesterdaylatecount}}</span></li>
-                                    <li class="list-group-item d-flex bd-highlight list-group-item-danger pointer" id="yesterdayabsentbtn"><i class="fa-light fa-calendar-xmark mr-2"></i>ABSENT <span class="ml-auto">{{$empcount-$yesterdaycount}}</span></li>
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-danger pointer" id="yesterdayabsentbtn"><i class="fa-light fa-calendar-xmark mr-2"></i>ABSENT <span class="ml-auto">{{$empcount-($yesterdaycount+$yesterdaylatecount)}}</span></li>
                                 </ul>
                             </div>
                             <!-- <h5 class="title-style my-3"><span>EMPLOYEE BIRTHDAYS</span></h5>
@@ -862,10 +862,10 @@ function getattend(){
         $(document).ready(function(){
           $.get(url, function(response){
             response.forEach(function(data){
-                const editedText = data.date.slice(0)
+                const editedText = data.report_date.slice(0)
                 date.push(editedText);               
-                count.push(data.count);
-                absent_count.push(empcount-(data.count));
+                count.push(data.unique_employees_present);
+                absent_count.push(data.absent_count);
             });
             var ctx = document.getElementById("myAreaChart");
                 var myChart = new Chart(ctx, {
