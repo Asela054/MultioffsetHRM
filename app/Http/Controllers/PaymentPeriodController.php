@@ -210,96 +210,169 @@ class PaymentPeriodController extends Controller
         $EPFAdministration=$fig_list['EPF12']['amt'];
         $ETFAdministration=$fig_list['ETF3']['amt'];
 
-        $DataArray = [
-            [
+        $accountlist = DB::table('payroll_chart_accounts')
+            ->select('type_code', 'credit_account_id', 'debit_account_id')
+            ->where('status', 1)
+            ->where('company_id', $companyId)
+            ->where('branch_id', $companyBranchId)
+            ->get();
+
+        foreach ($accountlist as $account) {
+            $typeCode = $account->type_code;
+            if ($typeCode == 'PAYEE_TAX') {
+                $accountcrno = $account->credit_account_id;
+                $accountdrno = $account->debit_account_id;
+                $transamount = $payee_tax;
+                $narrationcr = 'Payee Tax';
+                $narrationdr = 'Salary Payee Tax';
+            } elseif ($typeCode == 'SALARY_ADVANCE') {
+                $accountcrno = $account->credit_account_id;
+                $accountdrno = $account->debit_account_id;
+                $transamount = $salary_advance;
+                $narrationcr = 'Salary Advance';
+                $narrationdr = 'Salary Advance';
+            } elseif ($typeCode == 'EPF') {
+                $accountcrno = $account->credit_account_id;
+                $accountdrno = $account->debit_account_id;
+                $transamount = $emp_fund_reserve;
+                $narrationcr = 'Employee Provident Fund Reserve';
+                $narrationdr = 'Salary & Wages - Administrative';
+            } elseif ($typeCode == 'SALARY_PAYMENT_SUSPENSE') {
+                $accountcrno = $account->credit_account_id;
+                $accountdrno = $account->debit_account_id;
+                $transamount = $payment_suspense;
+                $narrationcr = 'Salary Payment Suspense';
+                $narrationdr = 'Salary & Wages - Administrative';
+            } elseif ($typeCode == 'EMPLOYEE_TRAVELLING') {
+                $accountcrno = $account->credit_account_id;
+                $accountdrno = $account->debit_account_id;
+                $transamount = $travelling;
+                $narrationcr = 'Employee Travelling Expenses Reserve';
+                $narrationdr = 'Employee Travelling Expenses';
+            } elseif ($typeCode == 'EMPLOYEE_INCENTIVE') {
+                $accountcrno = $account->credit_account_id;
+                $accountdrno = $account->debit_account_id;
+                $transamount = $incentive;
+                $narrationcr = 'Employee Incentive Reserve';
+                $narrationdr = 'Employee Incentive';
+            } elseif ($typeCode == 'EPF_ADMINISTRATION') {
+                $accountcrno = $account->credit_account_id;
+                $accountdrno = $account->debit_account_id;
+                $transamount = $EPFAdministration;
+                $narrationcr = 'Employee Provident Fund Reserve';
+                $narrationdr = 'EPF-Administration';
+            } elseif ($typeCode == 'ETF_ADMINISTRATION') {
+                $accountcrno = $account->credit_account_id;
+                $accountdrno = $account->debit_account_id;
+                $transamount = $ETFAdministration;
+                $narrationcr = 'Employee Trust Fund Reserve';
+                $narrationdr = 'ETF-Administration';
+            }
+
+            $data = [
                 "userid" => $user,
                 "company" => $companyId,
                 "branch" => $companyBranchId,
                 "tradate" => $date,
-                "traamount" => $payee_tax,
-                "accountcrno" => '140',
-                "narrationcr" => 'Payee Tax',
-                "accountdrno" => '53',
-                "narrationdr" => 'Salary & Wages - Administrative',
-            ],
-            [
-                "userid" => $user,
-                "company" => $companyId,
-                "branch" => $companyBranchId,
-                "tradate" => $date,
-                "traamount" => $salary_advance,
-                "accountcrno" => '123',
-                "narrationcr" => 'Salary Advance',
-                "accountdrno" => '53',
-                "narrationdr" => 'Salary & Wages - Administrative',
-            ],
-            [
-                "userid" => $user,
-                "company" => $companyId,
-                "branch" => $companyBranchId,
-                "tradate" => $date,
-                "traamount" => $emp_fund_reserve,
-                "accountcrno" => '136',
-                "narrationcr" => 'Employee Provident Fund Reserve',
-                "accountdrno" => '53',
-                "narrationdr" => 'Salary & Wages - Administrative',
-            ],
-            [
-                "userid" => $user,
-                "company" => $companyId,
-                "branch" => $companyBranchId,
-                "tradate" => $date,
-                "traamount" => $payment_suspense,
-                "accountcrno" => '135',
-                "narrationcr" => 'Salary Payment Suspense',
-                "accountdrno" => '53',
-                "narrationdr" => 'Salary & Wages - Administrative',
-            ],
-            [
-                "userid" => $user,
-                "company" => $companyId,
-                "branch" => $companyBranchId,
-                "tradate" => $date,
-                "traamount" => $travelling,
-                "accountcrno" => '138',
-                "narrationcr" => 'Employee Travelling Expenses Reserve',
-                "accountdrno" => '9',
-                "narrationdr" => 'Employee Travelling Expenses',
-            ],
-            [
-                "userid" => $user,
-                "company" => $companyId,
-                "branch" => $companyBranchId,
-                "tradate" => $date,
-                "traamount" => $incentive,
-                "accountcrno" => '139',
-                "narrationcr" => 'Employee Incentive Reserve',
-                "accountdrno" => '10',
-                "narrationdr" => 'Employee Incentive',
-            ],
-            [
-                "userid" => $user,
-                "company" => $companyId,
-                "branch" => $companyBranchId,
-                "tradate" => $date,
-                "traamount" => $EPFAdministration,
-                "accountcrno" => '136',
-                "narrationcr" => 'Employee Provident Fund Reserve',
-                "accountdrno" => '54',
-                "narrationdr" => 'EPF-Administration',
-            ],
-            [
-                "userid" => $user,
-                "company" => $companyId,
-                "branch" => $companyBranchId,
-                "tradate" => $date,
-                "traamount" => $ETFAdministration,
-                "accountcrno" => '137',
-                "narrationcr" => 'Employee Trust Fund Reserve',
-                "accountdrno" => '55',
-                "narrationdr" => 'ETF-Administration',
-            ],
-        ];
+                "traamount" => $transamount,
+                "accountcrno" => $accountcrno,
+                "narrationcr" => $narrationcr,
+                "accountdrno" => $accountdrno,
+                "narrationdr" => $narrationdr,
+            ];
+            $DataArray[] = $data;
+        }
+
+        // $DataArray = [
+        //     [
+        //         "userid" => $user,
+        //         "company" => $companyId,
+        //         "branch" => $companyBranchId,
+        //         "tradate" => $date,
+        //         "traamount" => $payee_tax,
+        //         "accountcrno" => '140',
+        //         "narrationcr" => 'Payee Tax',
+        //         "accountdrno" => '53',
+        //         "narrationdr" => 'Salary Payee Tax',
+        //     ],
+        //     [
+        //         "userid" => $user,
+        //         "company" => $companyId,
+        //         "branch" => $companyBranchId,
+        //         "tradate" => $date,
+        //         "traamount" => $salary_advance,
+        //         "accountcrno" => '123',
+        //         "narrationcr" => 'Salary Advance',
+        //         "accountdrno" => '53',
+        //         "narrationdr" => 'Salary Advance',
+        //     ],
+        //     [
+        //         "userid" => $user,
+        //         "company" => $companyId,
+        //         "branch" => $companyBranchId,
+        //         "tradate" => $date,
+        //         "traamount" => $emp_fund_reserve,
+        //         "accountcrno" => '136',
+        //         "narrationcr" => 'Employee Provident Fund Reserve',
+        //         "accountdrno" => '53',
+        //         "narrationdr" => 'Salary & Wages - Administrative',
+        //     ],
+        //     [
+        //         "userid" => $user,
+        //         "company" => $companyId,
+        //         "branch" => $companyBranchId,
+        //         "tradate" => $date,
+        //         "traamount" => $payment_suspense,
+        //         "accountcrno" => '135',
+        //         "narrationcr" => 'Salary Payment Suspense',
+        //         "accountdrno" => '53',
+        //         "narrationdr" => 'Salary & Wages - Administrative',
+        //     ],
+        //     [
+        //         "userid" => $user,
+        //         "company" => $companyId,
+        //         "branch" => $companyBranchId,
+        //         "tradate" => $date,
+        //         "traamount" => $travelling,
+        //         "accountcrno" => '138',
+        //         "narrationcr" => 'Employee Travelling Expenses Reserve',
+        //         "accountdrno" => '9',
+        //         "narrationdr" => 'Employee Travelling Expenses',
+        //     ],
+        //     [
+        //         "userid" => $user,
+        //         "company" => $companyId,
+        //         "branch" => $companyBranchId,
+        //         "tradate" => $date,
+        //         "traamount" => $incentive,
+        //         "accountcrno" => '139',
+        //         "narrationcr" => 'Employee Incentive Reserve',
+        //         "accountdrno" => '10',
+        //         "narrationdr" => 'Employee Incentive',
+        //     ],
+        //     [
+        //         "userid" => $user,
+        //         "company" => $companyId,
+        //         "branch" => $companyBranchId,
+        //         "tradate" => $date,
+        //         "traamount" => $EPFAdministration,
+        //         "accountcrno" => '136',
+        //         "narrationcr" => 'Employee Provident Fund Reserve',
+        //         "accountdrno" => '54',
+        //         "narrationdr" => 'EPF-Administration',
+        //     ],
+        //     [
+        //         "userid" => $user,
+        //         "company" => $companyId,
+        //         "branch" => $companyBranchId,
+        //         "tradate" => $date,
+        //         "traamount" => $ETFAdministration,
+        //         "accountcrno" => '137',
+        //         "narrationcr" => 'Employee Trust Fund Reserve',
+        //         "accountdrno" => '55',
+        //         "narrationdr" => 'ETF-Administration',
+        //     ],
+        // ];
            
         $allSuccessful = true;
         $responses = [];
