@@ -8,6 +8,7 @@ use App\JobCategory;
 use App\PayrollchartAccount;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class PayrollchartAccountController extends Controller
 {
@@ -54,6 +55,9 @@ class PayrollchartAccountController extends Controller
             abort(403);
         }
 
+        $companyId = Session::get('company_id');
+        $branchId = Session::get('company_branch_id');
+
         $type=$request->input('type');
         $creditacc=$request->input('creditacc');
         $debitacc=$request->input('debitacc');
@@ -64,6 +68,8 @@ class PayrollchartAccountController extends Controller
         $request->type_code= $typeCode;
         $request->credit_account_id=$creditacc;
         $request->debit_account_id=$debitacc;
+        $request->company_id=$companyId;
+        $request->branch_id=$branchId;
         $request->status= '1';
         $request->created_by=Auth::id();
         $request->updated_by = '0';

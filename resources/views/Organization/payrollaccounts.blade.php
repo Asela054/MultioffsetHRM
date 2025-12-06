@@ -232,8 +232,8 @@ $(document).ready(function(){
             success: function (data) {
 
                 $('#type').val(data.result.type);
-                $('#creditacc').val(data.result.credit_account_id);
-                $('#debitacc').val(data.result.debit_account_id);
+                $('#creditacc').val(data.result.credit_account_id).trigger('change');
+                $('#debitacc').val(data.result.debit_account_id).trigger('change');
                 $('#hidden_id').val(id);
                 $('.modal-title').text('Edit Payroll Chart of Account');
                 $('#action_button').html('Edit');
