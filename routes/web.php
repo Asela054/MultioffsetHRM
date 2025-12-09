@@ -914,6 +914,10 @@ Route::post('/payrollchartaccountdelete' ,'PayrollchartAccountController@delete'
 
 // Route::get('/get-accounts', 'PayrollchartAccountController@getAllAccounts')->name('getchartsaccounts');
 
+// Employee Birthday Report
+Route::get('EmpoloyeeBdReport',['uses' => 'EmployeeBdReportController@getemployeeBdlist', 'as' => 'EmpoloyeeBdReport']);
+Route::get('employee_bd_report_list',['uses' => 'EmployeeBdReportController@employee_bd_report_list', 'as' => 'employee_bd_report_list']);
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
