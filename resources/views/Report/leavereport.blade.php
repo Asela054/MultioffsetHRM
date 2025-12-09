@@ -11,7 +11,7 @@
             </div>
         </div>
 
-        <div class="container-fluid mt-4">
+        <div class="container-fluid mt-2 p-0 p-2">
             <div class="card mb-2">
                 <div class="card-body">
                     <form class="form-horizontal" id="formFilter">
@@ -56,7 +56,8 @@
                             </div>
                             <div class="col">
                                 <br>
-                                <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"> Filter</button>
+                                <button type="submit" class="btn btn-primary btn-sm filter-btn px-3" id="btn-filter"> Filter</button>
+                                <button type="button" class="btn btn-danger btn-sm filter-btn px-3" id="btn-reset"> Clear</button>
                             </div>
                         </div>
 
@@ -70,13 +71,14 @@
                     <table class="table table-striped table-bordered table-sm small nowrap" style="width: 100%" id="attendreporttable">
                         <thead>
                         <tr>
-                            <th>UID</th>
-                            <th>Name with Initial</th>
+                            <th>EMP ID</th>
+                            <th>EPF NO</th>
+                            <th>Employee Name</th>
                             <th>Department</th>
-                            <th>Leave From</th>
-                            <th>Leave To</th>
                             <th>Leave Type</th>
                             <th>Day Type</th>
+                            <th>Leave From</th>
+                            <th>Leave To</th>
                             <th>Covering Person</th>
                             <th>Reason</th>
                             <th>Status</th>
@@ -231,11 +233,10 @@
                     },
 
                     columns: [
-                        { data: 'id' },
-                        { data: 'emp_name_with_initial' },
+                        { data: 'emp_id' },
+                        { data: 'emp_etfno' },
+                        { data: 'employee_display' },
                         { data: 'dept_name' },
-                        { data: 'leave_from' },
-                        { data: 'leave_to' },
                         { data: 'leave_type_name' },
                         { 
                         data: 'half_short', name: 'half_short', render: function(data, type, row) {
@@ -250,6 +251,8 @@
                             }
                         }
                         },
+                        { data: 'leave_from' },
+                        { data: 'leave_to' },
                         { data: 'emp_covering_name' },
                         { data: 'reson' },
                         { data: 'status' }
@@ -265,6 +268,20 @@
                 let employee = $('#employee').val();
 
                 load_dt(department, employee);
+            });
+
+            $('#btn-reset').on('click', function(e) {
+                e.preventDefault();
+                
+                department.val(null).trigger('change');
+                employee.val(null).trigger('change');
+                leave_type.val(null).trigger('change');
+                covering_employee.val(null).trigger('change');
+                
+                from_date.val('');
+                to_date.val('');
+                
+                load_dt('', '');
             });
         });
     </script>
