@@ -9,7 +9,7 @@
            
         </div>
     </div>
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-2 p-0 p-2">
         <div class="card mb-2">
             <div class="card-body">
                 <form class="form-horizontal" id="formFilter">
@@ -26,7 +26,8 @@
                         </div>
                         <div class="col">
                             <br>
-                            <button type="submit" class="btn btn-primary btn-sm filter-btn" id="btn-filter"> Filter</button>
+                            <button type="submit" class="btn btn-primary btn-sm filter-btn px-3" id="btn-filter"> Filter</button>
+                            <button type="button" class="btn btn-danger btn-sm filter-btn px-3" id="btn-reset"> Clear</button>
                         </div>
                     </div>
 
@@ -41,22 +42,25 @@
                             <table class="table table-striped table-bordered table-sm small" id="emptable">
                                 <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Name with Initial</th>
-                                    <th>Location</th>
-                                    <th>Department</th>
-                                    <th>Date of Birth</th>
-                                    <th>Mobile No</th>
-                                    <th>Telephone</th>
+                                    <th>EMP ID</th>
+                                    <th>EPF No</th>
+                                    <th>First Name</th> 
+                                    <th>Middle Name</th>
+                                    <th>Last Name</th>
+                                    <th>Full Name</th>
+                                    <th>Name With Initial</th>
                                     <th>Nic No</th>
-                                    <th>Gender</th>
-                                    <th>Email</th>
+                                    <th>Date of Birth</th>
                                     <th>Permanent Address</th>
                                     <th>Temporary Address</th>
+                                    <th>Job Title</th>
                                     <th>Job Category</th>
-                                    <th>Job Status</th>
-                                    <th>Permanent Date</th>
-
+                                    <th>Department</th>
+                                    <th>Join Date</th>
+                                    <th>Confirm Date</th>
+                                    <th>Basic Salary</th>
+                                    <th>Daily Pay Rate</th>
+                                    <th>Leave</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -78,7 +82,7 @@ $(document).ready(function() {
 
     $('#report_menu_link').addClass('active');
     $('#report_menu_link_icon').addClass('active');
-    $('#employeereportmaster').addClass('navbtnactive');
+    $('#employeedetailsreport').addClass('navbtnactive');
 
     let company = $('#company');
     let department = $('#department');
@@ -142,21 +146,25 @@ $(document).ready(function() {
                 "data": {'department':department},
             },
             columns: [
-                { data: 'id' },
+                { data: 'emp_id' },
+                { data: 'emp_etfno' },
+                { data: 'emp_first_name' },
+                { data: 'emp_med_name' },
+                { data: 'emp_last_name' },
+                { data: 'emp_fullname' },
                 { data: 'emp_name_with_initial' },
-                { data: 'location' },
-                { data: 'dept_name' },
-                { data: 'emp_birthday' },
-                { data: 'emp_mobile' },
-                { data: 'emp_work_telephone' },
                 { data: 'emp_national_id' },
-                { data: 'emp_gender' },
-                { data: 'emp_email' },
+                { data: 'emp_birthday' },
                 { data: 'emp_address' },
                 { data: 'emp_addressT' },
                 { data: 'title' },
-                { data: 'e_status' },
-                { data: 'emp_permanent_date' }
+                { data: 'job_category' },
+                { data: 'dept_name' },
+                { data: 'emp_join_date' },
+                { data: 'emp_permanent_date' },
+                { data: 'emp_basic_salary' },
+                { data: 'emp_daily_pay_rate' },
+                { data: 'emp_leave' }
             ],
             "bDestroy": true,
             "order": [[ 0, "desc" ]],
@@ -170,7 +178,14 @@ $(document).ready(function() {
         load_dt(department);
     });
 
-
+    $('#btn-reset').on('click', function(e) {
+                e.preventDefault();
+                
+                department.val(null).trigger('change');
+                
+                
+                load_dt('');
+            });
 
 } );
 </script>
