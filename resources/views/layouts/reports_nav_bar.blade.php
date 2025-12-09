@@ -50,6 +50,9 @@
       @can('employee-report')
       <li><a class="dropdown-item" href="{{ route('EmpoloyeeReport')}}">Employees Report</a></li>
       @endcan
+      @can('employee-report')
+      <li><a class="dropdown-item" href="{{ route('EmpoloyeeBdReport')}}">Employees Birthday Report</a></li>
+      @endcan
       @can('employee-bank-report')
       <li><a class="dropdown-item" href="{{ route('empBankReport')}}">Employee Banks</a></li>
       @endcan
