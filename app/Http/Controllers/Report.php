@@ -21,6 +21,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Str;
 use Yajra\Datatables\Datatables;
+use App\Helpers\EmployeeHelper;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -76,6 +77,8 @@ class Report extends Controller
             ->leftjoin('branches', 'employees.emp_location', '=', 'branches.id')
             ->leftjoin('departments', 'employees.emp_department', '=', 'departments.id')
             ->leftjoin('employment_statuses', 'employment_statuses.id', '=', 'employees.emp_status')
+            ->leftjoin('job_categories', 'job_categories.id', '=', 'employees.job_category_id')
+            ->leftjoin('payroll_profiles', 'payroll_profiles.emp_id', '=', 'employees.id')
             //->select('employees.*', 'job_titles.title', 'branches.location', 'departments.name as dept_name', 'employment_statuses.emp_status as e_status')
             ->where('employees.emp_company', $companyId)
             ->where('employees.emp_location', $companyBranchId)
@@ -90,10 +93,12 @@ class Report extends Controller
                     ->orWhere('employees.emp_name_with_initial', 'like', '%' . $searchValue . '%')
                     ->orWhere('branches.location', 'like', '%' . $searchValue . '%')
                     ->orWhere('departments.name', 'like', '%' . $searchValue . '%')
+                    ->orWhere('employees.emp_id', 'like', '%' . $searchValue . '%')
+                    ->orWhere('employees.emp_etfno', 'like', '%' . $searchValue . '%')
+                    ->orWhere('employees.calling_name', 'like', '%' . $searchValue . '%')
                     ->orWhere('employees.emp_birthday', 'like', '%' . $searchValue . '%')
                     ->orWhere('employees.emp_mobile', 'like', '%' . $searchValue . '%')
                     ->orWhere('employees.emp_work_telephone', 'like', '%' . $searchValue . '%')
-                    ->orWhere('employees.emp_name_with_initial', 'like', '%' . $searchValue . '%')
                     ->orWhere('employees.emp_national_id', 'like', '%' . $searchValue . '%')
                     ->orWhere('employees.emp_gender', 'like', '%' . $searchValue . '%')
                     ->orWhere('employees.emp_email', 'like', '%' . $searchValue . '%')
@@ -109,6 +114,8 @@ class Report extends Controller
             ->leftjoin('branches', 'employees.emp_location', '=', 'branches.id')
             ->leftjoin('departments', 'employees.emp_department', '=', 'departments.id')
             ->leftjoin('employment_statuses', 'employment_statuses.id', '=', 'employees.emp_status')
+            ->leftjoin('job_categories', 'job_categories.id', '=', 'employees.job_category_id')
+            ->leftjoin('payroll_profiles', 'payroll_profiles.emp_id', '=', 'employees.id')
             ->where('employees.emp_company', $companyId)
             ->where('employees.emp_location', $companyBranchId)
             ->where('employees.is_resigned', 0)
@@ -127,10 +134,12 @@ class Report extends Controller
                 ->orWhere('employees.emp_name_with_initial', 'like', '%' . $searchValue . '%')
                 ->orWhere('branches.location', 'like', '%' . $searchValue . '%')
                 ->orWhere('departments.name', 'like', '%' . $searchValue . '%')
+                ->orWhere('employees.emp_id', 'like', '%' . $searchValue . '%')
+                ->orWhere('employees.emp_etfno', 'like', '%' . $searchValue . '%')
+                ->orWhere('employees.calling_name', 'like', '%' . $searchValue . '%')
                 ->orWhere('employees.emp_birthday', 'like', '%' . $searchValue . '%')
                 ->orWhere('employees.emp_mobile', 'like', '%' . $searchValue . '%')
                 ->orWhere('employees.emp_work_telephone', 'like', '%' . $searchValue . '%')
-                ->orWhere('employees.emp_name_with_initial', 'like', '%' . $searchValue . '%')
                 ->orWhere('employees.emp_national_id', 'like', '%' . $searchValue . '%')
                 ->orWhere('employees.emp_gender', 'like', '%' . $searchValue . '%')
                 ->orWhere('employees.emp_email', 'like', '%' . $searchValue . '%')
@@ -146,6 +155,8 @@ class Report extends Controller
             ->leftjoin('branches', 'employees.emp_location', '=', 'branches.id')
             ->leftjoin('departments', 'employees.emp_department', '=', 'departments.id')
             ->leftjoin('employment_statuses', 'employment_statuses.id', '=', 'employees.emp_status')
+            ->leftjoin('job_categories', 'job_categories.id', '=', 'employees.job_category_id')
+            ->leftjoin('payroll_profiles', 'payroll_profiles.emp_id', '=', 'employees.id')
             ->where('employees.emp_company', $companyId)
             ->where('employees.emp_location', $companyBranchId)
             ->where('employees.is_resigned', 0)
@@ -157,22 +168,27 @@ class Report extends Controller
 
         $query->select(
             "employees.id",
+            "employees.emp_id",
+            "employees.emp_etfno",
+            "employees.emp_first_name",
+            "employees.emp_med_name",
+            "employees.emp_last_name",
+            "employees.emp_fullname",
             "employees.emp_name_with_initial",
-            "branches.location",
+            "employees.calling_name",
             "departments.name as dept_name",
             "employees.emp_birthday",
-            "employees.emp_mobile",
-            "employees.emp_work_telephone",
-            "employees.emp_name_with_initial",
             "employees.emp_national_id",
-            "employees.emp_gender",
-            "employees.emp_email",
             "employees.emp_address",
             "employees.emp_address_2",
             "employees.emp_addressT1",
             "employees.emp_address_T2",
+            "employees.emp_join_date",
             "employment_statuses.emp_status as e_status",
             "job_titles.title",
+            "job_categories.category",
+            "payroll_profiles.basic_salary as emp_basic_salary",
+            "payroll_profiles.day_salary as emp_daily_pay_rate",
             "employees.emp_permanent_date"
         );
 
@@ -184,23 +200,118 @@ class Report extends Controller
         $data_arr = array();
 
         foreach ($records as $record) {
+            $empid = $record->emp_id;
+            $like_from_date = date('Y').'-01-01';
+            $like_from_date2 = date('Y').'-12-31';
+            
+            // Get annual leaves
+            $total_taken_annual_leaves = DB::table('leaves')
+                ->where('leaves.emp_id', '=', $empid)
+                ->whereBetween('leaves.leave_from', [$like_from_date, $like_from_date2])
+                ->where('leaves.leave_type', '=', '1')
+                ->where('leaves.status', '=', 'Approved')
+                ->get();
+            
+            $current_year_taken_a_l = 0;
+            foreach ($total_taken_annual_leaves as $tta){
+                $leave_from = $tta->leave_from;
+                $leave_to = $tta->leave_to;
+                $leave_from_year = Carbon::parse($leave_from)->year;
+                $leave_to_year = Carbon::parse($leave_to)->year;
+                
+                if($leave_from_year != $leave_to_year){
+                    $lastDayOfMonth = Carbon::parse($leave_from)->endOfMonth()->toDateString();
+                    $to = Carbon::createFromFormat('Y-m-d', $lastDayOfMonth);
+                    $from = Carbon::createFromFormat('Y-m-d', $leave_from);
+                    $diff_in_days = $to->diffInDays($from);
+                    $current_year_taken_a_l += $diff_in_days;
+                    
+                    $jan_data = DB::table('leaves')->where('leaves.id', '=', $tta->id)->first();
+                    $firstDayOfMonth = Carbon::parse($jan_data->leave_to)->startOfMonth()->toDateString();
+                    $to_t = Carbon::createFromFormat('Y-m-d', $jan_data->leave_to);
+                    $from_t = Carbon::createFromFormat('Y-m-d', $firstDayOfMonth);
+                    $diff_in_days_f = $to_t->diffInDays($from_t);
+                    $current_year_taken_a_l += $diff_in_days_f;
+                }else{
+                    $current_year_taken_a_l += $tta->no_of_days;
+                }
+            }
+            
+            // Get casual leaves
+            $total_taken_casual_leaves = DB::table('leaves')
+                ->where('leaves.emp_id', '=', $empid)
+                ->whereBetween('leaves.leave_from', [$like_from_date, $like_from_date2])
+                ->where('leaves.leave_type', '=', '2')
+                ->where('leaves.status', '=', 'Approved')
+                ->get();
+            
+            $current_year_taken_c_l = 0;
+            foreach ($total_taken_casual_leaves as $tta){
+                $leave_from = $tta->leave_from;
+                $leave_to = $tta->leave_to;
+                $leave_from_year = Carbon::parse($leave_from)->year;
+                $leave_to_year = Carbon::parse($leave_to)->year;
+                
+                if($leave_from_year != $leave_to_year){
+                    $lastDayOfMonth = Carbon::parse($leave_from)->endOfMonth()->toDateString();
+                    $to = Carbon::createFromFormat('Y-m-d', $lastDayOfMonth);
+                    $from = Carbon::createFromFormat('Y-m-d', $leave_from);
+                    $diff_in_days = $to->diffInDays($from);
+                    $current_year_taken_c_l += $diff_in_days;
+                }else{
+                    $current_year_taken_c_l += $tta->no_of_days;
+                }
+            }
+            
+            // Get medical leaves
+            $total_taken_medical_leaves = DB::table('leaves')
+                ->where('leaves.emp_id', '=', $empid)
+                ->whereBetween('leaves.leave_from', [$like_from_date, $like_from_date2])
+                ->where('leaves.leave_type', '=', '4')
+                ->where('leaves.status', '=', 'Approved')
+                ->get();
+            
+            $current_year_taken_medical = 0;
+            foreach ($total_taken_medical_leaves as $medic){
+                $leave_from = $medic->leave_from;
+                $leave_to = $medic->leave_to;
+                $leave_from_year = Carbon::parse($leave_from)->year;
+                $leave_to_year = Carbon::parse($leave_to)->year;
+                
+                if($leave_from_year != $leave_to_year){
+                    $lastDayOfMonth = Carbon::parse($leave_from)->endOfMonth()->toDateString();
+                    $to = Carbon::createFromFormat('Y-m-d', $lastDayOfMonth);
+                    $from = Carbon::createFromFormat('Y-m-d', $leave_from);
+                    $diff_in_days = $to->diffInDays($from);
+                    $current_year_taken_medical += $diff_in_days;
+                }else{
+                    $current_year_taken_medical += $medic->no_of_days;
+                }
+            }
+            
+            $total_leaves_taken = $current_year_taken_a_l + $current_year_taken_c_l + $current_year_taken_medical;
 
             $data_arr[] = array(
-                "id" => $record->id,
+                "emp_id" => $record->emp_id,
+                "emp_etfno" => $record->emp_etfno,
+                "emp_first_name" => $record->emp_first_name,
+                "emp_med_name" => $record->emp_med_name,
+                "emp_last_name" => $record->emp_last_name,
+                "emp_fullname" => $record->emp_fullname,
                 "emp_name_with_initial" => $record->emp_name_with_initial,
-                "location" => $record->location,
-                "dept_name" => $record->dept_name,
-                "emp_birthday" => $record->emp_birthday,
-                "emp_mobile" => $record->emp_mobile,
-                "emp_work_telephone" => $record->emp_work_telephone,
                 "emp_national_id" => $record->emp_national_id,
-                "emp_gender" => $record->emp_gender,
-                "emp_email" => $record->emp_email,
+                "emp_birthday" => $record->emp_birthday,
                 "emp_address" => $record->emp_address . $record->emp_address_2,
                 "emp_addressT" => $record->emp_addressT1 . $record->emp_address_T2,
-                "e_status" => $record->e_status,
                 "title" => $record->title,
-                "emp_permanent_date" => $record->emp_permanent_date
+                "job_category" => $record->category,
+                "dept_name" => $record->dept_name,
+                "emp_join_date" => $record->emp_join_date,
+                "emp_permanent_date" => $record->emp_permanent_date,
+                "emp_basic_salary" => $record->emp_basic_salary,
+                "emp_daily_pay_rate" => $record->emp_daily_pay_rate,
+                "emp_leave" => $total_leaves_taken,
+                "e_status" => $record->e_status,
             );
         }
 
@@ -1447,12 +1558,15 @@ class Report extends Controller
             $query2.= 'AND ';
             $query2.= '( ';
             $query2.= 'employees.emp_id like "'.$searchValue.'%" ';
+            $query2.= 'OR employees.emp_etfno like "'.$searchValue.'%" ';
             $query2.= 'OR employees.emp_name_with_initial like "'.$searchValue.'%" ';
+            $query2.= 'OR employees.calling_name like "'.$searchValue.'%" ';
             $query2.= 'OR leaves.leave_from like "'.$searchValue.'%" ';
             $query2.= 'OR leaves.leave_to like "'.$searchValue.'%" ';
             $query2.= 'OR leaves.comment like "'.$searchValue.'%" ';
             $query2.= 'OR leaves.reson like "'.$searchValue.'%" ';
             $query2.= 'OR ec.emp_name_with_initial like "'.$searchValue.'%" ';
+            $query2.= 'OR ec.calling_name like "'.$searchValue.'%" ';
             $query2.= 'OR departments.name like "'.$searchValue.'%" ';
             $query2.= ') ';
         }
@@ -1487,7 +1601,13 @@ class Report extends Controller
         $query6.= ' ';
         $query4 = ') t ';
         $query5 = 'LIMIT ' . (string)$start . ' , ' . $rowperpage . ' ';
-        $query7 = 'ORDER BY '.$columnName.' '.$columnSortOrder.' ';
+        if (in_array($columnName, ['emp_id', 'emp_etfno', 'emp_name_with_initial'])) {
+            $query7 = 'ORDER BY employees.'.$columnName.' '.$columnSortOrder.' ';
+        } elseif (in_array($columnName, ['leave_from', 'leave_to', 'leave_type', 'status', 'half_short', 'reson', 'comment'])) {
+            $query7 = 'ORDER BY leaves.'.$columnName.' '.$columnSortOrder.' ';
+        } else {
+            $query7 = 'ORDER BY '.$columnName.' '.$columnSortOrder.' ';
+        }
 
         $totalRecordswithFilter_arr = DB::select($query1.$query2.$query6.$query4);
         $totalRecordswithFilter = $totalRecordswithFilter_arr[0]->acount;
@@ -1496,7 +1616,9 @@ class Report extends Controller
         $query3 = 'select  
             leaves.*,
             employees.emp_id ,
+            employees.emp_etfno ,
             employees.emp_name_with_initial ,
+            employees.calling_name ,
             ec.emp_name_with_initial as emp_covering_name,
             leave_types.leave_type as leave_type_name,
             departments.name as dept_name  
@@ -1510,7 +1632,14 @@ class Report extends Controller
 
             $data_arr[] = array(
                 "id" => $record->id,
+                "emp_id" => $record->emp_id,
+                "emp_etfno" => $record->emp_etfno,
                 "emp_name_with_initial" => $record->emp_name_with_initial,
+                "employee_display" => EmployeeHelper::getDisplayName((object)[
+                    'emp_id' => $record->emp_id,
+                    'emp_name_with_initial' => $record->emp_name_with_initial,
+                    'calling_name' => $record->calling_name
+                ]),
                 "leave_from" => $record->leave_from,
                 "leave_to" => $record->leave_to,
                 "leave_type_name" => $record->leave_type_name,
