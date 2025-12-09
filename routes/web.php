@@ -923,3 +923,7 @@ Route::get('/clear-cache', function() {
     
     return "Cache cleared successfully!";
 });
+
+// Employee Birthday Report
+Route::get('EmpoloyeeBdReport',['uses' => 'EmployeeBdReportController@getemployeeBdlist', 'as' => 'EmpoloyeeBdReport']);
+Route::get('employee_bd_report_list',['uses' => 'EmployeeBdReportController@employee_bd_report_list', 'as' => 'employee_bd_report_list']);
