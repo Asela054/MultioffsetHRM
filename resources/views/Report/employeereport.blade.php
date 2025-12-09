@@ -39,7 +39,7 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="table-responsive">
-                            <table class="table table-striped table-bordered table-sm small" id="emptable">
+                            <table class="table table-striped table-bordered table-sm small nowrap" id="emptable">
                                 <thead>
                                 <tr>
                                     <th>EMP ID</th>
