@@ -52,6 +52,8 @@
                                     <th>Date of Birth</th>
                                     <th>Age</th>
                                     <th>Department</th>
+                                    <th style="display:none;">ID</th>
+                                    <th style="display:none;">Calling Name</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -110,14 +112,34 @@ $(document).ready(function() {
             "lengthMenu": [[10, 25, 50, 100, 500, 1000], [10, 25, 50, 100, 500, 1000]],
             dom: 'Blfrtip',
             buttons: [
-                'excelHtml5',
-                'pdfHtml5'
+                {
+                    extend: 'excelHtml5',
+                    text: 'Excel',
+                    className: 'btn btn-default btn-sm',
+                    exportOptions: {
+                        columns: ':visible'
+                    }
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: 'Print',
+                    className: 'btn btn-default btn-sm',
+                    orientation: 'landscape', 
+                    exportOptions: {
+                        columns: ':visible'
+                    }
+                }
             ],
             processing: true,
             serverSide: true,
             ajax: {
-                "url": "{{url('/employee_bd_report_list')}}",
-                "data": {'department':department, 'date':date},
+                "url": scripturl + "/employee_bd_report_list.php",
+                "type": "POST",
+                "data": {'department':department,
+                        'date':date,
+                        'company': '{{ session("company_id") }}',              
+                        'company_branch': '{{ session("company_branch_id") }}'
+                        },
             },
             columns: [
                 { data: 'emp_id' },
@@ -125,7 +147,9 @@ $(document).ready(function() {
                 { data: 'employee_display' },
                 { data: 'emp_birthday' },
                 { data: 'age' },
-                { data: 'dept_name' }
+                { data: 'dept_name' },
+                { data: 'id', name: 'id' , visible: false},
+                { data: "calling_name", visible: false }
             ],
             "bDestroy": true,
             "order": [[ 0, "desc" ]],

@@ -9,7 +9,7 @@
       || auth()->user()->can('no-pay-report')
       || auth()->user()->can('employee-absent-report'))
   <div class="dropdown">
-    <a  role="button" data-toggle="dropdown" class="btn navbtncolor" data-target="#" href="#" id="employeereportmaster">
+    <a  role="button" data-toggle="dropdown" class="btn navbtncolor" href="#" id="employeereportmaster">
         Attendance & Leave Report<span class="caret"></span></a>
         <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
           
@@ -44,7 +44,7 @@
 
   @if(auth()->user()->can('employee-report')|| auth()->user()->can('employee-bank-report') || auth()->user()->can('employee-resign-report'))
 <div class="dropdown">
-<a  role="button" data-toggle="dropdown" class="btn navbtncolor" data-target="#" href="#" id="employeedetailsreport">
+<a  role="button" data-toggle="dropdown" class="btn navbtncolor" href="#" id="employeedetailsreport">
     Employee Details Report<span class="caret"></span></a>
     <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
       @can('employee-report')
@@ -69,7 +69,7 @@
 
 @if(auth()->user()->can('department-wise-ot-report')|| auth()->user()->can('department-wise-leave-report')|| auth()->user()->can('department-wise-attendance-report'))
 <div class="dropdown">
-<a  role="button" data-toggle="dropdown" class="btn navbtncolor" data-target="#" href="#" id="departmentvisereport">
+<a  role="button" data-toggle="dropdown" class="btn navbtncolor" href="#" id="departmentvisereport">
   Department-Wise Reports<span class="caret"></span></a>
     <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
       @can('department-wise-attendance-report')

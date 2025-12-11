@@ -82,6 +82,9 @@
                             <th>Covering Person</th>
                             <th>Reason</th>
                             <th>Status</th>
+                            <th style="display:none;">ID</th>
+                            <th style="display:none;">Name With Initial</th>
+                            <th style="display:none;">Calling Name</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -208,7 +211,7 @@
                             text: 'Excel',
                             className: 'btn btn-default btn-sm',
                             exportOptions: {
-                                columns: 'th:not(:last-child)'
+                                columns: ':visible'
                             }
                         },
                         {
@@ -216,22 +219,28 @@
                             text: 'Print',
                             className: 'btn btn-default btn-sm',
                             exportOptions: {
-                                columns: 'th:not(:last-child)'
+                                columns: ':visible'
                             }
                         }
                     ],
                     processing: true,
                     serverSide: true,
                     ajax: {
-                        "url": "{{url('/leave_report_list')}}",
-                        "data": {'department':department, 
-                        'employee':employee, 
-                        'leave_type':leave_type.val(),
-                        'covering_employee':covering_employee.val(),
-                        'from_date':from_date.val(), 
-                        'to_date':to_date.val()},
+                        "url": scripturl + "/leave_report_list.php",
+                        "type": "POST",
+                        "data": function(d) {
+                            return $.extend({}, d, {
+                                'department': department, 
+                                'employee': employee, 
+                                'leave_type': leave_type.val(),
+                                'covering_employee': covering_employee.val(),
+                                'from_date': from_date.val(), 
+                                'to_date': to_date.val(),
+                                'company': '{{ session("company_id") }}',              
+                                'company_branch': '{{ session("company_branch_id") }}'
+                            });
+                        }
                     },
-
                     columns: [
                         { data: 'emp_id' },
                         { data: 'emp_etfno' },
@@ -239,26 +248,30 @@
                         { data: 'dept_name' },
                         { data: 'leave_type_name' },
                         { 
-                        data: 'half_short', name: 'half_short', render: function(data, type, row) {
-                            if (data == 1) {
-                                return "Full Day";
-                            } else if (data == 0.50) {
-                                return "Half Day";
-                            } else if (data == 0.25) {
-                                return "Short Leave";
-                            } else {
-                                return "Unknown";
+                            data: 'half_short', 
+                            render: function(data, type, row) {
+                                if (data == 1) {
+                                    return "Full Day";
+                                } else if (data == 0.50) {
+                                    return "Half Day";
+                                } else if (data == 0.25) {
+                                    return "Short Leave";
+                                } else {
+                                    return "Unknown";
+                                }
                             }
-                        }
                         },
                         { data: 'leave_from' },
                         { data: 'leave_to' },
                         { data: 'emp_covering_name' },
                         { data: 'reson' },
-                        { data: 'status' }
+                        { data: 'status' },
+                        { data: 'id', name: 'id' , visible: false},
+                        { data: "emp_name_with_initial", visible: false },
+                        { data: "calling_name", visible: false },
                     ],
                     "bDestroy": true,
-                    "order": [[ 0, "desc" ]],
+                    "order": [[ 6, "desc" ]]
                 });
             }
 
