@@ -3864,13 +3864,25 @@ class AttendanceController extends Controller
                 foreach ($get_edit_details as $detail) {
                 if (!empty($detail->timestamp)) {
                     $period = (new DateTime($detail->timestamp))->format('A');
+                    $timestampdate = (new DateTime($detail->timestamp))->format('Y-m-d');
+                    $date = (new DateTime($detail->date))->format('Y-m-d');
 
                     if ($period === 'AM') {
-                        if (!is_null($detail->prev_val)) {
-                            $firstdetails[] = $detail->prev_val;
+                        if($timestampdate > $date){
+                            if (!is_null($detail->prev_val)) {
+                                $lastdetails[] = $detail->prev_val;
+                            }
+                            if (!is_null($detail->new_val)) {
+                                $lastdetails[] = $detail->new_val;
+                            }
                         }
-                        if (!is_null($detail->new_val)) {
-                            $firstdetails[] = $detail->new_val;
+                        else{
+                            if (!is_null($detail->prev_val)) {
+                                $firstdetails[] = $detail->prev_val;
+                            }
+                            if (!is_null($detail->new_val)) {
+                                $firstdetails[] = $detail->new_val;
+                            }
                         }
                     } elseif ($period === 'PM') {
                         if (!is_null($detail->prev_val)) {

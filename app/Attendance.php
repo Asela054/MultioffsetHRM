@@ -137,7 +137,9 @@ class Attendance extends Model
             }
 
             //get difference in hours
-            $diff = round((strtotime($work_hours_to) - strtotime($work_hours_from)) / 3600, 1);
+            // $diff = round((strtotime($work_hours_to) - strtotime($work_hours_from)) / 3600, 1);
+            $diff = $work_hours_from->diffInMinutes($work_hours_to);
+            $diff = round(($diff/60), 2);
 
             if($first_time >=$today_twelve && $first_time < $today_one ){
             }else{
@@ -289,7 +291,8 @@ class Attendance extends Model
             ->select(DB::raw('SUM(no_of_days) as total'))
             ->where('emp_id', $emp_id )
             ->where('status', 'Approved' )
-            ->where('leave_from', 'like',  $month . '%');
+            ->where('leave_from', 'like',  $month . '%')
+            ->where('leave_type', '!=', 6);
         $leave_days_data = $query->get();
         $leave_days = (!empty($leave_days_data[0]->total)) ? $leave_days_data[0]->total : 0;
 
@@ -1254,46 +1257,94 @@ class Attendance extends Model
     {
         // Clone the time to avoid modifying the original variable
         $roundedTime = $time->copy();
-
+        
         // Get the current minutes
         $minutes = $roundedTime->minute;
-
+        
+        // Special case: if minutes are exactly 30, return as-is (8:30 AM stays 8:30 AM)
+        if ($minutes === 30) {
+            return $roundedTime->second(0);
+        }
+        
         // Calculate the number of minutes past the last half-hour mark
-        // E.g., for 8:13, $minutes_past_30 = 13 (since 13 % 30 = 13)
-        // E.g., for 8:45, $minutes_past_30 = 15 (since 45 % 30 = 15)
         $minutes_past_30 = $minutes % 30;
-
-        // The amount to add to reach the next 30-minute mark
-        // If minutes_past_30 is 0 (i.e., time is exactly on the hour/half-hour),
-        // we still want to round UP to the next mark (as per your requirement 8:30 -> 9:00)
+        
+        // Calculate minutes to add to reach the next half-hour mark
         if ($minutes_past_30 === 0) {
-            $minutesToAdd = 30; // 8:30 + 30 minutes = 9:00
+            // On the hour (0, 30, 60) - hour marks stay as-is
+            // Actually, 0 minutes means we're exactly on the hour (8:00 AM)
+            // According to your requirement: 8:00 AM to 8:29 AM round to 8:30 AM
+            // So 8:00 AM should round to 8:30 AM
+            $minutesToAdd = 30;
         } else {
-            // Amount to add is 30 minus the minutes past the last mark
+            // Between minutes 1-29 or 31-59
             $minutesToAdd = 30 - $minutes_past_30;
         }
-
+        
         // Add the calculated minutes and reset the seconds to 0
         return $roundedTime->addMinutes($minutesToAdd)->second(0);
     }
+    // public function roundToNextHalfHour(Carbon $time): Carbon
+    // {
+    //     // Clone the time to avoid modifying the original variable
+    //     $roundedTime = $time->copy();
+
+    //     // Get the current minutes
+    //     $minutes = $roundedTime->minute;
+
+    //     // Calculate the number of minutes past the last half-hour mark
+    //     // E.g., for 8:13, $minutes_past_30 = 13 (since 13 % 30 = 13)
+    //     // E.g., for 8:45, $minutes_past_30 = 15 (since 45 % 30 = 15)
+    //     $minutes_past_30 = $minutes % 30;
+
+    //     // The amount to add to reach the next 30-minute mark
+    //     // If minutes_past_30 is 0 (i.e., time is exactly on the hour/half-hour),
+    //     // we still want to round UP to the next mark (as per your requirement 8:30 -> 9:00)
+    //     if ($minutes_past_30 === 0) {
+    //         $minutesToAdd = 30; // 8:30 + 30 minutes = 9:00
+    //     } else {
+    //         // Amount to add is 30 minus the minutes past the last mark
+    //         $minutesToAdd = 30 - $minutes_past_30;
+    //     }
+
+    //     // Add the calculated minutes and reset the seconds to 0
+    //     return $roundedTime->addMinutes($minutesToAdd)->second(0);
+    // }
 
     public function roundToPreviousHalfHour(Carbon $time): Carbon
     {
-        // Clone the time to avoid modifying the original variable
-        $roundedTime = $time->copy();
-
+        $roundedTime = $time->copy()->second(0);
         $minutes = $roundedTime->minute;
-
-        // Calculate the number of minutes past the hour (0-59)
-        // The amount of minutes to SUBTRACT is the remainder of dividing by 30.
-        // E.g., 5:07 PM: 7 % 30 = 7. Subtract 7 minutes --> 5:00 PM.
-        // E.g., 4:55 PM: 55 % 30 = 25. Subtract 25 minutes --> 4:30 PM.
-        // E.g., 5:31 PM: 31 % 30 = 1. Subtract 1 minute --> 5:30 PM.
-        $minutesToSubtract = $minutes % 30;
         
-        // Carbon's subMinutes correctly handles crossing the hour boundary.
-        return $roundedTime->subMinutes($minutesToSubtract)->second(0);
+        if ($minutes === 30) {
+            // 5:30 PM -> 5:30 PM (no change)
+            return $roundedTime;
+        } elseif ($minutes > 30) {
+            // 5:31 PM to 5:59 PM -> 5:30 PM
+            return $roundedTime->subMinutes($minutes - 30);
+        } else {
+            // 0-29 minutes: 5:00 PM to 5:29 PM -> 5:00 PM
+            // This includes 5:00 PM (minutes = 0) which should stay 5:00 PM
+            return $roundedTime->subMinutes($minutes);
+        }
     }
+    // public function roundToPreviousHalfHour(Carbon $time): Carbon
+    // {
+    //     // Clone the time to avoid modifying the original variable
+    //     $roundedTime = $time->copy();
+
+    //     $minutes = $roundedTime->minute;
+
+    //     // Calculate the number of minutes past the hour (0-59)
+    //     // The amount of minutes to SUBTRACT is the remainder of dividing by 30.
+    //     // E.g., 5:07 PM: 7 % 30 = 7. Subtract 7 minutes --> 5:00 PM.
+    //     // E.g., 4:55 PM: 55 % 30 = 25. Subtract 25 minutes --> 4:30 PM.
+    //     // E.g., 5:31 PM: 31 % 30 = 1. Subtract 1 minute --> 5:30 PM.
+    //     $minutesToSubtract = $minutes % 30;
+        
+    //     // Carbon's subMinutes correctly handles crossing the hour boundary.
+    //     return $roundedTime->subMinutes($minutesToSubtract)->second(0);
+    // }
 
     public function get_ot_hours_approved($emp_id, $month){
 

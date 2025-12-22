@@ -444,20 +444,71 @@ class LeaveController extends Controller
 
 
 
+            // $casual_leaves = 0;
+            // $join_date = new DateTime($emp_join_date);
+            // $current_date = new DateTime();
+            // $interval = $join_date->diff($current_date);
+            
+            // $years_of_service = $interval->y;
+            // $months_of_service = $interval->m;
+            
+            // // Casual leave calculation
+            // if ($years_of_service == 0) {
+            //     // First year - 0.5 day for every  completed month
+            //    $casual_leaves = number_format((6 / 12) * $months_of_service, 2);
+
+            // } else {
+            //     $casual_leaves = 7;
+            // }
             $casual_leaves = 0;
             $join_date = new DateTime($emp_join_date);
             $current_date = new DateTime();
             $interval = $join_date->diff($current_date);
-            
+
             $years_of_service = $interval->y;
             $months_of_service = $interval->m;
-            
+            $days_of_service = $interval->d;
+
             // Casual leave calculation
             if ($years_of_service == 0) {
-                // First year - 0.5 day for every  completed month
-               $casual_leaves = number_format((6 / 12) * $months_of_service, 2);
-
+                // First year - 0.5 day for every completed month from join date
+                $casual_leaves = number_format(0.5 * $months_of_service, 2);
+                
+            } elseif ($years_of_service == 1) {
+                // Second year - check if still within first year + 1 day
+                $first_year_end = clone $join_date;
+                $first_year_end->modify('+1 year'); // 2024-10-07 -> 2025-10-07
+                
+                $second_year_end = clone $join_date;
+                $second_year_end->modify('+2 years'); // 2024-10-07 -> 2026-10-07
+                
+                // Check if current date is between first_year_end and second_year_end
+                if ($current_date > $first_year_end && $current_date <= $second_year_end) {
+                    // From 2025-10-08 to 2025-12-31: 0.5 per month
+                    $start_second_year = clone $first_year_end;
+                    $start_second_year->modify('+1 day'); // 2025-10-08
+                    
+                    // Check if we're in the calendar year after first anniversary
+                    if ($current_date >= $start_second_year) {
+                        $month_start = max($start_second_year, new DateTime($current_date->format('Y-01-01')));
+                        
+                        // Calculate months from month_start to current_date or end of year
+                        $end_date = min($current_date, new DateTime($current_date->format('Y-12-31')));
+                        
+                        $month_interval = $month_start->diff($end_date);
+                        $months_in_second_year = $month_interval->y * 12 + $month_interval->m;
+                        
+                        // if ($month_interval->d > 0) {
+                        //     $months_in_second_year += 1; // Count partial month
+                        // }
+                        
+                        $casual_leaves = number_format(0.5 * $months_in_second_year, 2);
+                    }
+                } else {
+                    $casual_leaves = 7;
+                }
             } else {
+                // After second year - always 7 casual leaves
                 $casual_leaves = 7;
             }
 

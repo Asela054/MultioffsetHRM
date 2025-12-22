@@ -595,6 +595,9 @@
                             $('#leave_msg').html(msg);
                         }
 
+                        if(data.available_no_of_annual_leaves<=0){$('#leavetype option[value="1"]').attr('disabled','disabled');}
+                        if(data.available_no_of_casual_leaves<=0){$('#leavetype option[value="2"]').attr('disabled','disabled');}
+                        if(data.available_no_of_med_leaves<=0){$('#leavetype option[value="4"]').attr('disabled','disabled');}
                     }
                 });
             }
@@ -803,7 +806,7 @@
                         $('#no_of_days').val(diffDays);
                         $('#no_of_days').val();
                         
-                        $('#half_short').val(data.result.leave_category);
+                        $('#half_short').val(data.result.leave_category).trigger('change');
                         // $('#coveringemployee').val(data.result.covering_employee);
                        
                         let newOption = new Option(data.result.covering_employee_name, data.result.covering_employee, true, true);

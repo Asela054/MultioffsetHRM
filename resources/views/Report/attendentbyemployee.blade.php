@@ -452,10 +452,28 @@ async function generatePDF() {
     } else {
         date = from_date + ' - ' + to_date;
     }
+
+    // --- NEW: DATA EXTRACTION & SORTING ---
+    // Extract rows from the HTML table
+    const tableCustom = document.getElementById('dailyattendance_report_table');
+    const rows = Array.from(tableCustom.querySelectorAll('tbody tr'));
+
+    const tableData = rows.map(row => {
+        return Array.from(row.cells).map(cell => cell.innerText.trim());
+    });
+
+    // Sort by the first column (Index 0) ASC
+    tableData.sort((a, b) => {
+        // Use localeCompare for strings, or simple subtraction for numbers
+        return a[0].localeCompare(b[0], undefined, {numeric: true, sensitivity: 'base'});
+    });
+    
     let endPosY;
 
     doc.autoTable({ 
-        html: '#dailyattendance_report_table',
+        // html: '#dailyattendance_report_table',
+        head: [Array.from(tableCustom.querySelectorAll('thead th')).map(th => th.innerText)],
+        body: tableData,
         theme: 'grid',
         margin: margins,
         headStyles: {

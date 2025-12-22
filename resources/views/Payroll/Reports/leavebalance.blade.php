@@ -174,6 +174,8 @@ function leavebalncetable(data) {
                 '<th>Name</th>' +
                 '<th>Anual Leaves</th>' +
                 '<th>Casual Leaves</th>' +
+                '<th>Medical Leaves</th>' +
+                '<th>Total Balance Leaves</th>' +
                 '<th>Daily Rate</th>' +
                 '<th style="text-align:right;">Amount</th>' +
             '</tr>' +
@@ -185,6 +187,8 @@ function leavebalncetable(data) {
             '<td>' + row.emp_name + '</td>' +
             '<td>' + row.anualbalnce + '</td>' +
             '<td>' + row.casualbalance + '</td>' +
+            '<td>' + row.medicalbalance + '</td>' +
+            '<td>' + row.totalleavebalance + '</td>' +
             '<td>' + row.daliyrate + '</td>' +
             '<td style="text-align:right;">' + row.total_amount + '</td>' +
         '</tr>';
@@ -192,7 +196,7 @@ function leavebalncetable(data) {
 
     tableHtml += '</tbody>';
     tableHtml += '<tr>' +
-                    '<td colspan="5" style="text-align:right;"><strong>Total Amount:</strong></td>' +
+                    '<td colspan="7" style="text-align:right;"><strong>Total Amount:</strong></td>' +
                     '<td style="text-align:right;">' + data.total_amount_all_employees + '</td>' +
                 '</tr>';
 
