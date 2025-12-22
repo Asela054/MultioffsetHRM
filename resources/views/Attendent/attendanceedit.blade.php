@@ -393,7 +393,7 @@
                                         <div class="col">
                                             <label class="small font-weight-bold text-dark">Select Machine</label>
                                             <select id="machine" name="machine" class="form-control form-control-sm" required>
-                                                <option value="">Select Machine</option>
+                                                <!-- <option value="">Select Machine</option> -->
                                                 @foreach($fingerprints as $fingerprint)
                                                 <option value="{{$fingerprint->id}}">{{$fingerprint->name}}</option>
                                                 @endforeach

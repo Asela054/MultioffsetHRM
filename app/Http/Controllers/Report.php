@@ -7,7 +7,7 @@ use App\Employee;
 use App\Branch;
 use App\Attendance;
 use App\OtApproved;
-use App\EmployeePaySlip;
+use App\EmployeePayslip;
 use App\EmployeeSalary;
 use App\Holiday;
 use App\Leave;
@@ -2182,9 +2182,9 @@ class Report extends Controller
         }
 
         $data = array(
-            'BRA_I'=> $figs_list['BRA_I']['fig_val'],
-            'add_bra2'=> $figs_list['add_bra2']['fig_val'],
-            'NOPAY'=> $figs_list['NOPAY']['fig_val'],
+            'BRA_I'=> $figs_list['BRA_I']['fig_val'] ?? 0,
+            'add_bra2'=> $figs_list['add_bra2']['fig_val'] ?? 0,
+            'NOPAY'=> $figs_list['NOPAY']['fig_val'] ?? 0,
         );
 
         return $data;
@@ -2244,7 +2244,7 @@ class Report extends Controller
         $emp_query .= ' order by employees.emp_id ';
 
         $data = DB::select($emp_query);
-
+        
         //remove emp_id's which doesn't have no pay
         $index = 0;
         foreach ($data as $d){
@@ -2256,7 +2256,7 @@ class Report extends Controller
             }
             $index++;
         }
-
+        
         return Datatables::of($data)
             ->addIndexColumn()
             ->addColumn('month', function ($row) use ($month) {
@@ -2279,14 +2279,14 @@ class Report extends Controller
                 $ot_hours = (new \App\Attendance)->get_ot_hours($row->emp_id, $month);
                 $normal_rate_otwork_hrs = $ot_hours['normal_rate_otwork_hrs'];
                 $double_rate_otwork_hrs = $ot_hours['double_rate_otwork_hrs'];
-
+                
                 $no_pay_amount_data = $this->get_no_pay_amount($row->emp_id, $work_days, $leave_days, $no_pay_days, $normal_rate_otwork_hrs, $double_rate_otwork_hrs);
-
-                $no_pay_amount = $no_pay_amount_data['NOPAY'];
-
+                
+                $no_pay_amount = $no_pay_amount_data['NOPAY'] ?? 0;
+                
                 //add 2 cols, bra_1, bra_2 Capital
-                $BRA_I = $no_pay_amount_data['BRA_I'];
-                $add_bra2 = $no_pay_amount_data['add_bra2'];
+                $BRA_I = $no_pay_amount_data['BRA_I'] ?? 0;
+                $add_bra2 = $no_pay_amount_data['add_bra2'] ?? 0;
 
                 //convert no_pay_amount to unsigned integer
                 $no_pay_amount = abs($no_pay_amount);
@@ -2299,7 +2299,7 @@ class Report extends Controller
                 }
 
                 $view_no_pay_days_btn = $no_pay_days.' <a href="javascript:void(0)" class="btn btn-xs btn-primary view_no_pay_days" data-id="'.$row->emp_id.'" data-month="'.$month.'" data-amount="'.$no_pay_amount.'" data-basic="'.$basic_salary.'">View</a>';
-
+                
                 return array(
                     'no_pay_days' => $no_pay_days,
                     'basic_salary' => number_format($basic_salary, 2),

@@ -103,7 +103,7 @@
                                                     <img style="height: 2.5rem;width: 2.5rem;margin-right: 1rem;border-radius: 100%;" src="{{$imagePath}}" alt="Employee Photo"/>
                                                 </td>
                                                 <td nowrap>
-                                                    {{$leavelist->emp_name_with_initial}}<br>
+                                                    {{$leavelist->emp_name_with_initial}} - {{$leavelist->calling_name}}<br>
                                                     <small class="text-muted">{{$leavelist->department}}</small>
                                                 </td>
                                                 <td nowrap class="align-text-top">{{$leavelist->leave_type}}</td>

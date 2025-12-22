@@ -154,6 +154,7 @@ class HomeController extends Controller
                 'leaves.no_of_days',
                 'leaves.reson',
                 'employees.emp_name_with_initial',
+                'employees.calling_name',
                 'employee_pictures.emp_pic_filename',
                 'departments.name as department'
             )
