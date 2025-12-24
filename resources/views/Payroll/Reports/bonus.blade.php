@@ -201,7 +201,7 @@ function bonustablemonth(data) {
     var tableHtml = '<table class="table table-bordered table-hover nowarp" id="emptable" width="100%" cellspacing="0">' +
         '<thead>' +
             '<tr>' +
-                '<th>ID</th>' +
+                '<th>EPF NO</th>' +
                 '<th>Name</th>' +
                 '<th>Salary</th>' +
                 '<th>Nopay</th>' +
@@ -213,7 +213,7 @@ function bonustablemonth(data) {
     // Populate the table with the employee data
     $.each(data.data, function(index, row) {
         tableHtml += '<tr>' +
-            '<td>' + row.empid + '</td>' +
+            '<td>' + row.emp_etfno + '</td>' +
             '<td>' + row.emp_name + '</td>' +
             '<td>' + row.basic_salary + '</td>' +
             '<td>' + row.total_no_pay + '</td>' +
@@ -243,7 +243,7 @@ function bonustableweekly(data) {
     var tableHtml = '<table class="table table-bordered table-hover nowarp" id="emptable" width="100%" cellspacing="0">' +
         '<thead>' +
             '<tr>' +
-                '<th >ID</th>' +
+                '<th >EPF NO</th>' +
                 '<th >Name</th>' +
                 '<th>Total Pay Salary</th>' +
                 '<th>Bonus</th>' +
@@ -253,7 +253,7 @@ function bonustableweekly(data) {
 
     $.each(data.data, function(index, row) {
         tableHtml += '<tr>' +
-            '<td>' + row.empid + '</td>' +
+            '<td>' + row.emp_etfno + '</td>' +
             '<td>' + row.emp_name + '</td>' +
             '<td>' + row.basic_salary + '</td>' +
             '<td>' + row.total_bonus + '</td>' +

@@ -183,7 +183,7 @@ function leavebalncetable(data) {
         '<tbody>';
     $.each(data.data, function(index, row) {
         tableHtml += '<tr>' +
-            '<td>' + row.empid + '</td>' +
+            '<td>' + row.emp_id + '</td>' +
             '<td>' + row.emp_name + '</td>' +
             '<td>' + row.anualbalnce + '</td>' +
             '<td>' + row.casualbalance + '</td>' +
