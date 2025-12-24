@@ -233,7 +233,7 @@ function bonustablemonth(data) {
 
     // Initialize DataTable
     $('#emptable').DataTable({
-        "order": [],
+        "order": [0, 'asc'],
     });
 }
 
@@ -272,7 +272,7 @@ function bonustableweekly(data) {
     $('#divPrint').html(tableHtml);
 
     $('#emptable').DataTable({
-        "order": [],
+        "order": [0, 'asc'],
     });
 }
 
@@ -368,7 +368,7 @@ async function generatePDF() {
                 }
 
                 if (data.column.index === 0 && data.row.index === data.table.body.length - 1) {
-                    const lastRowY = data.cell.y + data.cell.height; row
+                    const lastRowY = data.cell.y + data.cell.height; 
                     doc.line(doc.internal.pageSize.getWidth() * 0.05, lastRowY + 1, doc.internal.pageSize.getWidth() - doc.internal.pageSize.getWidth() * 0.05, lastRowY + 1); 
                     doc.line(doc.internal.pageSize.getWidth() * 0.05, lastRowY + 4, doc.internal.pageSize.getWidth() - doc.internal.pageSize.getWidth() * 0.05, lastRowY + 4);
                 }
