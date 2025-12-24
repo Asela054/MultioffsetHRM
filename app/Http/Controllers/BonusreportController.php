@@ -46,6 +46,7 @@ class BonusreportController extends Controller
             ->join('payroll_profiles', 'employees.id', '=', 'payroll_profiles.emp_id')
             ->select(
                 'employees.id as empid',
+                'employees.emp_etfno as emp_etfno',
                 'employees.emp_name_with_initial as emp_name',
                 'payroll_profiles.basic_salary as basicsalary',
                 'payroll_profiles.id as payroll_profiles_id'                
@@ -55,11 +56,13 @@ class BonusreportController extends Controller
             })
             ->where('payroll_profiles.payroll_process_type_id', '=',1)
             ->where('employees.deleted', '=',0)
-            ->orderBy('employees.id')
+            ->where('employees.is_resigned', '=',0)
+            ->orderBy('employees.emp_etfno', 'asc')
             ->get();
 
             foreach ($query as $row) {
                 $empId = $row->empid;
+                $emp_etfno = $row->emp_etfno;
                 $empName = $row->emp_name;
                 $basicSalary = $row->basicsalary;
                 $payrollProfileId = $row->payroll_profiles_id;
@@ -92,6 +95,7 @@ class BonusreportController extends Controller
 
                             $datareturn[] = [
                                 'empid' => $empId,
+                                'emp_etfno' => $emp_etfno,
                                 'emp_name' => $empName,
                                 'basic_salary' => $basicSalary,
                                 'total_no_pay' => $totalNoPayValue,
@@ -111,6 +115,7 @@ class BonusreportController extends Controller
             ->join('payroll_profiles', 'employees.id', '=', 'payroll_profiles.emp_id')
             ->select(
                 'employees.id as empid',
+                'employees.emp_etfno as emp_etfno',
                 'employees.emp_name_with_initial as emp_name',
                 'payroll_profiles.basic_salary as basicsalary',
                 'payroll_profiles.id as payroll_profiles_id'                
@@ -118,10 +123,13 @@ class BonusreportController extends Controller
             ->where('employees.emp_department', '=', $department)
             ->where('payroll_profiles.payroll_process_type_id', '=',2)
             ->where('employees.deleted', '=',0)
+            ->where('employees.is_resigned', '=',0)
+            ->orderBy('employees.emp_etfno', 'asc')
             ->get();
 
             foreach ($query2 as $row) {
                 $empId = $row->empid;
+                $emp_etfno = $row->emp_etfno;
                 $empName = $row->emp_name;
                 $payrollProfileId = $row->payroll_profiles_id;
             
@@ -151,6 +159,7 @@ class BonusreportController extends Controller
 
                             $datareturn[] = [
                                 'empid' => $empId,
+                                'emp_etfno' => $emp_etfno,
                                 'emp_name' => $empName,
                                 'basic_salary' => $totalbasicPayValue,
                                 'total_bonus' => number_format($totalbonus, 2) 
