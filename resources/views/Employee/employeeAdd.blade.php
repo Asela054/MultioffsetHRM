@@ -562,6 +562,30 @@ aria-labelledby="staticBackdropLabel" aria-hidden="true">
     </div>
 </div>
 
+<div class="modal fade" id="confirmModal3" data-backdrop="static" data-keyboard="false" tabindex="-1"
+aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col text-center">
+                        <h4 class="font-weight-normal">Are you sure you want to change the employee status?</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer p-2">
+                <button type="button" name="ok_button3" id="ok_button3" class="btn btn-danger px-3 btn-sm">OK</button>
+                <button type="button" class="btn btn-dark px-3 btn-sm" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 @section('script')
 <script>
@@ -782,6 +806,7 @@ $(document).ready(function () {
                     searchable: false,
                     render: function(data, type, row) {
                         var is_resigned = row.is_resigned;
+                        var status = row.status;
                         var buttons = '';
 
                         if (canViewEmployee) {
@@ -798,6 +823,14 @@ $(document).ready(function () {
 
                         if (canEditEmployee && is_resigned == 0) {
                             buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Resign Employee" class="btn btn-outline-warning btn-sm resign" id="' + row.emp_id + '" name="' + row.emp_name_with_initial + '"><i class="fas fa-user-times"></i></button>';
+                        }
+
+                        if (canEditEmployee) {
+                            if (row.status == 1) {
+                                buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Deactivate Employee" class="btn btn-outline-success btn-sm status" id="' + row.id + '"><i class="fas fa-user-check"></i></button>';
+                            } else if (row.status == 2) {
+                                buttons += '<button style="margin:1px;" data-toggle="tooltip" data-placement="bottom" title="Activate Employee" class="btn btn-outline-danger btn-sm status" id="' + row.id + '"><i class="fas fa-user-slash"></i></button>';
+                            }
                         }
 
                         if (canDeleteEmployee) {
@@ -949,6 +982,43 @@ $(document).ready(function () {
                     alert('Data Deleted');
                 }, 2000);
                 location.reload();
+            }
+        })
+    });
+
+    //status change
+    var status_user_id;
+    $(document).on('click', '.status', function () {
+        status_user_id = $(this).attr('id');
+        
+        if (!status_user_id || status_user_id.trim() === '') {
+            alert('Invalid employee ID');
+            return false;
+        }
+        
+        $('#confirmModal3').modal('show');
+    });
+    $('#ok_button3').click(function () {
+        if (!status_user_id) {
+            alert('No employee selected');
+            return false;
+        }
+        $.ajax({
+            url: "Employee/active/" + status_user_id,
+            beforeSend: function () {
+                $('#ok_button3').text('Processing...');
+            },
+            success: function (data) {
+                setTimeout(function () {
+                    $('#confirmModal3').modal('hide');
+                    $('#ok_button3').text('OK');
+                    alert('Employee Status Updated');
+                }, 2000);
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                alert('Error updating status: ' + error);
+                $('#ok_button3').text('OK');
             }
         })
     });
