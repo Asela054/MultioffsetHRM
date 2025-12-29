@@ -335,7 +335,7 @@
 										<label class="custom-control-label" for="specialattendanceyes">Yes</label>
 									</div>
 									<div class="custom-control custom-radio custom-control-inline">
-										<input type="radio" id="specialattendanceno" name="specialattendance" class="custom-control-input" value="No"  {{ ($employee->special_attendance=="No")? "checked" : "" }}>
+										<input type="radio" id="specialattendanceno" name="specialattendance" class="custom-control-input" value=""  {{ ($employee->special_attendance=="")? "checked" : "" }}>
 										<label class="custom-control-label" for="specialattendanceno">No</label>
 									</div>
 								</div>
