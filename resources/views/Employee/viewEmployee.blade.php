@@ -153,7 +153,7 @@
 								</div>
 							</div>
 							<div class="form-row">
-								<div class="col">
+								<div class="col-md-4 col-12 mb-2">
 									<label class="small font-weight-bold text-dark">Photograph</label>
 									<input type="file" data-preview="#preview" class="form-control form-control-sm {{ $errors->has('photograph') ? ' has-error' : '' }}" name="photograph" id="photograph">
 									<img class="col-sm-6" id="preview" src="">
@@ -162,14 +162,7 @@
 										<strong>{{ $errors->first('photograph') }}</strong>
 									</span>
 									@endif
-								</div>
-								<div class="col">
-									<label class="small font-weight-bold text-dark">Preview</label>
-									@isset($employee->emp_pic_filename)
-									<img class="card-img-top w-25 m-3 d-flex justify-content-center"
-										src="../images/{{ $employee->emp_pic_filename }}" alt="Card image cap">
-									@endisset
-								</div>								
+								</div>							
 							</div>
 							<div class="form-row">
 								<div class="col-12 col-sm-12 col-md-3 col-lg-3">
@@ -335,7 +328,7 @@
 										<label class="custom-control-label" for="specialattendanceyes">Yes</label>
 									</div>
 									<div class="custom-control custom-radio custom-control-inline">
-										<input type="radio" id="specialattendanceno" name="specialattendance" class="custom-control-input" value="No"  {{ ($employee->special_attendance=="No")? "checked" : "" }}>
+										<input type="radio" id="specialattendanceno" name="specialattendance" class="custom-control-input" value=""  {{ ($employee->special_attendance=="")? "checked" : "" }}>
 										<label class="custom-control-label" for="specialattendanceno">No</label>
 									</div>
 								</div>

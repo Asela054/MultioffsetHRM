@@ -254,8 +254,7 @@ class EmployeeController extends Controller
             'employeejob' => 'required',
             'shift' => 'required',
             'employeecompany' => 'required',
-            'department' => 'required',
-            'emp_etfname' => 'required'
+            'department' => 'required'
         );
 
         $error = Validator::make($request->all(), $rules);
@@ -613,6 +612,29 @@ class EmployeeController extends Controller
             ->update(['deleted' => 1]);
 
         Session::flash('success', 'The Employee Details Successfuly Updated');
+    }
+
+
+    public function status($id)
+    {
+        $permission = Auth::user()->can('employee-edit');
+        if ($permission == false) {
+            return response()->json(['error' => 'UnAuthorized'], 401);
+        }
+
+        $employee = DB::table('employees')->where('id', $id)->first();
+        
+        if (!$employee) {
+            return response()->json(['error' => 'Employee not found'], 404);
+        }
+
+        $newStatus = $employee->status == 1 ? 2 : 1;
+        
+        DB::table('employees')
+            ->where('id', $id)
+            ->update(['status' => $newStatus]);
+
+        return response()->json(['success' => 'Employee status updated successfully']);
     }
 
     public function exportempoloyee()

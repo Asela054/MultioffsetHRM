@@ -7,7 +7,7 @@
   || auth()->user()->can('job-employment-status-list')
   || auth()->user()->can('skill-list'))
   <div class="dropdown">
-    <a  role="button" data-toggle="dropdown" class="btn navbtncolor" data-target="#" href="#" id="employeemaster">
+    <a  role="button" data-toggle="dropdown" class="btn navbtncolor"  href="#" id="employeemaster">
         Master Data <span class="caret"></span></a>
         <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
           @can('skill-list')
@@ -29,7 +29,7 @@
   {{-- @if(auth()->user()->can('employee-list')
       || auth()->user()->can('employee-select'))
   <div class="dropdown">
-    <a  role="button" data-toggle="dropdown" class="btn navbtncolor" data-target="#" href="#" id="employeeinformation">
+    <a  role="button" data-toggle="dropdown" class="btn navbtncolor"  href="#" id="employeeinformation">
         Employee Information <span class="caret"></span></a>
         <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
           @can('employee-list')
@@ -48,7 +48,7 @@
 
   @if(auth()->user()->can('pe-task-list'))
   <div class="dropdown">
-    <a  role="button" data-toggle="dropdown" class="btn navbtncolor" data-target="#" href="#" id="performanceinformation">
+    <a  role="button" data-toggle="dropdown" class="btn navbtncolor"  href="#" id="performanceinformation">
       Performance Evaluation <span class="caret"></span></a>
         <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
           @can('allowance-amount-list')
@@ -66,7 +66,7 @@
 
   @if(auth()->user()->can('allowance-amount-list'))
   <div class="dropdown">
-    <a  role="button" data-toggle="dropdown" class="btn navbtncolor" data-target="#" href="#" id="allowanceinformation">
+    <a  role="button" data-toggle="dropdown" class="btn navbtncolor"  href="#" id="allowanceinformation">
       Allowance Amounts <span class="caret"></span></a>
         <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
           @can('allowance-amount-list')
