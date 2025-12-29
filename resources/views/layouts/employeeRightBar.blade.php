@@ -1,8 +1,18 @@
 <div class="col-lg-3">
     <div class="card">
-        @isset($employee->emp_pic_filename)            
-            <img src="../images/{{ \App\EmployeePicture::where(['emp_id' => $id])->pluck('emp_pic_filename')->first() }}" class="card-img-top" alt="...">
-        @endisset
+        @php
+            $employeePicture = \App\EmployeePicture::where('emp_id', $id)->pluck('emp_pic_filename')->first();
+        @endphp
+
+        @if($employeePicture && file_exists(public_path("/images/$employeePicture")))
+            <img src="{{ asset("/images/$employeePicture") }}" class="card-img-top" alt="...">
+        @else
+            @if($employee->emp_gender == "Male")
+                <img src="{{ asset("/image/profile.png") }}" class="card-img-top" alt="...">
+            @else
+                <img src="{{ asset("/image/girl.png") }}" class="card-img-top" alt="...">
+            @endif
+        @endif
         <ul class="list-group list-group-flush">
             <li class="list-group-item py-1 px-2" id="view_employee_link"><a href="{{ url('/viewEmployee/') }}/{{$id}}" class="text-decoration-none text-dark"><i class="fas fa-paper-plane mr-2"></i>Personal Details</a></li>
             <li class="list-group-item py-1 px-2" id="view_contact_link"><a href="{{ url('/viewEmergencyContacts/') }}/{{$id}}" class="text-decoration-none text-dark"><i class="fas fa-paper-plane mr-2"></i>Emergency Contacts</a></li>
