@@ -17,6 +17,7 @@ $columns = array(
     array('db' => '`e`.`is_resigned`', 'dt' => 'is_resigned', 'field' => 'is_resigned'),
     array('db' => '`e`.`emp_national_id`', 'dt' => 'emp_national_id', 'field' => 'emp_national_id'),
     array('db' => '`job_categories`.`category`', 'dt' => 'category', 'field' => 'category'),
+    array('db' => '`e`.`status`', 'dt' => 'status', 'field' => 'status'),
 );
 
 require('config.php');
