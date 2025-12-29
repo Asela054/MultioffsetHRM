@@ -165,17 +165,6 @@
                                 </div>
                                 <div class="form-row mb-1">
                                     <div class="col">
-                                        <label class="small font-weight-bold text-dark">EPF Name</label>
-                                        <input type="text" name="emp_etfname" id="emp_etfname" class="form-control form-control-sm  {{ $errors->has('emp_etfname') ? ' has-error' : '' }}" />
-                                        @if ($errors->has('emp_etfname'))
-                                            <span class="help-block">
-                                            <strong>{{ $errors->first('emp_etfname') }}</strong>
-                                        </span>
-                                        @endif
-                                    </div>
-                                </div>
-                                <div class="form-row mb-1">
-                                    <div class="col">
                                         <label class="small font-weight-bold text-dark">Name with Initial</label>
                                         <input type="text" name="emp_name_with_initial" id="emp_name_with_initial" class="form-control form-control-sm  {{ $errors->has('emp_name_with_initial') ? ' has-error' : '' }}" />
                                         @if ($errors->has('emp_name_with_initial'))

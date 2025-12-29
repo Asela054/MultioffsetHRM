@@ -254,8 +254,7 @@ class EmployeeController extends Controller
             'employeejob' => 'required',
             'shift' => 'required',
             'employeecompany' => 'required',
-            'department' => 'required',
-            'emp_etfname' => 'required'
+            'department' => 'required'
         );
 
         $error = Validator::make($request->all(), $rules);
