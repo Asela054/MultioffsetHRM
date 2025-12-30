@@ -5,12 +5,12 @@
         @endphp
 
         @if($employeePicture && file_exists(public_path("/images/$employeePicture")))
-            <img src="{{ asset("/images/$employeePicture") }}" class="card-img-top" alt="...">
+            <img src="{{ asset("/images/$employeePicture") }}" class="card-img-top p-4" alt="...">
         @else
             @if($employee->emp_gender == "Male")
-                <img src="{{ asset("/image/profile.png") }}" class="card-img-top" alt="...">
+                <img src="{{ asset("/images/man.png") }}" class="card-img-top p-4" alt="...">
             @else
-                <img src="{{ asset("/image/girl.png") }}" class="card-img-top" alt="...">
+                <img src="{{ asset("/image/girl.png") }}" class="card-img-top p-4" alt="...">
             @endif
         @endif
         <ul class="list-group list-group-flush">
