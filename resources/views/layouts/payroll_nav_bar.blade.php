@@ -3,7 +3,7 @@
 
   @if(auth()->user()->can('EmployeePayment-list'))
     <div class="dropdown">
-      <a  role="button" data-toggle="dropdown" class="btn navbtncolor" data-target="#" href="#" id="payroll_Remunerations">
+      <a  role="button" data-toggle="dropdown" class="btn navbtncolor"  href="#" id="payroll_Remunerations">
           Policy Management <span class="caret"></span></a>
   
           <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
@@ -32,7 +32,7 @@
       </div>
 
       <div class="dropdown">
-        <a  role="button" data-toggle="dropdown" class="btn navbtncolor" data-target="#" href="#" id="payroll_ReportList">
+        <a  role="button" data-toggle="dropdown" class="btn navbtncolor"  href="#" id="payroll_ReportList">
             Reports <span class="caret"></span></a>
     
             <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
@@ -52,7 +52,7 @@
         </div>
 
         <div class="dropdown">
-          <a  role="button" data-toggle="dropdown" class="btn navbtncolor" data-target="#" href="#" id="payroll_statments">
+          <a  role="button" data-toggle="dropdown" class="btn navbtncolor"  href="#" id="payroll_statments">
             Statements <span class="caret"></span></a>
       
               <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
@@ -63,6 +63,7 @@
                   <li><a class="dropdown-item" href="{{ route('ReportPaySummary')}}" id="travelrequest_link">Pay Summary</a></li>                
                   <li><a class="dropdown-item" href="{{ route('EmpSalaryJournalVoucher')}}" id="travelrequest_link">Employee Salary (Journal Voucher)</a></li>                
                   <li><a class="dropdown-item" href="{{ route('EmpEpfEtfJournalVoucher')}}" id="travelrequest_link">EPF and ETF (Journal Voucher)</a></li>                            
+                  <li><a class="dropdown-item" href="{{ route('SpecialNote')}}" id="payroll_SpecialNote">Special Notes</a></li>                            
                  
               </ul>
           </div>
