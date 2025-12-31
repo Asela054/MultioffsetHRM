@@ -919,6 +919,17 @@ Route::post('/payrollchartaccountdelete' ,'PayrollchartAccountController@delete'
 Route::get('EmpoloyeeBdReport',['uses' => 'EmployeeBdReportController@getemployeeBdlist', 'as' => 'EmpoloyeeBdReport']);
 Route::get('employee_bd_report_list',['uses' => 'EmployeeBdReportController@employee_bd_report_list', 'as' => 'employee_bd_report_list']);
 
+/*-- Special notes----*/
+Route::get('SpecialNote',['uses' => 'SpecialNoteController@index', 'as' => 'SpecialNote']); 
+Route::post('addSpecialNote',['uses' => 'SpecialNoteController@store', 'as' => 'addSpecialNote']); 
+Route::get('SpecialNote/{id}/edit', 'SpecialNoteController@edit')->name('SpecialNote.edit');  
+Route::post('SpecialNote/update', 'SpecialNoteController@update')->name('SpecialNote.update');
+Route::get('SpecialNote/destroy/{id}', 'SpecialNoteController@destroy');
+Route::get('SpecialNote/{id}/view', 'SpecialNoteController@viewEmployees')->name('SpecialNote.view');
+Route::post('SpecialNote/{id}/getEmployees', 'SpecialNoteController@getEmployeesForEdit')->name('SpecialNote.getEmployees');
+Route::post('get_employee_department', 'SpecialNoteController@getEmployeeDepartment');
+/*-- End Special notes----*/
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
