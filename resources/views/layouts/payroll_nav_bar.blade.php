@@ -23,6 +23,7 @@
               <li><a class="dropdown-item" href="{{ route('OtherFacilityPaymentList')}}" id="travelrequest_link">Other Facilities</a></li>       
               <li><a class="dropdown-item" href="{{ route('SalaryIncrementList')}}" id="travelrequest_link">Salary Increments</a></li>
               <li><a class="dropdown-item" href="{{ route('SalaryProcessSchedule')}}" id="travelrequest_link">Salary Schedule</a></li>
+              <li><a class="dropdown-item" href="{{ route('SpecialNote')}}" id="payroll_SpecialNote">Special Notes</a></li>  
               <li><a class="dropdown-item" href="{{ route('EmployeeWorkSummary')}}" id="travelrequest_link">Work Summary</a></li>
               {{-- <li><a class="dropdown-item" href="{{ route('shiftsalarypreparation')}}" id="travelrequest_link">Shift Salary Preperation</a></li> --}}
               <li><a class="dropdown-item" href="{{ route('EmployeePayslipList')}}" id="travelrequest_link">Salary Preperation</a></li>
@@ -63,7 +64,6 @@
                   <li><a class="dropdown-item" href="{{ route('ReportPaySummary')}}" id="travelrequest_link">Pay Summary</a></li>                
                   <li><a class="dropdown-item" href="{{ route('EmpSalaryJournalVoucher')}}" id="travelrequest_link">Employee Salary (Journal Voucher)</a></li>                
                   <li><a class="dropdown-item" href="{{ route('EmpEpfEtfJournalVoucher')}}" id="travelrequest_link">EPF and ETF (Journal Voucher)</a></li>                            
-                  <li><a class="dropdown-item" href="{{ route('SpecialNote')}}" id="payroll_SpecialNote">Special Notes</a></li>                            
                  
               </ul>
           </div>
