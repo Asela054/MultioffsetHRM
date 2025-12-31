@@ -192,7 +192,7 @@ $(document).ready(function(){
 
     $('#payroll_menu_link').addClass('active');
     $('#payroll_menu_link_icon').addClass('active');
-    $('#payroll_statments').addClass('navbtnactive');
+    $('#payroll_Remunerations').addClass('navbtnactive');
 
     let company = $('#company');
     let department = $('#department');
