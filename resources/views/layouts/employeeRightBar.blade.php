@@ -10,7 +10,7 @@
                 if ($employeegender == "Male"){
                     $imagePath = asset("/images/man.png");
                 } else {
-                    $imagePath = asset("/image/girl.png");
+                    $imagePath = asset("/images/girl.png");
                 } 
             }
         @endphp
