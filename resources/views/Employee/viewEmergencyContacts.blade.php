@@ -188,7 +188,7 @@
         $('#employee_menu_link').addClass('active');
         $('#employee_menu_link_icon').addClass('active');
         $('#employeeinformation').addClass('navbtnactive');
-	    $('#view_contact_link').addClass('navbtnactive');
+	    $('#view_contact_link').addClass('active');
 
         $(document).on('click', '.btn-edit', function () {
             var id = $(this).data('id');
