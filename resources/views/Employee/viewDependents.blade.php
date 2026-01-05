@@ -83,36 +83,6 @@
                             </tbody>
                         </table>
                         </div>
-                        <hr class="border-dark">
-                        <form class="form-horizontal" method="POST" action="{{ route('dependetAttachment') }}" enctype="multipart/form-data">
-                            {{ csrf_field() }}
-                            <div class="form-row">
-                                <div class="col">
-                                    <label class="small font-weight-bold text-dark">Select File</label>
-                                    <input type="file" class="form-control form-control-sm" id="empattachment" name="empattachment">
-                                    @if ($errors->has('empattachment'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('empattachment') }}</strong>
-                                    </span>
-                                    @endif
-                                </div>
-                                <div class="col">
-                                    <label class="small font-weight-bold text-dark">Comment</label>
-                                    <textarea class="form-control form-control-sm" id="empcomment" name="empcomment" rows="3"></textarea>
-                                    @if ($errors->has('empcomment'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('empcomment') }}</strong>
-                                    </span>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="form-group mt-3">
-                                @can('employee-edit')
-                                    <button type="submit" name="" id="" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-save"></i>&nbsp;Save</button>
-                                @endcan
-                            </div>
-                            <input type="hidden" class="form-control" id="id" name="id" value="{{$id}}">
-                        </form>
                     </div>
                     @include('layouts.employeeRightBar')
                 </div>
@@ -204,7 +174,7 @@ $('#dataTable').DataTable();
     $('#employee_menu_link').addClass('active');
     $('#employee_menu_link_icon').addClass('active');
     $('#employeeinformation').addClass('navbtnactive');
-	$('#view_dependent_link').addClass('navbtnactive');
+	$('#view_dependent_link').addClass('active');
 
 $("#birthday").datetimepicker({
     pickTime: false,
