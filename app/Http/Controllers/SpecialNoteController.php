@@ -57,11 +57,15 @@ class SpecialNoteController extends Controller
         $specialNote->created_by = auth()->id();
         $specialNote->save();
 
+        $empIdMap = $this->convertEmpIdToId($request->input('employee'));
+
         foreach($request->input('employee') as $emp_id) {
-            $detail = new SpecialNoteDetail;
-            $detail->note_id = $specialNote->id;
-            $detail->emp_id = $emp_id;
-            $detail->save();
+            if(isset($empIdMap[$emp_id])) {
+                $detail = new SpecialNoteDetail;
+                $detail->note_id = $specialNote->id;
+                $detail->emp_id = $empIdMap[$emp_id]; 
+                $detail->save();
+            }
         }
 
         return response()->json(['success' => 'Special Note Added Successfully.']);
@@ -79,7 +83,11 @@ class SpecialNoteController extends Controller
         {
             $data = SpecialNote::with('details')->findOrFail($id);
             
-            $employee_ids = $data->details->pluck('emp_id')->toArray();
+            $employee_ids = DB::table('special_note_details')
+                ->join('employees', 'special_note_details.emp_id', '=', 'employees.id')
+                ->where('special_note_details.note_id', $id)
+                ->pluck('employees.emp_id')
+                ->toArray();
             
             return response()->json([
                 'result' => $data,
@@ -117,12 +125,16 @@ class SpecialNoteController extends Controller
         $specialNote->save();
 
         SpecialNoteDetail::where('note_id', $specialNote->id)->delete();
-        
+
+        $empIdMap = $this->convertEmpIdToId($request->input('employee'));
+
         foreach($request->input('employee') as $emp_id) {
-            $detail = new SpecialNoteDetail;
-            $detail->note_id = $specialNote->id;
-            $detail->emp_id = $emp_id;
-            $detail->save();
+            if(isset($empIdMap[$emp_id])) {
+                $detail = new SpecialNoteDetail;
+                $detail->note_id = $specialNote->id;
+                $detail->emp_id = $empIdMap[$emp_id]; 
+                $detail->save();
+            }
         }
 
         return response()->json(['success' => 'Data is successfully updated']);
@@ -165,7 +177,7 @@ class SpecialNoteController extends Controller
             foreach($specialNote->details as $detail) {
                 if($detail->employee) {
                     $employees[] = [
-                        'id' => $detail->employee->emp_id,
+                        'id' => $detail->employee->emp_id, 
                         'name' => $detail->employee->emp_name_with_initial . ' - ' . $detail->employee->calling_name
                     ];
                 }
@@ -181,10 +193,10 @@ class SpecialNoteController extends Controller
 
     public function getEmployeesForEdit(Request $request, $id)
     {
-        $employeeIds = $request->input('ids');
+        $employeeEmpIds = $request->input('ids');
         
         $employees = DB::table('employees')
-            ->whereIn('emp_id', $employeeIds)
+            ->whereIn('emp_id', $employeeEmpIds)
             ->where('deleted', 0)
             ->select([
                 'employees.emp_id as id',
@@ -206,6 +218,14 @@ class SpecialNoteController extends Controller
             ->first();
         
         return response()->json($employee);
+    }
+
+    private function convertEmpIdToId($empIds)
+    {
+        return DB::table('employees')
+            ->whereIn('emp_id', $empIds)
+            ->where('deleted', 0)
+            ->pluck('id', 'emp_id');
     }
 
 }
