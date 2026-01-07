@@ -165,7 +165,7 @@ class EmployeePayslipController extends Controller
 			$sqlmain.="INNER JOIN (SELECT emp_id, emp_etfno, SUM(work_days) AS work_days, SUM(leave_days) AS leave_days, SUM(nopay_days) AS nopay_days, SUM(normal_rate_otwork_hrs) AS normal_rate_otwork_hrs, SUM(double_rate_otwork_hrs) AS double_rate_otwork_hrs, SUM(work_days_exclusions) AS work_days_exclusions FROM (SELECT emp_id, emp_etfno, work_days, leave_days, nopay_days, normal_rate_otwork_hrs, double_rate_otwork_hrs, working_week_days AS work_days_exclusions FROM employee_work_rates WHERE (work_year IN (YEAR(?), YEAR(?)) AND work_month IN (MONTH(?), MONTH(?))) UNION ALL SELECT emp_id, emp_etfno, (work_days*-1) AS work_days, (leave_days*-1) AS leave_days, (nopay_days*-1) AS nopay_days, (normal_rate_otwork_hrs*-1) AS normal_rate_otwork_hrs, (double_rate_otwork_hrs*-1) AS double_rate_otwork_hrs, (work_days_exclusions*-1) AS work_days_exclusions FROM employee_paid_rates WHERE (salary_process_year IN (YEAR(?), YEAR(?)) AND salary_process_month IN (MONTH(?), MONTH(?)))) AS drv_workprog GROUP BY emp_id) AS drv_workrate ON employees.id=drv_workrate.emp_id ";
 			
 			$sqlmain.="LEFT OUTER JOIN (SELECT payroll_profile_id, (MAX(emp_payslip_no)+1) AS emp_payslip_no FROM employee_payslips WHERE payment_period_to<? GROUP BY payroll_profile_id) AS drv_key ON payroll_profiles.id=drv_key.payroll_profile_id ";
-			$sqlmain.="LEFT OUTER JOIN (SELECT drv_pre.id as emp_payslip_id, drv_pre.payroll_profile_id, drv_pre.emp_payslip_no, drv_pre.payroll_process_type_id, drv_pre.basic_salary, drv_paidrate.work_days, drv_paidrate.leave_days, drv_paidrate.nopay_days, drv_paidrate.normal_rate_otwork_hrs, drv_paidrate.double_rate_otwork_hrs, drv_paidrate.work_days_exclusions, drv_pre.payslip_cancel FROM (SELECT id, payroll_profile_id, emp_payslip_no, payroll_process_type_id, basic_salary, payslip_cancel FROM employee_payslips WHERE payment_period_to>=?) AS drv_pre LEFT OUTER JOIN (SELECT employee_payslip_id, SUM(work_days) AS work_days, SUM(leave_days) AS leave_days, SUM(nopay_days) AS nopay_days, SUM(normal_rate_otwork_hrs) AS normal_rate_otwork_hrs, SUM(double_rate_otwork_hrs) AS double_rate_otwork_hrs, SUM(work_days_exclusions) AS work_days_exclusions FROM employee_paid_rates WHERE (salary_process_year IN(YEAR(?), YEAR(?)) AND salary_process_month IN (MONTH(?), MONTH(?))) GROUP BY employee_payslip_id) AS drv_paidrate ON drv_pre.id=drv_paidrate.employee_payslip_id) AS drv_payslips ON (payroll_profiles.id=drv_payslips.payroll_profile_id AND IFNULL(drv_key.emp_payslip_no, 1)=drv_payslips.emp_payslip_no) WHERE payroll_process_types.id=? AND companies.id=? AND employees.deleted=0 AND employees.is_resigned=0) AS drv_main ";
+			$sqlmain.="LEFT OUTER JOIN (SELECT drv_pre.id as emp_payslip_id, drv_pre.payroll_profile_id, drv_pre.emp_payslip_no, drv_pre.payroll_process_type_id, drv_pre.basic_salary, drv_paidrate.work_days, drv_paidrate.leave_days, drv_paidrate.nopay_days, drv_paidrate.normal_rate_otwork_hrs, drv_paidrate.double_rate_otwork_hrs, drv_paidrate.work_days_exclusions, drv_pre.payslip_cancel FROM (SELECT id, payroll_profile_id, emp_payslip_no, payroll_process_type_id, basic_salary, payslip_cancel FROM employee_payslips WHERE payment_period_to>=?) AS drv_pre LEFT OUTER JOIN (SELECT employee_payslip_id, SUM(work_days) AS work_days, SUM(leave_days) AS leave_days, SUM(nopay_days) AS nopay_days, SUM(normal_rate_otwork_hrs) AS normal_rate_otwork_hrs, SUM(double_rate_otwork_hrs) AS double_rate_otwork_hrs, SUM(work_days_exclusions) AS work_days_exclusions FROM employee_paid_rates WHERE (salary_process_year IN(YEAR(?), YEAR(?)) AND salary_process_month IN (MONTH(?), MONTH(?))) GROUP BY employee_payslip_id) AS drv_paidrate ON drv_pre.id=drv_paidrate.employee_payslip_id) AS drv_payslips ON (payroll_profiles.id=drv_payslips.payroll_profile_id AND IFNULL(drv_key.emp_payslip_no, 1)=drv_payslips.emp_payslip_no) WHERE payroll_process_types.id=? AND companies.id=?) AS drv_main ";
 			/*
 			$sqlmain.="LEFT OUTER JOIN (SELECT drv_key.payroll_profile_id, (drv_key.emp_payslip_no+1) AS emp_payslip_no, drv_pre.id as emp_payslip_id, drv_pre.payroll_process_type_id, drv_pre.basic_salary, drv_paidrate.work_days, drv_paidrate.leave_days, drv_paidrate.nopay_days, drv_paidrate.normal_rate_otwork_hrs, drv_paidrate.double_rate_otwork_hrs, drv_pre.payslip_cancel FROM (SELECT payroll_profile_id, MAX(emp_payslip_no) AS emp_payslip_no FROM employee_payslips WHERE payment_period_to<? GROUP BY payroll_profile_id) AS drv_key LEFT OUTER JOIN (SELECT id, payroll_profile_id, emp_payslip_no, payroll_process_type_id, basic_salary, payslip_cancel FROM employee_payslips WHERE payment_period_to>=?) AS drv_pre ON (drv_key.payroll_profile_id=drv_pre.payroll_profile_id AND (drv_key.emp_payslip_no+1)=drv_pre.emp_payslip_no) LEFT OUTER JOIN (SELECT employee_payslip_id, SUM(work_days) AS work_days, SUM(leave_days) AS leave_days, SUM(nopay_days) AS nopay_days, SUM(normal_rate_otwork_hrs) AS normal_rate_otwork_hrs, SUM(double_rate_otwork_hrs) AS double_rate_otwork_hrs FROM employee_paid_rates WHERE (salary_process_year IN(YEAR(?), YEAR(?)) AND salary_process_month IN (MONTH(?), MONTH(?)))) AS drv_paidrate ON drv_pre.id=drv_paidrate.employee_payslip_id) AS drv_payslips ON payroll_profiles.id=drv_payslips.payroll_profile_id WHERE payroll_process_types.id=? AND branches.id=?) AS drv_main ";
 			*/
@@ -1302,20 +1302,10 @@ class EmployeePayslipController extends Controller
 		$emp_array[] = $sum_array;
 		
 		if($request->print_record=='1'){
-			$excel_rows[] = array('EPF NO', 'Employee Name', 'Basic', 'No-pay', 'Total Salary Before Nopay', 'Arrears', 'Weekly Attendance', 'Incentive', 'Director Incentive', 'Other Addition', 'Salary Arrears', 'Normal', 'Double', 'Total Earned', 'Total for Tax', 'EPF-8', 'Salary Advance', 'Loans', 'IOU', 'Funeral Fund', 'PAYE', 'Other Deductions', 'Total Deductions', 'Balance Pay', 'EPF-12', 'ETF-3');
-			$rpt_row_cnt = 0;//skip-title-row
-			foreach($emp_array as $excel_data){
-				if($rpt_row_cnt>0){
-					$excel_rows[] = array($excel_data['emp_epfno'], $excel_data['emp_first_name'], $excel_data['BASIC'], $excel_data['NOPAY'], $excel_data['tot_bnp'], $excel_data['sal_arrears1'], $excel_data['ATTBONUS_W'], $excel_data['INCNTV_EMP'], $excel_data['INCNTV_DIR'], $excel_data['add_other'], $excel_data['sal_arrears2'], $excel_data['OTHRS1'], $excel_data['OTHRS2'], $excel_data['tot_earn'], $excel_data['tot_fortax'], $excel_data['EPF8'], $excel_data['sal_adv'], $excel_data['LOAN'], $excel_data['ded_IOU'], $excel_data['ded_fund_1'], $excel_data['PAYE'], $excel_data['ded_other'], $excel_data['tot_ded'], $excel_data['NETSAL'], $excel_data['EPF12'], $excel_data['ETF3']);
-				}
-				
-				$rpt_row_cnt++;
-				
-			}
-			Excel::create('PayRegister '.$request->rpt_info, function($excel) use ($excel_rows){
+			Excel::create('PayRegister '.$request->rpt_info, function($excel) use ($emp_array){
 				$excel->setTitle('PayRegister');
-				$excel->sheet('SalarySheet', function($sheet) use ($excel_rows){
-					$sheet->fromArray($excel_rows, null, 'A1', false, false);
+				$excel->sheet('SalarySheet', function($sheet) use ($emp_array){
+					$sheet->fromArray($emp_array, null, 'A1', false, false);
 				});
 			})->download('xlsx');
 		}else if($request->print_record=='2'){
@@ -1387,7 +1377,7 @@ class EmployeePayslipController extends Controller
 		$rem_net_sal = 0;
 		$rem_ded_other = 0;
 		
-		$sect_name = ($emp_department_col=='2')?'All Sections':$request->rpt_dept_name;
+		$sect_name = ($emp_department_val=='2')?'All Sections':$request->rpt_dept_name;
 		$paymonth_name = Carbon\Carbon::createFromFormat('Y-m-d', $payment_period_fr)->format('F Y');//format('F');
 		
 		$sum_array = array('id'=>'', 'emp_epfno'=>'', 'emp_first_name'=>'', 'emp_nicno'=>'', 'location'=>'', 'BASIC'=>0, 'BRA_I'=>'0', 'add_bra2'=>'0', 'NOPAY'=>0, 'tot_bnp'=>0, 'sal_arrears1'=>0, 'tot_fortax'=>0, 'ATTBONUS'=>0, 'add_transport'=>0, 'add_other'=>0, 'sal_arrears2'=>0, 'OTHRS1'=>0, 'OTHRS2'=>0, 'tot_earn'=>0, 'EPF8'=>0, 'EPF12'=>0, 'ETF3'=>0, 'sal_adv'=>0, 'ded_tp'=>0, 'ded_other'=>0, 'PAYE'=>0, 'LOAN'=>0, 'tot_ded'=>0, 'NETSAL'=>0, 'OTHER_REM'=>0,'Totalsalary'=>0);
@@ -1761,15 +1751,6 @@ class EmployeePayslipController extends Controller
 			$emp_increments_array[$i->payroll_profile_id][] = array('name'=>$i->remuneration_name, 'value'=>$i->increment_value);
 		}
 		
-		$sqlempnotes = "select payroll_profiles.id as payroll_profile_id, special_notes.note from special_notes inner join special_note_details on special_notes.id=special_note_details.note_id inner join payroll_profiles on special_note_details.emp_id=payroll_profiles.emp_id where special_notes.period_id=? order by special_notes.id";
-		
-		$special_empnotes = DB::select($sqlempnotes, [$payment_period_id]);
-		
-		$special_empnotes_array = array();
-		
-		foreach($special_empnotes as $p){
-			$special_empnotes_array[$p->payroll_profile_id][] = array('note'=>$p->note);
-		}
 		/*
 		$ea=$emp_array;
 		for($cnt=1;$cnt<26;$cnt++){
@@ -1791,9 +1772,9 @@ class EmployeePayslipController extends Controller
 		ini_set("memory_limit", "999M");
 		ini_set("max_execution_time", "999");
 		
-		$pdf = PDF::loadView('Payroll.payslipProcess.SalarySheet_pdf', compact('emp_array', 'emp_increments_array', 'special_empnotes_array', 'more_info', 'sect_name', 'paymonth_name', 'company_addr'));
+		$pdf = PDF::loadView('Payroll.payslipProcess.SalarySheet_pdf', compact('emp_array', 'emp_increments_array', 'more_info', 'sect_name', 'paymonth_name', 'company_addr'));
         return $pdf->download('salary-list.pdf');
-		// return view('Payroll.payslipProcess.SalarySheet_pdf', compact('emp_array', 'emp_increments_array', 'special_empnotes_array', 'more_info', 'sect_name', 'paymonth_name', 'company_addr'));
+		//return view('Payroll.payslipProcess.SalarySheet_pdf', compact('emp_array', 'more_info'));
     }
 
 
