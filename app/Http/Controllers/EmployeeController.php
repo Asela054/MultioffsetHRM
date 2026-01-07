@@ -416,7 +416,7 @@ class EmployeeController extends Controller
         $department = $request->department;
         $job_category_id = $request->job_category_id;
         $work_category_id = $request->work_category_id;
-
+        $leave_approve_person = $request->leave_approve_person;
         $emergency_contact_person = $request->emergency_contact_person;
         $emergency_contact_tp = $request->emergency_contact_tp;
 
@@ -463,7 +463,7 @@ class EmployeeController extends Controller
         $employee->emp_department = $department;
         $employee->job_category_id = $job_category_id;
         $employee->work_category_id = $work_category_id;
-
+        $employee->leave_approve_person = $leave_approve_person;
         $employee->emp_work_telephone = $request->input('emp_work_telephone');
         $employee->tp1 = $request->input('telephone');
         $employee->emp_mobile = $request->input('emp_mobile');
