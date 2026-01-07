@@ -9,10 +9,18 @@
             </div>
         </div>
         <div class="container-fluid mt-4">
+            {{-- Show global success/error messages --}}
+            @if (session('success'))
+                <div class="alert alert-success" id="att_msg">{{ session('success') }}</div>
+            @elseif (session('error'))
+                <div class="alert alert-danger" id="att_msg">{{ session('error') }}</div>
+            @else
+                <div id="att_msg"></div>
+            @endif
             <div class="row">
-                <div class="col-lg-9">
+                <div class="col-lg-9 col-md-12">
                     <div class="row">
-                        <div class="col">
+                        <div class="col-12">
                             <div class="card mb-2">
                                 <div class="card-header">Add Employee Files</div>
                                 <div class="card-body">
@@ -20,7 +28,7 @@
                                     <form class="form-horizontal" method="POST" action="{{ route('employeeAttachmentJson') }}" enctype="multipart/form-data">
                                         {{ csrf_field() }}
                                         <div class="form-row">
-                                            <div class="col">
+                                            <div class="col-md-4 col-12 mb-3">
                                                 <label class="small font-weight-bold text-dark">Select File</label><br>
                                                 <input type="file" class="form-control form-control-sm" id="empattachment" name="empattachment">
                                                 @if ($errors->has('empattachment'))
@@ -29,11 +37,21 @@
 											</span>
                                                 @endif
                                             </div>
-                                            <div class="col">
+                                            <div class="col-md-4 col-12 mb-3">
                                                 <label class="small font-weight-bold text-dark">Attachment Type</label>
                                                 <select name="attachment_type" class="form-control form-control-sm" id="attachment_type" >
-                                                    <option value="1"> Type 1</option>
-                                                    <option value="2"> Type 2</option>
+                                                    <option value="1">CV</option>
+                                                    <option value="2">Birth Certificate</option>
+                                                    <option value="3">O/L Certificates</option>
+                                                    <option value="4">A/L Certificates</option>
+                                                    <option value="5">Other Educational Certificates</option>
+                                                    <option value="6">Professional Qualification</option>
+                                                    <option value="7">Training Certificates</option>
+                                                    <option value="8">Service Letter</option>
+                                                    <option value="9">NIC</option>
+                                                    <option value="10">Driving License</option>
+                                                    <option value="11">Grama Niladhari Certificate</option>
+                                                    <option value="12">Police Clearance Certificate</option>
                                                 </select>
                                                 @if ($errors->has('attachment_type'))
                                                     <span class="help-block">
@@ -41,7 +59,7 @@
 											</span>
                                                 @endif
                                             </div>
-                                            <div class="col">
+                                            <div class="col-md-4 col-12 mb-3">
                                                 <label class="small font-weight-bold text-dark">Comment</label>
                                                 <textarea class="form-control form-control-sm" id="empcomment" name="empcomment" rows="3"></textarea>
                                                 @if ($errors->has('empcomment'))
@@ -51,9 +69,11 @@
                                                 @endif
                                             </div>
                                         </div>
-                                        <div class="form-group mt-3">
+                                        <div class="form-group mt-2 text-right">
                                             @can('employee-edit')
-                                                <button type="submit" name="" id="" class="btn btn-outline-primary btn-sm fa-pull-right px-4"><i class="fas fa-save"></i>&nbsp;Save</button>
+                                                <button type="submit" class="btn btn-primary btn-sm px-4">
+                                                    <i class="fas fa-plus"></i>&nbsp;Add
+                                                </button>                                            
                                             @endcan
                                         </div>
                                         <input type="hidden" class="form-control" id="id" name="id" value="{{$id}}">
@@ -69,37 +89,127 @@
                         <div class="col">
                             <div class="card mb-2">
                                 <div class="card-body">
-                                    <div class="center-block fix-width scroll-inner">
-                                     <table class="table table-striped nowrap" style="width: 100%">
+                                    <div class="d-none d-md-block table-responsive">
+                                     <table class="table table-striped table-bordered table-sm small" id="dataTable">
                                          <thead>
                                             <tr>
-                                                <th>File</th>
+                                                <th>File Name</th>
                                                 <th>File Type</th>
+                                                <th>Comment</th>
                                                 <th class="text-right">Action</th>
                                             </tr>
                                          </thead>
                                          <tbody>
-                                            @php $count = 1; @endphp
+                                            @php
+                                                $typeNames = [
+                                                    1 => 'CV',
+                                                    2 => 'Birth Certificate',
+                                                    3 => 'O/L Certificates',
+                                                    4 => 'A/L Certificates',
+                                                    5 => 'Other Educational Certificates',
+                                                    6 => 'Professional Qualification',
+                                                    7 => 'Training Certificates',
+                                                    8 => 'Service Letter',
+                                                    9 => 'NIC',
+                                                    10 => 'Driving License',
+                                                    11 => 'Grama Niladhari Certificate',
+                                                    12 => 'Police Clearance Certificate',
+                                                ];
+                                            @endphp
                                             @foreach($attachments as $att)
                                                 <tr>
-                                                    <td> <a href="{{route('download_file', $att->emp_ath_file_name)}}">{{'Attachment - '. $count}}</a> </td>
-                                                    <td> {{$att->attachment_type_rel->name}} </td>
-                                                    <td class="text-right"> <button type="button" class="btn btn-sm btn-danger btn-delete" data-id="{{$att->emp_ath_id}}"> <i class="fa fa-trash"></i> </button> </td>
+                                                    <td>
+                                                        <a href="{{route('download_file', $att->emp_ath_file_name)}}">
+                                                            {{$att->emp_ath_file_name}}
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        @if($att->attachment_type_rel && isset($att->attachment_type_rel->name))
+                                                            {{$att->attachment_type_rel->name}}
+                                                        @else
+                                                            {{ $typeNames[$att->attachment_type] ?? $att->attachment_type }}
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ $att->empcomment }}</td>
+                                                    <td class="text-right">
+                                                        <button type="button" class="btn btn-sm btn-danger btn-delete" data-id="{{$att->emp_ath_id}}">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </td>
                                                 </tr>
-                                                @php $count++ @endphp
                                             @endforeach
                                          </tbody>
                                      </table>
+                                    </div>
+                                    <div class="d-md-none">
+                                        @php
+                                            $typeNames = [
+                                                1 => 'CV',
+                                                2 => 'Birth Certificate',
+                                                3 => 'O/L Certificates',
+                                                4 => 'A/L Certificates',
+                                                5 => 'Other Educational Certificates',
+                                                6 => 'Professional Qualification',
+                                                7 => 'Training Certificates',
+                                                8 => 'Service Letter',
+                                                9 => 'NIC',
+                                                10 => 'Driving License',
+                                                11 => 'Grama Niladhari Certificate',
+                                                12 => 'Police Clearance Certificate',
+                                            ];
+                                        @endphp
+                                        @foreach($attachments as $att)
+                                            <div class="card mb-2 border">
+                                                <div class="card-body p-3">
+                                                    <div class="mb-2">
+                                                        <strong class="small text-muted">FILE NAME</strong>
+                                                        <div class="mt-1">
+                                                            <a href="{{route('download_file', $att->emp_ath_file_name)}}" class="text-break">
+                                                                {{$att->emp_ath_file_name}}
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="mb-2">
+                                                        <strong class="small text-muted">FILE TYPE</strong>
+                                                        <div class="mt-1">
+                                                            @if($att->attachment_type_rel && isset($att->attachment_type_rel->name))
+                                                                {{$att->attachment_type_rel->name}}
+                                                            @else
+                                                                {{ $typeNames[$att->attachment_type] ?? $att->attachment_type }}
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    @if($att->empcomment)
+                                                        <div class="mb-2">
+                                                            <strong class="small text-muted">COMMENT</strong>
+                                                            <div class="mt-1">{{ $att->empcomment }}</div>
+                                                        </div>
+                                                    @endif
+                                                    
+                                                    <div class="text-right mt-3">
+                                                        <button type="button" class="btn btn-sm btn-danger btn-delete" data-id="{{$att->emp_ath_id}}">
+                                                            <i class="fa fa-trash"></i> Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                        
+                                        @if($attachments->isEmpty())
+                                            <div class="text-center text-muted py-4">
+                                                <p>No attachments found</p>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-
                 </div>
+                
                 @include('layouts.employeeRightBar')
-
             </div>
         </div>
 
@@ -137,7 +247,7 @@
         $('#employee_menu_link').addClass('active');
         $('#employee_menu_link_icon').addClass('active');
         $('#employeeinformation').addClass('navbtnactive');
-        $('#view_empfile_link').addClass('navbtnactive');
+        $('#view_empfile_link').addClass('active');
 
             let delete_id = 0;
             $(document).on('click', '.btn-delete', function () {

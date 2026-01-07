@@ -606,58 +606,6 @@
 
             </div>
         </div>
-        <div class="container-fluid mt-4">
-            <div class="card mb-4">
-                <div class="card-header">Attachments</div>
-                <div class="card-body">
-                    <div class="sbp-preview">
-                        <div class="sbp-preview-content">
-                            <form class="form-horizontal" method="POST" action="{{ route('qulificationAttachment') }}"
-                                  enctype="multipart/form-data">
-                                {{ csrf_field() }}
-
-
-                                <div class="form-row">
-                                    <label class="form-label col-md-2">Select File</label>
-                                    <div class="custom-file  col-lg-6">
-                                        <input type="hidden" class="form-control form-control-sm" id="id" name="id" value="{{$id}}">
-                                        <input type="file" class="custom-file-input form-control form-control-sm" id="empattachment"
-                                               name="empattachment">
-                                        @if ($errors->has('empattachment'))
-                                            <span class="help-block">
-                                                            <strong>{{ $errors->first('empattachment') }}</strong>
-                                                        </span>
-                                        @endif
-                                        <label class="custom-file-label" for="validatedCustomFile">Choose
-                                            file...</label>
-                                        <div class="invalid-feedback">Example invalid custom file feedback</div>
-                                    </div>
-                                </div>
-
-                                <div class="form-row mt-3">
-                                    <label for="inputEmail3" class="col-sm-2 col-form-label">Comment</label>
-                                    <div class="form-group">
-                                        <textarea class="form-control form-control-sm" id="empcomment" name="empcomment"
-                                                  rows="3"></textarea>
-                                        @if ($errors->has('empcomment'))
-                                            <span class="help-block">
-                                                            <strong>{{ $errors->first('empcomment') }}</strong>
-                                                        </span>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                @can('employee-edit')
-                                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                                @endcan
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
     </main>
 
 @endsection
@@ -669,7 +617,7 @@
             $('#employee_menu_link').addClass('active');
             $('#employee_menu_link_icon').addClass('active');
             $('#employeeinformation').addClass('navbtnactive');
-            $('#view_qualification_link').addClass('navbtnactive');
+            $('#view_qualification_link').addClass('active');
 
 
             $('#create_work').click(function () {

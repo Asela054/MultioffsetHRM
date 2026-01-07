@@ -163,7 +163,7 @@
             $('#employee_menu_link').addClass('active');
             $('#employee_menu_link_icon').addClass('active');
             $('#employeeinformation').addClass('navbtnactive');
-            $('#view_bank_link').addClass('navbtnactive');
+            $('#view_bank_link').addClass('active');
 
             let bank_name = $('#bank_name');
             let branch_name = $('#branch_name');

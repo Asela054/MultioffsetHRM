@@ -135,7 +135,7 @@
         $('#employee_menu_link').addClass('active');
         $('#employee_menu_link_icon').addClass('active');
         $('#employeeinformation').addClass('navbtnactive');
-        $('#view_emprequment_link').addClass('navbtnactive');
+        $('#view_emprequment_link').addClass('active');
 
         $('#first_interwer').select2();
         $('#second_interwer').select2();

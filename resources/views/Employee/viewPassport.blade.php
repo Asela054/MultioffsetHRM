@@ -188,7 +188,7 @@
         $('#employee_menu_link').addClass('active');
         $('#employee_menu_link_icon').addClass('active');
         $('#employeeinformation').addClass('navbtnactive');
-        $('#view_passport_link').addClass('navbtnactive');
+        $('#view_passport_link').addClass('active');
 
         $('#issue_date').datepicker({
             format: "yyyy/mm/dd",
