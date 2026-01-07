@@ -278,6 +278,12 @@
                             
                             {!! 'We are pleased to inform you that your salary has been increased with a ' . $increment_message . ', totaling <b>LKR ' . number_format((float)$increment_total, 2, '.', ',') . '</b>, in recognition of your valuable contributions to the company.' !!}
                         @endif
+                        @if (!empty($special_empnotes_array[$row['pay_profile']]))
+                            @php 
+                                $notes_details = $special_empnotes_array[$row['pay_profile']];
+                            @endphp
+                            <br>{!! nl2br(e($notes_details)) !!}                            
+                        @endif
                         </td>
                         <!-- <td class="bodytd" colspan="2" style="text-align:center;border-bottom:none;  border-top:none; border-right:none; padding-top:15px;"><b></b></td> -->
                         <td class="bodytd" colspan="2" style="text-align:center;border-bottom:none; border-top:none; border-right:none; padding-top:15px;">
