@@ -23,6 +23,7 @@ class SpecialNoteController extends Controller
             ->orderBy('id', 'desc')
             ->get();
         $payment_period = DB::table('payment_periods')
+            ->where('payroll_process_type_id', 1)
             ->orderBy('payment_period_fr', 'desc')
             ->get();
         
