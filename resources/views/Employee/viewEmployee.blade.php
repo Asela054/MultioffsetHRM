@@ -332,6 +332,20 @@
 										<label class="custom-control-label" for="specialattendanceno">No</label>
 									</div>
 								</div>
+								<div class="col-12 col-sm-12 col-md-3 col-lg-3">
+									<label class="small font-weight-bold text-dark">Leave Approval Person</label>
+									<br>
+									<div class="custom-control custom-radio custom-control-inline">
+										<input type="radio" class="custom-control-input" id="leave_approve_person_yes" name="leave_approve_person" value="1"
+												{{ $employee->leave_approve_person == 1 ? 'checked' : "" }}>
+										<label class="custom-control-label" for="leave_approve_person_yes">Yes</label>
+									</div>
+									<div class="custom-control custom-radio custom-control-inline">
+											<input type="radio" class="custom-control-input" id="leave_approve_person_no" name="leave_approve_person" value="0" 
+												{{ $employee->leave_approve_person == 0 ? 'checked' : "" }}>
+											<label class="custom-control-label" for="leave_approve_person_no">No</label>
+									</div>
+								</div>
 							</div>
 							<div class="form-row" hidden>
 								<div class="col">
