@@ -406,7 +406,7 @@
                 allowClear: true,
                 parent: '#formModal',
                 ajax: {
-                    url: '{{url("employee_list_sel2")}}',
+                    url: '{{url("leave_approve_person_sel2")}}',
                     dataType: 'json',
                     data: function(params) {
                         return {
