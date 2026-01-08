@@ -521,6 +521,7 @@ Route::get('OccupationGroup.fetch_single', 'OccupationGroupController@fetch_sing
 
 /*-- common routes --*/
 Route::get('employee_list_sel2', 'EmployeeController@employee_list_sel2')->name('employee_list_sel2');
+Route::get('leave_approve_person_sel2', 'EmployeeController@leave_approve_person_sel2')->name('leave_approve_person_sel2');
 Route::get('location_list_sel2', 'EmployeeController@location_list_sel2')->name('location_list_sel2');
 Route::post('get_dept_emp_list', 'EmployeeController@get_dept_emp_list')->name('get_dept_emp_list');
 

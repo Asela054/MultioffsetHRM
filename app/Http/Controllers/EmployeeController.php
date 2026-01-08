@@ -833,4 +833,63 @@ class EmployeeController extends Controller
             return response()->json($results);
         }
     }
+
+    public function leave_approve_person_sel2(Request $request)
+    {
+        $companyId = Session::get('company_id');
+        $companyBranchId = Session::get('company_branch_id');
+        $user = Auth::user();
+        $userDepartmentIds = $user->departments->pluck('id');
+        $department=$request->input('department');
+        
+        if ($request->ajax()) {
+            
+            $page = $request->input('page');
+            $resultCount = 25;
+        
+            $offset = ($page - 1) * $resultCount;
+            $breeds = DB::table('employees')
+                ->where('employees.emp_name_with_initial', 'LIKE', '%' . $request->input('term') . '%')
+                ->where('emp_company', $companyId)
+                ->where('emp_location', $companyBranchId)
+                ->when($request->input('department'), function ($query, $department) use ($companyId) {
+                    return $query->where('emp_company', $companyId)
+                                ->where('emp_department', $department);
+                })
+                ->where('is_resigned', 0)
+                ->where('deleted', 0)
+                ->where('leave_approve_person', 1)
+                ->orderBy('employees.emp_name_with_initial')
+                ->skip($offset)
+                ->take($resultCount)
+                ->distinct()
+                ->get([
+                    'employees.emp_id as id',
+                    DB::raw('CONCAT(employees.emp_name_with_initial, " - ", employees.calling_name) as text')
+                ]);
+
+               
+
+            $count = DB::table('employees')
+                ->where('employees.emp_name_with_initial', 'LIKE', '%' . $request->input('term') . '%')
+                ->where('emp_company', $companyId)
+                ->where('emp_location', $companyBranchId);
+        
+            $count = $count->where('is_resigned', 0);
+            $count = $count->where('deleted', 0)->count();
+        
+
+            $endCount = $offset + $resultCount;
+            $morePages = $endCount < $count;
+        
+            $results = [
+                "results" => $breeds,
+                "pagination" => [
+                    "more" => $morePages
+                ]
+            ];
+        
+            return response()->json($results);
+        }
+    }
 }
