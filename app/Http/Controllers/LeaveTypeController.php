@@ -360,6 +360,8 @@ class LeaveTypeController extends Controller
         $department = $request->get('department');
         $employee_sel = $request->get('employee');
         $location = $request->get('location');
+        $formdate = $request->get('fromdate');
+        $todate = $request->get('todate');
 
         $query = \Illuminate\Support\Facades\DB::query()
             ->select('employees.*',
@@ -412,7 +414,7 @@ class LeaveTypeController extends Controller
 
             $total_taken_annual_leaves = DB::table('leaves')
                 ->where('leaves.emp_id', '=', $empid)
-                ->whereBetween('leaves.leave_from', [$like_from_date, $like_from_date2])
+                ->whereBetween('leaves.leave_from', [$formdate, $todate])
                 ->where('leaves.leave_type', '=', '1')
                 ->where('leaves.status', '=', 'Approved')
                 ->get()->toArray();
@@ -457,7 +459,7 @@ class LeaveTypeController extends Controller
             $like_from_date2_cas = date('Y').'-12-31';
             $total_taken_casual_leaves = DB::table('leaves')
                 ->where('leaves.emp_id', '=', $empid)
-                ->whereBetween('leaves.leave_from', [$like_from_date_cas, $like_from_date2_cas])
+                ->whereBetween('leaves.leave_from', [$formdate, $todate])
                 ->where('leaves.leave_type', '=', '2')
                 ->where('leaves.status', '=', 'Approved')
                 ->get();
@@ -492,7 +494,7 @@ class LeaveTypeController extends Controller
             $like_from_date2_med = date('Y').'-12-31';
             $total_taken_medical_leaves = DB::table('leaves')
                 ->where('leaves.emp_id', '=', $empid)
-                ->whereBetween('leaves.leave_from', [$like_from_date_med, $like_from_date2_med])
+                ->whereBetween('leaves.leave_from', [$formdate, $todate])
                 ->where('leaves.leave_type', '=', '4')
                 ->where('leaves.status', '=', 'Approved')
                 ->get();
@@ -529,6 +531,9 @@ class LeaveTypeController extends Controller
 
             $employee_join_date = Carbon::parse($emp_join_date);
             $current_date = Carbon::now();
+            if($todate < $current_date){
+                $current_date = Carbon::parse($todate);
+            }
 
             // Calculate months of service
             $months_of_service = $employee_join_date->diffInMonths($current_date);
@@ -611,6 +616,9 @@ class LeaveTypeController extends Controller
                 // }
                 $join_date = new DateTime($emp_join_date);
                 $current_date = new DateTime();
+                if($todate < $current_date){
+                    $current_date = Carbon::parse($todate);
+                }
                 $interval = $join_date->diff($current_date);
 
                 $years_of_service = $interval->y;
