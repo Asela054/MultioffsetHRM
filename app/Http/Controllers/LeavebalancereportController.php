@@ -80,6 +80,9 @@ class LeavebalancereportController extends Controller
 
             $employee_join_date = Carbon::parse($row->emp_join_date);
             $current_date = Carbon::now();
+            if($from_date < $current_date){
+                $current_date = Carbon::parse($from_date);
+            }
             $join_year = Carbon::parse($employee_join_date)->year;
             $join_month = Carbon::parse($employee_join_date)->month;
             $join_date = Carbon::parse($employee_join_date)->day;
@@ -151,6 +154,9 @@ class LeavebalancereportController extends Controller
             if($leaves->casual_leaves>0):
                 $join_date = new DateTime($row->emp_join_date);
                 $current_date = new DateTime();
+                if($from_date < $current_date){
+                    $current_date = Carbon::parse($from_date);
+                }
                 $interval = $join_date->diff($current_date);
 
                 $years_of_service = $interval->y;

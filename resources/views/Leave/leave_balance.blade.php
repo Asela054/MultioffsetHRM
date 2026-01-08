@@ -35,6 +35,13 @@
                                 <select name="employee" id="employee" class="form-control form-control-sm">
                                 </select>
                             </div>
+                            <div class="col">
+                                <label class="small font-weight-bold text-dark">Period</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="date" class="form-control" id="fromdate" name="fromdate">
+                                    <input type="date" class="form-control" id="todate" name="todate">
+                                </div>
+                            </div>
 
                             <div class="col-md-12">
                                 <button type="submit" class="btn btn-primary btn-sm filter-btn float-right" id="btn-filter"> Filter</button>
@@ -156,7 +163,7 @@
             });
 
 
-            function load_dt(department, employee, location){
+            function load_dt(department, employee, location, fromdate, todate){
                 $('#attendtable').DataTable({
                     processing: true,
                     serverSide: true,
@@ -182,7 +189,7 @@
                     ],
                     ajax: {
                         "url": "{!! route('leave_balance_list') !!}",
-                        "data": {'department':department, 'employee':employee, 'location': location },
+                        "data": {'department':department, 'employee':employee, 'location': location , 'fromdate': fromdate, 'todate': todate},
                     },
                     columns: [
                         { data: 'emp_id', name: 'emp_id' },
@@ -205,15 +212,17 @@
                 });
             }
 
-            load_dt('', '', '' );
+            load_dt('', '', '', '', '' );
 
             $('#formFilter').on('submit',function(e) {
                 e.preventDefault();
                 let department = $('#department').val();
                 let employee = $('#employee').val();
                 let location = $('#location').val();
+                let fromdate = $('#fromdate').val();
+                let todate = $('#todate').val();
 
-                load_dt(department, employee, location );
+                load_dt(department, employee, location, fromdate, todate);
             });
 
         });

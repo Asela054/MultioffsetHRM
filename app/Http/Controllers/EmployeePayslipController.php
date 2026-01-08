@@ -34,6 +34,8 @@ use PDF;
 
 use Validator;
 
+use Mpdf\Mpdf;
+
 class EmployeePayslipController extends Controller
 {
     /**
@@ -1770,6 +1772,9 @@ class EmployeePayslipController extends Controller
 		foreach($special_empnotes as $p){
 			$special_empnotes_array[$p->payroll_profile_id][] = array('note'=>$p->note);
 		}
+		// print_r($special_empnotes_array);
+		// die;
+		// dd($special_empnotes_array);
 		/*
 		$ea=$emp_array;
 		for($cnt=1;$cnt<26;$cnt++){
@@ -1791,9 +1796,52 @@ class EmployeePayslipController extends Controller
 		ini_set("memory_limit", "999M");
 		ini_set("max_execution_time", "999");
 		
-		$pdf = PDF::loadView('Payroll.payslipProcess.SalarySheet_pdf', compact('emp_array', 'emp_increments_array', 'special_empnotes_array', 'more_info', 'sect_name', 'paymonth_name', 'company_addr'));
-        return $pdf->download('salary-list.pdf');
+		// $pdf = PDF::loadView('Payroll.payslipProcess.SalarySheet_pdf', compact('emp_array', 'emp_increments_array', 'more_info', 'sect_name', 'paymonth_name', 'company_addr'));
+        // return $pdf->stream('salary-list.pdf');
+        // return $pdf->download('salary-list.pdf');
 		// return view('Payroll.payslipProcess.SalarySheet_pdf', compact('emp_array', 'emp_increments_array', 'special_empnotes_array', 'more_info', 'sect_name', 'paymonth_name', 'company_addr'));
+
+		// Verify font exists
+		$fontPath = public_path('fonts/Iskoola-Pota-Regular.ttf'); // Use non-hyphenated filename
+		$fontPathBold = public_path('fonts/Iskoola-Pota-Bold.ttf'); // Bold font path
+		if (!file_exists($fontPath) || !file_exists($fontPathBold)) {
+			die("Font file missing: " . (!file_exists($fontPath) ? $fontPath : $fontPathBold));
+		}
+
+		$mpdf = new \Mpdf\Mpdf([
+			'mode' => 'utf-8',
+			'format' => [220, 140],
+			// 'default_font' => 'iskpota',
+			// 'fontDir' => [public_path('fonts')],
+			// 'fontdata' => [
+			// 	'iskpota' => [
+			// 		'R' => 'Iskoola-Pota-Regular.ttf', // Regular font
+			// 		'B' => 'Iskoola-Pota-Bold.ttf',    // Bold font added here
+			// 		'useOTL' => 0xFF, // Enable basic OpenType
+			// 		'useKashida' => 0,
+			// 	]
+			// ],
+			'autoScriptToLang' => true,
+			'autoLangToFont' => true,
+			'showImageErrors' => true,
+			'margin_top' => 5,
+			'margin_bottom' => 5,
+			'margin_left' => 5,
+			'margin_right' => 5,
+			'default_pagebreak_mode' => 'slice',
+		]);
+
+		$html = view('Payroll.payslipProcess.SalarySheet_pdf', compact(
+			'emp_array', 'special_empnotes_array', 'more_info', 'sect_name', 'paymonth_name',
+			'company_name', 'company_addr'
+		))->render();
+		// Force UTF-8 encoding
+		$html = mb_convert_encoding($html, 'UTF-8', 'auto');
+		$css = '<style>* { font-family: Arial, sans-serif !important; }</style>';
+		$html = $css . $html;
+		$mpdf->WriteHTML($html);
+
+		return $mpdf->Output('salary-list.pdf', 'I');
     }
 
 
