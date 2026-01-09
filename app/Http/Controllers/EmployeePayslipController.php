@@ -1802,42 +1802,87 @@ class EmployeePayslipController extends Controller
 		// return view('Payroll.payslipProcess.SalarySheet_pdf', compact('emp_array', 'emp_increments_array', 'special_empnotes_array', 'more_info', 'sect_name', 'paymonth_name', 'company_addr'));
 
 		// Verify font exists
-		$fontPath = public_path('fonts/Iskoola-Pota-Regular.ttf'); // Use non-hyphenated filename
-		$fontPathBold = public_path('fonts/Iskoola-Pota-Bold.ttf'); // Bold font path
-		if (!file_exists($fontPath) || !file_exists($fontPathBold)) {
-			die("Font file missing: " . (!file_exists($fontPath) ? $fontPath : $fontPathBold));
-		}
+		// $fontPath = public_path('fonts/Iskoola-Pota-Regular.ttf'); // Use non-hyphenated filename
+		// $fontPathBold = public_path('fonts/Iskoola-Pota-Bold.ttf'); // Bold font path
+		// if (!file_exists($fontPath) || !file_exists($fontPathBold)) {
+		// 	die("Font file missing: " . (!file_exists($fontPath) ? $fontPath : $fontPathBold));
+		// }
+
+		// $mpdf = new \Mpdf\Mpdf([
+		// 	'mode' => 'utf-8',
+		// 	'format' => [220, 140],
+		// 	'default_font' => 'iskpota',
+		// 	'fontDir' => [public_path('fonts')],
+		// 	'fontdata' => [
+		// 		'iskpota' => [
+		// 			'R' => 'Iskoola-Pota-Regular.ttf', // Regular font
+		// 			'B' => 'Iskoola-Pota-Bold.ttf',    // Bold font added here
+		// 			'useOTL' => 0xFF, // Enable basic OpenType
+		// 			'useKashida' => 0,
+		// 		]
+		// 	],
+		// 	'autoScriptToLang' => true,
+		// 	'autoLangToFont' => true,
+		// 	'showImageErrors' => true,
+		// 	'margin_top' => 5,
+		// 	'margin_bottom' => 5,
+		// 	'margin_left' => 5,
+		// 	'margin_right' => 5,
+		// 	'default_pagebreak_mode' => 'slice',
+		// ]);
+
+		$defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+		$fontDirs = $defaultConfig['fontDir'];
+
+		$defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+		$fontData = $defaultFontConfig['fontdata'];
 
 		$mpdf = new \Mpdf\Mpdf([
 			'mode' => 'utf-8',
 			'format' => [220, 140],
-			// 'default_font' => 'iskpota',
-			// 'fontDir' => [public_path('fonts')],
-			// 'fontdata' => [
-			// 	'iskpota' => [
-			// 		'R' => 'Iskoola-Pota-Regular.ttf', // Regular font
-			// 		'B' => 'Iskoola-Pota-Bold.ttf',    // Bold font added here
-			// 		'useOTL' => 0xFF, // Enable basic OpenType
-			// 		'useKashida' => 0,
-			// 	]
-			// ],
+
+			'fontDir' => array_merge($fontDirs, [
+				public_path('fonts'), // MUST contain the TTF files
+			]),
+
+			'fontdata' => $fontData + [
+				'iskpota' => [
+					'R' => 'Iskoola-Pota-Regular.ttf',
+					'B' => 'Iskoola-Pota-Bold.ttf',
+					'useOTL' => 0xFF,   // ✅ REQUIRED
+					'useKashida' => 0,
+				],
+				'arial' => [
+					'R' => 'arial.ttf',
+					'B' => 'arialbd.ttf',
+				],
+			],
+
+			'default_font' => 'arial',
+
 			'autoScriptToLang' => true,
-			'autoLangToFont' => true,
-			'showImageErrors' => true,
-			'margin_top' => 5,
-			'margin_bottom' => 5,
-			'margin_left' => 5,
-			'margin_right' => 5,
-			'default_pagebreak_mode' => 'slice',
+			'autoLangToFont' => false, // ❗ IMPORTANT
 		]);
+
 
 		$html = view('Payroll.payslipProcess.SalarySheet_pdf', compact(
 			'emp_array', 'special_empnotes_array', 'more_info', 'sect_name', 'paymonth_name',
 			'company_name', 'company_addr'
 		))->render();
 		// Force UTF-8 encoding
-		$html = mb_convert_encoding($html, 'UTF-8', 'auto');
-		$css = '<style>* { font-family: Arial, sans-serif !important; }</style>';
+		// $html = mb_convert_encoding($html, 'UTF-8', 'auto');
+		$css = '<style>
+			body {
+				/* Arial first for English; iskpota second for Sinhala */
+				font-family: iskpota, arial, sans-serif;
+			}
+			.sinhala-text {
+				font-family: iskpota !important; 
+				font-size: 11pt;
+				line-height: 1.4;
+				font-weight: bold;
+			}
+		</style>';
 		$html = $css . $html;
 		$mpdf->WriteHTML($html);
 
