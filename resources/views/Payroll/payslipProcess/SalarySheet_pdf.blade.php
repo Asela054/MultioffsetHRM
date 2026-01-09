@@ -299,7 +299,7 @@
             </tr> -->
             <tr>
                 <td class="bodytd" colspan="4"
-                    style=" border-left:none; border-right:none;border-bottom:none; padding-top:5px; font-size:12px; text-align:left; vertical-align:top;">
+                    style=" border-left:none; border-right:none;border-bottom:none; padding-top:5px; font-size:13px; text-align:left; vertical-align:top;">
                     @if(!empty($emp_increments_array[$row['pay_profile']]))
                     @php
                     $increment_total=0;
@@ -328,7 +328,7 @@
                     @if(isset($special_empnotes_array[$row['pay_profile']]) && is_array($special_empnotes_array[$row['pay_profile']]))
                         @foreach($special_empnotes_array[$row['pay_profile']] as $note)
                             @if(isset($note['note']))
-                                <div style="font-family: 'iskpota', sans-serif;">
+                                <div class="sinhala-text">
                                     {{ $note['note'] }}
                                 </div>
                             @endif
