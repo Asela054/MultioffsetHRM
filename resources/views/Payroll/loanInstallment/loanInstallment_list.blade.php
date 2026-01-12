@@ -294,7 +294,7 @@ $(document).ready(function(){
 				}
 			}],
 		"createdRow": function( row, data, dataIndex ){
-			$('td', row).eq(8).removeClass('masked_col');
+			$('td', row).eq(9).removeClass('masked_col');
 			//$( row ).attr( 'id', 'row-'+data.payroll_profile_id );//$( row ).data( 'refid', data[3] );
 		}
 	});
@@ -302,8 +302,8 @@ $(document).ready(function(){
 
 
  $('#location_filter').on('keyup change', function () {
-		if (empTable.columns(2).search() !== this.value) {
-			empTable.columns(2).search(this.value).draw();
+		if (empTable.columns(3).search() !== this.value) {
+			empTable.columns(3).search(this.value).draw();
 		}
   });
 
@@ -332,8 +332,8 @@ $(document).ready(function(){
         $('#form_result').html('');
 
         var par = $(this).parent().parent();
-        $("#form_modal_employee").val(par.children("td:nth-child(2)").html());
-        $("#form_modal_loan").val(par.children("td:nth-child(4)").html());
+        $("#form_modal_employee").val(par.children("td:nth-child(3)").html());
+        $("#form_modal_loan").val(par.children("td:nth-child(5)").html());
 
         $.ajax({
             url: "EmployeeLoanInstallment/" + id + "/review",
@@ -390,13 +390,13 @@ $(document).ready(function(){
             var rowNode=selected_tr.node();
             var new_val=data.payment_value;//parseFloat($( rowNode ).find('td').eq(5).html())+data.payment_value;
             
-            $( rowNode ).find('td').eq(6).html( parseFloat(new_val).toFixed(2) );
+            $( rowNode ).find('td').eq(7).html( parseFloat(new_val).toFixed(2) );
             
             var d=selected_tr.data();
             var loan_tot=parseFloat(d[4]);//console.log("1="+loan_tot+"--"+d[3]+"--"+d[2]+"--"+d[1]);
-            var loan_settle=parseFloat($( rowNode ).find('td').eq(6).html());//console.log("2="+loan_settle);
+            var loan_settle=parseFloat($( rowNode ).find('td').eq(7).html());//console.log("2="+loan_settle);
             var loan_bal=loan_tot-loan_settle;//console.log("3="+loan_bal);
-            $( rowNode ).find('td').eq(7).html( parseFloat(loan_bal).toFixed(2) );
+            $( rowNode ).find('td').eq(8).html( parseFloat(loan_bal).toFixed(2) );
         }
     }
     })
