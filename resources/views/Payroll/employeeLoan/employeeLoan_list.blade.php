@@ -378,7 +378,7 @@ $(document).ready(function(){
 					return '<button type="button" class="edit btn btn-datatable btn-icon btn-primary" data-refid="'+row.id+'" ><i class="fas fa-edit"></i></button><button type="button" class="delete btn btn-datatable btn-icon btn-danger" data-refid="'+row.id+'" ><i class="fas fa-trash"></i></button>';
 					*/
 					if(row.loan_complete==0){
-						return '<button type="button" class="delete btn btn-datatable btn-icon btn-danger" data-refid="'+row.id+'" ><i class="fas fa-trash"></i></button>';
+						return '<button type="button" class="delete btn btn-datatable btn-icon btn-danger" data-refid="'+row.id+'" ><i class="fas fa-trash"></i></button>'+'<button type="button" class="remval_settle btn btn-datatable btn-icon btn-secondary" data-refid="'+row.id+'" title="Settle total remaining loan installments" ><i class="fas fa-book"></i></button>';
 					}else{
 						return '<span class="badge badge-success badge-pill">Completed</span>';
 					}
@@ -634,6 +634,32 @@ $(document).ready(function(){
   
   $('#ok_button').text('OK');
   $('#loanCancelModal').modal('show');
+ });
+ 
+ $(document).on('click', '.remval_settle', function(){
+  if(confirm('Mark loan as completed?')){
+	  remuneration_id = $(this).data('refid');
+	  
+	  var _token = $('#frmInfo input[name="_token"]').val();
+	  
+	  $.ajax({
+	   url:"freezeLoanInstallment",
+	   method:'POST',
+	   data:{id:null, installment_cancel:0, employee_loan_id:remuneration_id, payroll_profile_id:$('#payroll_profile_id').val(), opt_totpaid:'Y', _token:_token},
+	   dataType:"JSON",
+	   success:function(data){
+		   if(data.result=='error'){
+			   alert('Something wrong. \r\n'+data.msg);
+		   }else{
+			   var selected_tr=remunerationTable.row('#row-'+remuneration_id+'');
+			   var d=selected_tr.data();
+			   d.loan_paid=d.loan_amount;
+			   d.loan_complete=1;
+			   remunerationTable.row(selected_tr).data(d).draw();
+		   }
+	   }
+	  });
+  }
  });
  
  $(document).on('click', '.freeze', function(){
