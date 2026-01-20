@@ -3119,12 +3119,13 @@ class AttendanceController extends Controller
 
         if ($department != '') {
             $sql .= " AND employees.emp_department = '$department'";
-        }else{  
-            if (!empty($userDepartmentIds)) {
-                $departmentIdsString = implode(",", $userDepartmentIds);
-                $sql .= " AND employees.emp_department IN ($departmentIdsString)";
-            }
         }
+        // else{  
+        //     if (!empty($userDepartmentIds)) {
+        //         $departmentIdsString = implode(",", $userDepartmentIds);
+        //         $sql .= " AND employees.emp_department IN ($departmentIdsString)";
+        //     }
+        // }
 
         if ($employee != '') {
             $sql .= " AND employees.emp_id = '$employee'";
@@ -3220,12 +3221,13 @@ class AttendanceController extends Controller
             // Department filter
             if ($department != '') {
                 $sql .= " AND employees.emp_department = '$department'";
-            } else {
-                if (!empty($userDepartmentIds)) {
-                    $departmentIdsString = implode(",", $userDepartmentIds);
-                    $sql .= " AND employees.emp_department IN ($departmentIdsString)";
-                }
-            }
+            } 
+            // else {
+            //     if (!empty($userDepartmentIds)) {
+            //         $departmentIdsString = implode(",", $userDepartmentIds);
+            //         $sql .= " AND employees.emp_department IN ($departmentIdsString)";
+            //     }
+            // }
 
             // Employee filter
             if ($employee != '') {
