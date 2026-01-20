@@ -850,8 +850,8 @@ class EmployeeController extends Controller
             $offset = ($page - 1) * $resultCount;
             $breeds = DB::table('employees')
                 ->where('employees.emp_name_with_initial', 'LIKE', '%' . $request->input('term') . '%')
-                ->where('emp_company', $companyId)
-                ->where('emp_location', $companyBranchId)
+                // ->where('emp_company', $companyId)
+                // ->where('emp_location', $companyBranchId)
                 ->when($request->input('department'), function ($query, $department) use ($companyId) {
                     return $query->where('emp_company', $companyId)
                                 ->where('emp_department', $department);
