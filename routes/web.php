@@ -931,6 +931,10 @@ Route::post('SpecialNote/{id}/getEmployees', 'SpecialNoteController@getEmployees
 Route::post('get_employee_department', 'SpecialNoteController@getEmployeeDepartment');
 /*-- End Special notes----*/
 
+/*-- loan report----*/
+Route::get('/loanReport', 'LoanReportController@loanReport')->name('loanReport'); 
+/*-- End loan report----*/
+
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
