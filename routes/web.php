@@ -933,6 +933,7 @@ Route::post('get_employee_department', 'SpecialNoteController@getEmployeeDepartm
 
 /*-- loan report----*/
 Route::get('/loanReport', 'LoanReportController@loanReport')->name('loanReport'); 
+Route::get('/loanInstallmentReport', 'LoanReportController@loanInstallmentReport')->name('loanInstallmentReport'); 
 /*-- End loan report----*/
 
 Route::get('/clear-cache', function() {

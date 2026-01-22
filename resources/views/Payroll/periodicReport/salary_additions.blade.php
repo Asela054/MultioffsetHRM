@@ -26,7 +26,7 @@
                                                 </span>
                                                 <div>
                                                     <button type="button" name="find_employee" id="find_employee" class="btn btn-success btn-sm">Search</button>
-                                                    <button type="submit" name="print_record" id="print_record" disabled="disabled" class="btn btn-secondary btn-sm btn-light">Download</button>
+                                                    <button type="submit" name="print_record" id="print_record" value="1" disabled="disabled" class="btn btn-secondary btn-sm btn-light">Download</button>
                                                 </div>
                                             </div>
                                             
@@ -293,7 +293,7 @@ $(document).ready(function(){
 		if(data.errors){
 			html = '<div class="alert alert-danger">';
 			for(var count = 0; count < data.errors.length; count++){
-			  html += '<p>' + data.errors[count] + '</p>';
+			html += '<p>' + data.errors[count] + '</p>';
 			}
 			html += '</div>';
 			$('#search_result').html(html);
@@ -306,7 +306,6 @@ $(document).ready(function(){
 			$("#payment_period_id").val(data.payment_period_id);
 			$("#payslip_process_type_id").val($("#payroll_process_type_id").find(":selected").val());
 			$("#lbl_payroll_name").html($("#payroll_process_type_id").find(":selected").text());
-			//$('#find_employee').prop('disabled', false);
 			
 			$("#rpt_payroll_id").val($("#payroll_process_type_id").find(":selected").val());
 			$("#rpt_location_id").val($("#location_filter_id").find(":selected").val());
@@ -315,8 +314,8 @@ $(document).ready(function(){
 			$("#rpt_period_id").val($("#period_filter_id").find(":selected").val());
 			$("#rpt_info").val(data.work_date_fr+" To "+data.work_date_to+" ("+$("#payroll_process_type_id").find(":selected").text()+")");
 			
-			//$("#print_record").prop('disabled', false);
-			//$("#print_record").removeClass('btn-light');
+			$("#print_record").prop('disabled', false);
+			$("#print_record").removeClass('btn-light').addClass('btn-primary');
 			
 			$('#formModal').modal('hide');
 		}
