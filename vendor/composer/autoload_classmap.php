@@ -111,6 +111,7 @@ return array(
     'App\\Http\\Controllers\\LeaveTypeController' => $baseDir . '/app/Http/Controllers/LeaveTypeController.php',
     'App\\Http\\Controllers\\LeavebalancereportController' => $baseDir . '/app/Http/Controllers/LeavebalancereportController.php',
     'App\\Http\\Controllers\\LeaverequestController' => $baseDir . '/app/Http/Controllers/LeaverequestController.php',
+    'App\\Http\\Controllers\\LoanReportController' => $baseDir . '/app/Http/Controllers/LoanReportController.php',
     'App\\Http\\Controllers\\LoginController' => $baseDir . '/app/Http/Controllers/LoginController.php',
     'App\\Http\\Controllers\\OccupationGroupController' => $baseDir . '/app/Http/Controllers/OccupationGroupController.php',
     'App\\Http\\Controllers\\OtherFacilityController' => $baseDir . '/app/Http/Controllers/OtherFacilityController.php',

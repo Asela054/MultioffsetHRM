@@ -161,30 +161,22 @@ class SalaryIncrementController extends Controller
 						$rate_feed = false; // set-player-ranking
 						$save_code = 0;
 						
-						$cust_opt = array('2000'=>array('2000', '2100'));
-						$cust_col = array('2000'=>2, '2100'=>3);
-						
 						$file = fopen($filename, "r");
 						
 						while ($batchsucc){
 							if(($planData = fgetcsv($file, 10000, ",")) !== FALSE){
 								$numcols = count($planData);
-								if(($numcols==3)||($numcols==4)){
+								if($numcols==3){
 									$remuneration_profile_id = NULL;
 									$payroll_profile_id = 0;
 									$remuneration_id = $request->input('remuneration_file');
 									$effective_date = $planData[1];
-									
-									$remunerationFilter = NULL;
-									$incrementCollection = collect([]);
-									$affectedRowCnt = false;
-									
 									$salaryIncrement=NULL;
 									
 									$act_invalidated=true;
 									
 									try{
-										$employeeInfo = Employee::where(['emp_id'=>$planData[0]])
+										$employeeInfo = Employee::where(['emp_etfno'=>$planData[0]])
 																->firstOrFail();
 																
 										$payrollInfo = PayrollProfile::where(['emp_id'=>$employeeInfo->id])
@@ -193,10 +185,8 @@ class SalaryIncrementController extends Controller
 										$payroll_profile_id = $payrollInfo->id;
 										
 										$incrementFilter = array('effective_date'=>$effective_date);
-										$incrementFilter['payroll_profile_id'] = $payroll_profile_id;
-										$remunerationFilter = array($remuneration_id);//NULL;
 										
-										if(!(($remuneration_id=='1000')||($remuneration_id=='2000'))){
+										if($remuneration_id!='0'){
 											$remunerationProfile = RemunerationProfile::where(['payroll_profile_id'=>$payroll_profile_id, 
 																							   'remuneration_id'=>$remuneration_id])
 																->firstOrFail();
@@ -204,71 +194,39 @@ class SalaryIncrementController extends Controller
 											$remuneration_profile_id = $remunerationProfile->id;
 											
 											$incrementFilter['remuneration_profile_id'] = $remuneration_profile_id;
-											
-											
 										}else{
-											//$incrementFilter['remuneration_id'] = $remuneration_id;
-											
-											if(isset($cust_opt[$remuneration_id])){
-												$remunerationFilter = $cust_opt[$remuneration_id];
-											}
+											$incrementFilter['remuneration_id'] = $remuneration_id;
+											$incrementFilter['payroll_profile_id'] = $payroll_profile_id;
 										}
 										
 										$act_invalidated=false; // ready-to-insert-or-update
 										
-										//$salaryIncrement=SalaryIncrement::where($incrementFilter)
-																		//->firstOrFail();
-										$salaryIncrements=SalaryIncrement::whereIn('remuneration_id', $remunerationFilter)
-																		->where($incrementFilter)
-																		->getOrFail(); // salary-increment-scope
-										//var_dump($remunerationFilter);echo '<br />';
-										//var_dump($incrementFilter);echo '<br />';
-										//var_dump($salaryIncrements);echo 'exist';die;
-										foreach($salaryIncrements as $salaryIncrement){
-											$salaryIncrement->updated_by=$request->user()->id;
-											//var_dump($salaryIncrement);echo '<br />';
-											$incrementCollection = $incrementCollection->push($salaryIncrement);//merge
-										}
+										$salaryIncrement=SalaryIncrement::where($incrementFilter)
+																		->firstOrFail();
+										$salaryIncrement->updated_by=$request->user()->id;
 										
 									}catch (ModelNotFoundException $e) {
-										//var_dump($remunerationFilter);echo '<br />';
-										//var_dump($incrementFilter);echo '<br />';
-										//echo 'new';die;
 										if($act_invalidated){
 											// Data not found. Here, you should make sure that the absence of $data won't break anything
 											//$importmsg = 'Something wrong'; // throw new \Exception('----');
 										}else{
-											foreach($remunerationFilter as $r){
-												$salaryIncrement=new SalaryIncrement;
-												$salaryIncrement->remuneration_id=$r;//$remuneration_id;
-												$salaryIncrement->remuneration_profile_id=$remuneration_profile_id; 
-												$salaryIncrement->created_by=$request->user()->id;
-												//var_dump($salaryIncrement);echo '<br />';
-												$incrementCollection = $incrementCollection->push($salaryIncrement);//concat
-											}
+											$salaryIncrement=new SalaryIncrement;
+											$salaryIncrement->created_by=$request->user()->id;
 										}
 									}
-									//var_dump($incrementCollection);die;
-									//if(!empty($salaryIncrement))
-									if(!empty($incrementCollection)){
+									
+									if(!empty($salaryIncrement)){
 										//
-										foreach($incrementCollection as $salaryIncrement){
-											$salaryIncrement->payroll_profile_id=$payroll_profile_id; 
-											//$salaryIncrement->remuneration_id=$remuneration_id; 
-											//$salaryIncrement->remuneration_profile_id=$remuneration_profile_id; 
-											$salaryIncrement->effective_date=$effective_date; 
-											$increment_value = isset($cust_col[$salaryIncrement->remuneration_id])?$planData[$cust_col[$salaryIncrement->remuneration_id]]:$planData[2];
-											$salaryIncrement->increment_value=$increment_value;
-											$salaryIncrement->increment_cancel=0;
-											//
-											
-											
-											$affectedRowCnt = $salaryIncrement->save(); // true-or-false;
-											
-											if(!$affectedRowCnt){
-												break;
-											}
-										}
+										$salaryIncrement->payroll_profile_id=$payroll_profile_id; 
+										$salaryIncrement->remuneration_id=$remuneration_id; 
+										$salaryIncrement->remuneration_profile_id=$remuneration_profile_id; 
+										$salaryIncrement->effective_date=$effective_date; 
+										$salaryIncrement->increment_value=$planData[2]; 
+										$salaryIncrement->increment_cancel=0;
+										//
+										
+										
+										$affectedRowCnt = $salaryIncrement->save(); // true-or-false;
 										
 										if($affectedRowCnt){
 											$totjobs++; // increase-job-count
