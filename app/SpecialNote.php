@@ -8,7 +8,7 @@ class SpecialNote extends Model
 {
     protected $table = 'special_notes';
     
-    protected $fillable = ['period_id', 'note', 'created_by', 'updated_by'];
+    protected $fillable = ['period_id', 'msglangtype', 'note', 'created_by', 'updated_by'];
 
     public function details()
     {

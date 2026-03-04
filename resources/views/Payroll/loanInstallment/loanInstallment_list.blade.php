@@ -393,7 +393,7 @@ $(document).ready(function(){
             $( rowNode ).find('td').eq(7).html( parseFloat(new_val).toFixed(2) );
             
             var d=selected_tr.data();
-            var loan_tot=parseFloat(d[4]);//console.log("1="+loan_tot+"--"+d[3]+"--"+d[2]+"--"+d[1]);
+            var loan_tot=parseFloat(d[5]);//console.log("1="+loan_tot+"--"+d[3]+"--"+d[2]+"--"+d[1]);
             var loan_settle=parseFloat($( rowNode ).find('td').eq(7).html());//console.log("2="+loan_settle);
             var loan_bal=loan_tot-loan_settle;//console.log("3="+loan_bal);
             $( rowNode ).find('td').eq(8).html( parseFloat(loan_bal).toFixed(2) );

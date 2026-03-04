@@ -1763,14 +1763,14 @@ class EmployeePayslipController extends Controller
 			$emp_increments_array[$i->payroll_profile_id][] = array('name'=>$i->remuneration_name, 'value'=>$i->increment_value);
 		}
 		
-		$sqlempnotes = "select payroll_profiles.id as payroll_profile_id, special_notes.note from special_notes inner join special_note_details on special_notes.id=special_note_details.note_id inner join payroll_profiles on special_note_details.emp_id=payroll_profiles.emp_id where special_notes.period_id=? order by special_notes.id";
+		$sqlempnotes = "select payroll_profiles.id as payroll_profile_id, special_notes.note, special_notes.msglangtype from special_notes inner join special_note_details on special_notes.id=special_note_details.note_id inner join payroll_profiles on special_note_details.emp_id=payroll_profiles.emp_id where special_notes.period_id=? order by special_notes.id";
 		
 		$special_empnotes = DB::select($sqlempnotes, [$payment_period_id]);
 		
 		$special_empnotes_array = array();
 		
 		foreach($special_empnotes as $p){
-			$special_empnotes_array[$p->payroll_profile_id][] = array('note'=>$p->note);
+			$special_empnotes_array[$p->payroll_profile_id][] = array('note'=>$p->note, 'msglangtype'=>$p->msglangtype);
 		}
 		// print_r($special_empnotes_array);
 		// die;
@@ -1866,7 +1866,7 @@ class EmployeePayslipController extends Controller
 
 
 		$html = view('Payroll.payslipProcess.SalarySheet_pdf', compact(
-			'emp_array', 'special_empnotes_array', 'more_info', 'sect_name', 'paymonth_name',
+			'emp_array', 'emp_increments_array', 'special_empnotes_array', 'more_info', 'sect_name', 'paymonth_name',
 			'company_name', 'company_addr'
 		))->render();
 		// Force UTF-8 encoding

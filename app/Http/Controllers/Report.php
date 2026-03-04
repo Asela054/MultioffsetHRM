@@ -453,6 +453,7 @@ class Report extends Controller
             $query3 .= 'where (employees.is_resigned = 0 OR (employees.is_resigned = 1 AND employees.resignation_date >= "'.$to_date.'")) ';
 
             $query3.= 'AND employees.deleted = 0 ';
+            $query3.= 'AND employees.status = 1 ';
             $query3.= 'AND departments.id = "'.$department_->id .'" ';
 
             if($employee != ''){
@@ -471,6 +472,28 @@ class Report extends Controller
                 $period = CarbonPeriod::create($from_date, $to_date);
                 foreach ($period as $date) {
                     $f_date = $date->format('Y-m-d');
+                    $shift_on = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$record->onduty_time);
+                    $shift_off = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$record->offduty_time);
+
+                    $seven_am = Carbon::parse('07:00');
+                    $seven_am_time = $seven_am->format('H:i');
+                    $today_seven = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$seven_am_time);
+
+                    $eight_am = Carbon::parse('08:00');
+                    $eight_am_time = $eight_am->format('H:i');
+                    $today_eight = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$eight_am_time);
+
+                    $twelve_pm = Carbon::parse('12:00');
+                    $twelve_pm_time = $twelve_pm->format('H:i');
+                    $today_twelve = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$twelve_pm_time);
+
+                    $one_pm = Carbon::parse('13:00');
+                    $one_pm_time = $one_pm->format('H:i');
+                    $today_one = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$one_pm_time);
+
+                    $six_pm = Carbon::parse('18:00');
+                    $six_pm_time = $six_pm->format('H:i');
+                    $today_six = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$six_pm_time);
 
                     $sql = " SELECT *, Min(attendances.timestamp) as firsttimestamp, Max(attendances.timestamp) as lasttimestamp FROM attendances WHERE uid = '".$record->emp_id."' AND deleted_at IS NULL ";
                     $sql.= 'AND date LIKE "'.$f_date.'%" ';
@@ -481,13 +504,48 @@ class Report extends Controller
                     $attendances = DB::select($sql);
 
                     if(!empty($attendances)) {
-                        $to = \Carbon\Carbon::parse($attendances[0]->lasttimestamp);
-                        $from = \Carbon\Carbon::parse($attendances[0]->firsttimestamp);
+                        $last_time = \Carbon\Carbon::parse($attendances[0]->lasttimestamp);
+                        $first_time = \Carbon\Carbon::parse($attendances[0]->firsttimestamp);
+                        // $to = \Carbon\Carbon::parse($attendances[0]->lasttimestamp);
+                        // $from = \Carbon\Carbon::parse($attendances[0]->firsttimestamp);
+
+                        $from = '';
+                        if($first_time <= $shift_on) {
+                            $from = $today_eight;
+                        }
+
+                        if($first_time > $shift_on) {
+                            $from = $first_time;
+                        }
+
+                        if($first_time >=$today_twelve && $first_time < $today_one ){
+                            $from = $today_one;
+                        }
+
+                        $to = '';
+                        if($last_time > $shift_off && $last_time < $today_six) {
+                            $to = $shift_off;
+                        }else{
+                            $to = $last_time;
+                        }
+
+                        $to = Carbon::parse($to);
+                        $from = Carbon::parse($from); 
+
+                        if($first_time >=$today_twelve && $first_time < $today_one ){
+                        }else{
+                            $to->subHours(1);
+                        }
 
                         //diff in minutes and convert to hours
                         $diff_in_minutes = $to->diffInMinutes($from);
                         $diff_in_hours = $diff_in_minutes / 60;
                         //two decimal places
+
+                        if($first_time >=$today_twelve && $first_time < $today_one ){
+                        }else{
+                            $to->addHours(1);
+                        }
 
                         $diff_in_hours = number_format((float)$diff_in_hours, 2, '.', '');
                         $workhours = $diff_in_hours;
@@ -501,6 +559,22 @@ class Report extends Controller
                         ->first();
 
                         $dayOfWeek = Carbon::parse($rec_date)->dayOfWeek;
+
+                        $otdatalist = DB::table('ot_approved')
+                            // ->select(
+                            //     DB::raw('SUM(hours) as total_hours'), 
+                            //     DB::raw('SUM(double_hours) as total_double_hours')
+                            // )
+                            ->select(
+                                DB::raw("SUM(CASE WHEN TIME(`from`) < '08:00:00' THEN hours ELSE 0 END) as early_ot_hours"),
+                                DB::raw("SUM(CASE WHEN TIME(`from`) >= '17:00:00' THEN hours ELSE 0 END) as evening_ot_hours"),
+                                DB::raw('SUM(double_hours) as total_double_hours'),
+                                DB::raw('SUM(hours) as total_normal_hours')
+                            )
+                            ->where('date', $date->format('Y-m-d')) 
+                            ->where('approved', 1)
+                            ->where('emp_id', $record->emp_id) 
+                            ->first();
                         
                         // if date is a holiday or saturday or sunday all ot is double ot
                         // if (!empty($holiday_check) || $dayOfWeek == Carbon::SATURDAY || $dayOfWeek == Carbon::SUNDAY){
@@ -522,77 +596,77 @@ class Report extends Controller
                         // else{
 
                                 // Define start and end times for regular working hours
-                            $startOfEarlyOt = Carbon::parse($attendances[0]->date)->setTime(7, 0); // Early OT start - 7:00 AM
-                            $startOfWorkday = Carbon::parse($attendances[0]->date)->setTime(8, 0);// shift end time - 8:00 PM
-                            $endOfWorkday = Carbon::parse($attendances[0]->date)->setTime(17, 0); // shift end time - 5:00 PM
-                            $startOfAfternoonOt = Carbon::parse($attendances[0]->date)->setTime(18, 0); // OT start - 6:00 PM
+                            // $startOfEarlyOt = Carbon::parse($attendances[0]->date)->setTime(7, 0); // Early OT start - 7:00 AM
+                            // $startOfWorkday = Carbon::parse($attendances[0]->date)->setTime(8, 0);// shift end time - 8:00 PM
+                            // $endOfWorkday = Carbon::parse($attendances[0]->date)->setTime(17, 0); // shift end time - 5:00 PM
+                            // $startOfAfternoonOt = Carbon::parse($attendances[0]->date)->setTime(18, 0); // OT start - 6:00 PM
 
 
-                            // Morning OT Calculation
-                            $earlyOtMinutes = 0;
-                            $earlyOtHours = 0;
-                            $afternoonOtHours = 0;
-                            // dd($otfrom, $record->onduty_time);
-                            if($record->job_category_id!=6 && (!empty($holiday_check) || $dayOfWeek == Carbon::SATURDAY || $dayOfWeek == Carbon::SUNDAY)){
-                                $ot_hours = (new \App\Attendance)->get_ot_hours_by_date($record->emp_id, $to, $from, $date, $record->onduty_time, $record->offduty_time, $record->dept_id);
-                                if(!empty($ot_hours['ot_breakdown'])){
-                                    if($ot_hours['ot_breakdown'][0]['hours']>0){
-                                        $afternoonOtHours = $ot_hours['ot_breakdown'][0]['hours'];
-                                    }
-                                    else if($ot_hours['ot_breakdown'][0]['double_hours']>0){
-                                        $afternoonOtHours = $ot_hours['ot_breakdown'][0]['double_hours'];
-                                    }
-                                }
-                            }
-                            else{
-                                if(!empty($holiday_check) || $dayOfWeek == Carbon::SUNDAY){
-                                    $ot_hours = (new \App\Attendance)->get_ot_hours_by_date($record->emp_id, $to, $from, $date, $record->onduty_time, $record->offduty_time, $record->dept_id);
-                                    if(!empty($ot_hours['ot_breakdown'])){
-                                        if($ot_hours['ot_breakdown'][0]['hours']>0){
-                                            $afternoonOtHours = $ot_hours['ot_breakdown'][0]['hours'];
-                                        }
-                                        else if($ot_hours['ot_breakdown'][0]['double_hours']>0){
-                                            $afternoonOtHours = $ot_hours['ot_breakdown'][0]['double_hours'];
-                                        }
-                                    }
-                                }
-                                else{
-                                    if($startOfEarlyOt>=$from){
-                                        $ot_hours = (new \App\Attendance)->get_ot_hours_by_date($record->emp_id, $to, $from, $date, $record->onduty_time, $record->offduty_time, $record->dept_id);
-                                        if(!empty($ot_hours['ot_breakdown'])):
-                                            $earlyOtHours = $ot_hours['ot_breakdown'][0]['hours'];
-                                        endif;
-                                    }
+                            // // Morning OT Calculation
+                            // $earlyOtMinutes = 0;
+                            // $earlyOtHours = 0;
+                            // $afternoonOtHours = 0;
+                            // // dd($otfrom, $record->onduty_time);
+                            // if($record->job_category_id!=6 && (!empty($holiday_check) || $dayOfWeek == Carbon::SATURDAY || $dayOfWeek == Carbon::SUNDAY)){
+                            //     $ot_hours = (new \App\Attendance)->get_ot_hours_by_date($record->emp_id, $to, $from, $date, $record->onduty_time, $record->offduty_time, $record->dept_id);
+                            //     if(!empty($ot_hours['ot_breakdown'])){
+                            //         if($ot_hours['ot_breakdown'][0]['hours']>0){
+                            //             $afternoonOtHours = $ot_hours['ot_breakdown'][0]['hours'];
+                            //         }
+                            //         else if($ot_hours['ot_breakdown'][0]['double_hours']>0){
+                            //             $afternoonOtHours = $ot_hours['ot_breakdown'][0]['double_hours'];
+                            //         }
+                            //     }
+                            // }
+                            // else{
+                            //     if(!empty($holiday_check) || $dayOfWeek == Carbon::SUNDAY){
+                            //         $ot_hours = (new \App\Attendance)->get_ot_hours_by_date($record->emp_id, $to, $from, $date, $record->onduty_time, $record->offduty_time, $record->dept_id);
+                            //         if(!empty($ot_hours['ot_breakdown'])){
+                            //             if($ot_hours['ot_breakdown'][0]['hours']>0){
+                            //                 $afternoonOtHours = $ot_hours['ot_breakdown'][0]['hours'];
+                            //             }
+                            //             else if($ot_hours['ot_breakdown'][0]['double_hours']>0){
+                            //                 $afternoonOtHours = $ot_hours['ot_breakdown'][0]['double_hours'];
+                            //             }
+                            //         }
+                            //     }
+                            //     else{
+                            //         if($startOfEarlyOt>=$from){
+                            //             $ot_hours = (new \App\Attendance)->get_ot_hours_by_date($record->emp_id, $to, $from, $date, $record->onduty_time, $record->offduty_time, $record->dept_id);
+                            //             if(!empty($ot_hours['ot_breakdown'])):
+                            //                 $earlyOtHours = $ot_hours['ot_breakdown'][0]['hours'];
+                            //             endif;
+                            //         }
 
-                                    if($startOfAfternoonOt<=$to){
-                                        $ot_hours = (new \App\Attendance)->get_ot_hours_by_date($record->emp_id, $to, $from, $date, $record->onduty_time, $record->offduty_time, $record->dept_id);
-                                        if(count($ot_hours['ot_breakdown']) > 1):
-                                            $afternoonOtHours = $ot_hours['ot_breakdown'][1]['hours'];
-                                        else:
-                                            $afternoonOtHours = $ot_hours['ot_breakdown'][0]['hours'];
-                                        endif;
-                                    }
-                                }
-                            }
+                            //         if($startOfAfternoonOt<=$to){
+                            //             $ot_hours = (new \App\Attendance)->get_ot_hours_by_date($record->emp_id, $to, $from, $date, $record->onduty_time, $record->offduty_time, $record->dept_id);
+                            //             if(count($ot_hours['ot_breakdown']) > 1):
+                            //                 $afternoonOtHours = $ot_hours['ot_breakdown'][1]['hours'];
+                            //             else:
+                            //                 $afternoonOtHours = $ot_hours['ot_breakdown'][0]['hours'];
+                            //             endif;
+                            //         }
+                            //     }
+                            // }
                          
-                            // $earlyOtHours = OtApproved::where('emp_id', $record->emp_id)
-                            // ->where('date', $f_date)
-                            // ->whereTime('from', '<', '08:00:00')
-                            // ->sum('hours'); // Returns 0 if no records match
+                            // // $earlyOtHours = OtApproved::where('emp_id', $record->emp_id)
+                            // // ->where('date', $f_date)
+                            // // ->whereTime('from', '<', '08:00:00')
+                            // // ->sum('hours'); // Returns 0 if no records match
                            
                             
-                            // $afternoonOtHours = OtApproved::where('emp_id', $record->emp_id)
-                            // ->where('date', $f_date)
-                            // ->whereTime('from', '>=', '17:00:00')
-                            // ->sum('hours');
+                            // // $afternoonOtHours = OtApproved::where('emp_id', $record->emp_id)
+                            // // ->where('date', $f_date)
+                            // // ->whereTime('from', '>=', '17:00:00')
+                            // // ->sum('hours');
 
-                            // Calculate total OT (sum of early OT and afternoon OT)
-                            $totalOtHours = number_format($earlyOtHours + $afternoonOtHours, 1, '.', '');
+                            // // Calculate total OT (sum of early OT and afternoon OT)
+                            // $totalOtHours = number_format($earlyOtHours + $afternoonOtHours, 1, '.', '');
 
-                            // If total OT is less than 30 minutes, it should be considered as no OT (set to 0.0)
-                            if ($totalOtHours == '0.0') {
-                                $totalOtHours = '0.0';
-                            }
+                            // // If total OT is less than 30 minutes, it should be considered as no OT (set to 0.0)
+                            // if ($totalOtHours == '0.0') {
+                            //     $totalOtHours = '0.0';
+                            // }
 
                         // }
 
@@ -623,9 +697,23 @@ class Report extends Controller
                         $objattendance->lasttimestamp=$last_time_stamp;
                         $objattendance->workhours=$workhours;
                         $objattendance->location=$record->b_location;
-                        $objattendance->earlyot=$earlyOtHours;
-                        $objattendance->eveningot=$afternoonOtHours;
-                        $objattendance->totalot=$totalOtHours;
+                        if(empty($otdatalist)){
+                            $objattendance->earlyot=0;
+                            $objattendance->eveningot=0;
+                            $objattendance->totalot=0;
+                        }
+                        else{
+                            if (!empty($holiday_check) || $dayOfWeek == Carbon::SATURDAY || $dayOfWeek == Carbon::SUNDAY){
+                                $objattendance->earlyot=0;
+                                $objattendance->eveningot=$otdatalist->total_normal_hours + $otdatalist->total_double_hours;
+                                $objattendance->totalot=$otdatalist->total_normal_hours + $otdatalist->total_double_hours;
+                            }
+                            else{
+                                $objattendance->earlyot=$otdatalist->early_ot_hours;
+                                $objattendance->eveningot=$otdatalist->evening_ot_hours + $otdatalist->total_double_hours;
+                                $objattendance->totalot=$otdatalist->early_ot_hours + $otdatalist->evening_ot_hours + $otdatalist->total_double_hours;
+                            }
+                        }
 
                         array_push($atte_arr, $objattendance);
                     }
@@ -704,6 +792,9 @@ class Report extends Controller
         $html .= '<th>Check Out Time</th>';
         $html .= '<th>Work Hours</th>';
         $html .= '<th>Location</th>';
+        $html .= '<th>Early OT</th>';
+        $html .= '<th>OT</th>';
+        $html .= '<th>Total OT</th>';
        
         $html .= '</tr>';
         $html .= '</thead>';
@@ -716,7 +807,7 @@ class Report extends Controller
                 $department_id = $datalist->departmentID;
                 $department_name = Department::query()->where('id', $department_id)->first()->name;
                 $html .= '<tr>';
-                $html .= '<td colspan="8" style="background-color: #d5dbec;"> <strong> '.$department_name.'</strong> </td>';
+                $html .= '<td colspan="11" style="background-color: #d5dbec;"> <strong> '.$department_name.'</strong> </td>';
                 $html .= '</tr>';
             }
 
@@ -736,7 +827,7 @@ class Report extends Controller
                     $tr = '<tr style="background-color: #ffeaea">';
                 }
                 
-                else if($emp_data->workhours != '-' && $emp_data->timestamp < $emp_data->date . ' ' . $late_times->time_from && $emp_data->workhours < 9 ){
+                else if($emp_data->workhours != '-' && $emp_data->timestamp < $emp_data->date . ' ' . $late_times->time_from && $emp_data->workhours < 8 ){
                     $tr = '<tr style="background-color:rgb(247, 200, 120)">';
                 }
 
@@ -749,6 +840,9 @@ class Report extends Controller
                 $html .= '<td>'.$emp_data->lasttimestamp.'</td>';
                 $html .= '<td>'.$emp_data->workhours.'</td>';
                 $html .= '<td>'.$emp_data->location.'</td>';
+                $html .= '<td>'.$emp_data->earlyot.'</td>';
+                $html .= '<td>'.$emp_data->eveningot.'</td>';
+                $html .= '<td>'.$emp_data->totalot.'</td>';
                 $html .= '</tr>';
                 $department_id = $emp_data->dept_id;
 
