@@ -59,6 +59,9 @@
       @can('employee-loan-report')
       <li><a class="dropdown-item" href="{{ route('loanReport')}}">Employee Loans</a></li>
       @endcan
+      @can('employee-loan-report')
+      <li><a class="dropdown-item" href="{{ route('loanInstallmentReport')}}">Employee Loans Installments</a></li>
+      @endcan
       @can('employee-resign-report')
       <li><a class="dropdown-item" id="resignation_report_link" href="{{ route('employee_resign_report') }}">Employee Resign Report</a></li>
       @endcan
