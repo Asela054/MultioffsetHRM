@@ -523,7 +523,8 @@ class Report extends Controller
                         }
 
                         $to = '';
-                        if($last_time > $shift_off && $last_time < $today_six) {
+                        // if($last_time > $shift_off && $last_time < $today_six) {
+                        if($last_time > $shift_off) {
                             $to = $shift_off;
                         }else{
                             $to = $last_time;
@@ -790,8 +791,8 @@ class Report extends Controller
         $html .= '<th>Date</th>';
         $html .= '<th>Check In Time</th>';
         $html .= '<th>Check Out Time</th>';
-        $html .= '<th>Work Hours</th>';
-        $html .= '<th>Location</th>';
+        // $html .= '<th>Work Hours</th>';
+        // $html .= '<th>Location</th>';
         $html .= '<th>Early OT</th>';
         $html .= '<th>OT</th>';
         $html .= '<th>Total OT</th>';
@@ -838,8 +839,8 @@ class Report extends Controller
                 $html .= '<td>'.$emp_data->date.'</td>';
                 $html .= '<td>'.$emp_data->timestamp.'</td>';
                 $html .= '<td>'.$emp_data->lasttimestamp.'</td>';
-                $html .= '<td>'.$emp_data->workhours.'</td>';
-                $html .= '<td>'.$emp_data->location.'</td>';
+                // $html .= '<td>'.$emp_data->workhours.'</td>';
+                // $html .= '<td>'.$emp_data->location.'</td>';
                 $html .= '<td>'.$emp_data->earlyot.'</td>';
                 $html .= '<td>'.$emp_data->eveningot.'</td>';
                 $html .= '<td>'.$emp_data->totalot.'</td>';
