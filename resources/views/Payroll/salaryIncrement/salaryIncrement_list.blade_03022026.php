@@ -38,9 +38,7 @@
                                                     <div class="col">
                                                         <select name="remuneration_filter" id="remuneration_filter" class="form-control" >
                                                             <option value="" selected="selected">Select</option>
-                                                            <option value="2000">Normal Inc.</option>
-                                                            <option value="2100">Special Inc. </option>
-                                                            <option value="1000">Basic Salary</option>
+                                                            <option value="0">Basic Salary</option>
                                                             @foreach($remuneration as $payment)
                                                             
                                                             <option value="{{$payment->id}}">{{$payment->remuneration_name}}</option>
@@ -146,9 +144,7 @@
                                            </label>
                                            <div class="col">
                                              <select name="remuneration_file" id="remuneration_file" class="form-control" >
-                                                <!--option value="0" selected="selected">Basic Salary</option-->
-                                                <option value="2000" selected="selected">Normal/Special Inc.</option>
-                                                <option value="1000">Basic Salary</option>
+                                                <option value="0" selected="selected">Basic Salary</option>
                                                 @foreach($remuneration as $payment)
                                                 
                                                 <option value="{{$payment->id}}">{{$payment->remuneration_name}}</option>

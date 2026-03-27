@@ -188,7 +188,7 @@ class Attendance extends Model
                     }
                 }
 
-            } elseif ($diff >= 3) {
+            } elseif ($diff >= 1) {
 
                 if (in_array($day ,$work_days_arr)){
                     if(!$is_holiday) {

@@ -328,7 +328,7 @@
                     @if(isset($special_empnotes_array[$row['pay_profile']]) && is_array($special_empnotes_array[$row['pay_profile']]))
                         @foreach($special_empnotes_array[$row['pay_profile']] as $note)
                             @if(isset($note['note']))
-                                <div class="sinhala-text">
+                                <div @if ($note['msglangtype']==1) class="sinhala-text" @endif>
                                     {{ $note['note'] }}
                                 </div>
                             @endif

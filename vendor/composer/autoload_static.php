@@ -556,6 +556,7 @@ class ComposerStaticIniteb398d7792a091c0df79fcb8832a42ce
         'App\\Http\\Controllers\\LeaveTypeController' => __DIR__ . '/../..' . '/app/Http/Controllers/LeaveTypeController.php',
         'App\\Http\\Controllers\\LeavebalancereportController' => __DIR__ . '/../..' . '/app/Http/Controllers/LeavebalancereportController.php',
         'App\\Http\\Controllers\\LeaverequestController' => __DIR__ . '/../..' . '/app/Http/Controllers/LeaverequestController.php',
+        'App\\Http\\Controllers\\LoanReportController' => __DIR__ . '/../..' . '/app/Http/Controllers/LoanReportController.php',
         'App\\Http\\Controllers\\LoginController' => __DIR__ . '/../..' . '/app/Http/Controllers/LoginController.php',
         'App\\Http\\Controllers\\OccupationGroupController' => __DIR__ . '/../..' . '/app/Http/Controllers/OccupationGroupController.php',
         'App\\Http\\Controllers\\OtherFacilityController' => __DIR__ . '/../..' . '/app/Http/Controllers/OtherFacilityController.php',

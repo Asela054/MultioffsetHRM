@@ -107,6 +107,17 @@
                                     </select>
                                 </div>
                                 <div class="form-group mb-1">
+                                    <label class="small font-weight-bold text-dark">Special Msg Content*</label>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" id="msglangtype1" name="msglangtype" class="custom-control-input" value="1">
+                                        <label class="custom-control-label" for="msglangtype1">Sinhala</label>
+                                    </div>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" id="msglangtype2" name="msglangtype" class="custom-control-input" value="0">
+                                        <label class="custom-control-label" for="msglangtype2">English</label>
+                                    </div>
+                                </div>
+                                <div class="form-group mb-1">
                                     <label class="small font-weight-bold text-dark">Note*</label>
                                     <textarea name="note" id="note" class="form-control form-control-sm" rows="3" required></textarea>
                                 </div>
@@ -308,6 +319,7 @@ $(document).ready(function(){
             success: function (data) {
                 $('#period_filter_id').val(data.result.period_id);
                 $('#note').val(data.result.note);
+                $('input[name=msglangtype][value=' + data.result.msglangtype + ']').prop('checked', true);
                 
                 $('#company_field').hide();
                 

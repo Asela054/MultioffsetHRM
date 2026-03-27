@@ -54,6 +54,7 @@ class SpecialNoteController extends Controller
 
         $specialNote = new SpecialNote;
         $specialNote->period_id = $request->input('period_filter_id');
+        $specialNote->msglangtype = $request->input('msglangtype');
         $specialNote->note = $request->input('note');
         $specialNote->created_by = auth()->id();
         $specialNote->save();
@@ -121,6 +122,7 @@ class SpecialNoteController extends Controller
 
         $specialNote = SpecialNote::findOrFail($request->hidden_id);
         $specialNote->period_id = $request->input('period_filter_id');
+        $specialNote->msglangtype = $request->input('msglangtype');
         $specialNote->note = $request->input('note');
         $specialNote->updated_by = auth()->id();
         $specialNote->save();

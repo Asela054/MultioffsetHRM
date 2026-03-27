@@ -41,7 +41,7 @@ class HomeController extends Controller
         // $departments = $user->departments;
 
          $today = Carbon::now()->format('Y-m-d');
-         $empcount = DB::table('employees')->where('deleted', 0)->where('is_resigned', 0)->where('emp_company', $companyId)->count();
+         $empcount = DB::table('employees')->where('deleted', 0)->where('status', 1)->where('is_resigned', 0)->where('emp_company', $companyId)->count();
         //  $todaycount = Attendance::where('date','2023-09-18')->groupBy('date','emp_id')->count();
 
         // today attendance count
@@ -427,6 +427,7 @@ class HomeController extends Controller
         ->select('employees.emp_id', 'employees.emp_name_with_initial','employees.emp_department', 'employees.calling_name' ) 
         ->where('deleted', 0)
         ->where('is_resigned', 0)
+        ->where('status', 1)
         ->where('emp_company', $companyId)
         ->get();
 
@@ -721,6 +722,7 @@ class HomeController extends Controller
         $employeedata= DB::table('employees')
         ->select('employees.emp_id', 'employees.emp_name_with_initial','employees.emp_department', 'employees.calling_name' ) 
         ->where('deleted', 0)
+        ->where('status', 1)
         ->where('is_resigned', 0)
         ->where('emp_company', $companyId)
         ->get();
