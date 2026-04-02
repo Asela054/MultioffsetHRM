@@ -2,6 +2,7 @@
 <div class="row nowrap" style="padding-top: 5px;padding-bottom: 5px;">
 
   @if(auth()->user()->can('attendance-report')
+      || auth()->user()->can('attendance-report-time')
       || auth()->user()->can('late-attendance-report')
       || auth()->user()->can('leave-report')
       || auth()->user()->can('leave-balance-report')
@@ -15,6 +16,9 @@
           
             @can('attendance-report')
             <li><a class="dropdown-item" href="{{ route('attendetreportbyemployee')}}">Attendance Report</a></li>
+            @endcan
+            @can('attendance-report-time')
+            <li><a class="dropdown-item" href="{{ route('attendetreportbyemployeetime')}}">Attendance Report Time</a></li>
             @endcan
             @can('late-attendance-report')
             <li><a class="dropdown-item" href="{{ route('LateAttendance')}}">Late Attendance</a></li>
