@@ -365,11 +365,14 @@ Route::get('attendentreportbydate', function () {
 });
 Route::get('attendetreportbyemployee', 'Report@attendentbyemployee')->name('attendetreportbyemployee'); 
 Route::get('attendance_report_list', 'Report@attendance_report_list')->name('attendance_report_list');
+Route::get('attendetreportbyemployeetime', 'Report@attendetbyemployeetime')->name('attendetreportbyemployeetime');
 
 //post get_attendance_by_employee_data
 Route::post('get_attendance_by_employee_data', 'Report@get_attendance_by_employee_data')->name('get_attendance_by_employee_data');
+Route::post('get_attendance_by_employee_data_time', 'Report@get_attendance_by_employee_data_time')->name('get_attendance_by_employee_data_time');
 //get_attendance_by_employee_data_excel
 Route::post('get_attendance_by_employee_data_excel', 'Report@get_attendance_by_employee_data_excel')->name('get_attendance_by_employee_data_excel');
+Route::post('get_attendance_by_employee_data_excel_time', 'Report@get_attendance_by_employee_data_excel_time')->name('get_attendance_by_employee_data_excel_time');
 
 
 
