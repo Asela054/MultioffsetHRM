@@ -32,6 +32,7 @@ public function generatedailyattendacereport(Request $request)
         ->select('emp_id', 'emp_name_with_initial as emp_name')
         ->where('emp_department', $department)
         ->where('deleted', 0)
+        ->whereDate('emp_join_date', '<=', $from_date) 
         ->orderBy('emp_id')
         ->get();
 
