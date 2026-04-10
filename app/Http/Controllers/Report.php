@@ -234,6 +234,15 @@ class Report extends Controller
         return view('Report.attendentbyemployee');
     }
 
+    public function attendetbyemployeetime(Request $request)
+    {
+        $permission = Auth::user()->can('attendance-report');
+        if (!$permission) {
+           abort(403);
+        }
+        return view('Report.attendetbyemployeetime');
+    }
+
     public function attendance_report_list(Request $request)
     {
         $permission = Auth::user()->can('attendance-report');
@@ -710,9 +719,27 @@ class Report extends Controller
                                 $objattendance->totalot=$otdatalist->total_normal_hours + $otdatalist->total_double_hours;
                             }
                             else{
-                                $objattendance->earlyot=$otdatalist->early_ot_hours;
-                                $objattendance->eveningot=$otdatalist->evening_ot_hours + $otdatalist->total_double_hours;
-                                $objattendance->totalot=$otdatalist->early_ot_hours + $otdatalist->evening_ot_hours + $otdatalist->total_double_hours;
+                                if(!empty($otdatalist->early_ot_hours)){
+                                    $objattendance->earlyot=$otdatalist->early_ot_hours;
+                                }
+                                else{
+                                    $objattendance->earlyot=0;
+                                }
+
+                                if(!empty($otdatalist->evening_ot_hours) || !empty($otdatalist->total_double_hours)){
+                                    $objattendance->eveningot=$otdatalist->evening_ot_hours + $otdatalist->total_double_hours;
+                                }
+                                else{
+                                    $objattendance->eveningot=0;
+                                }
+                                // $objattendance->earlyot=$otdatalist->early_ot_hours;
+                                // $objattendance->eveningot=$otdatalist->evening_ot_hours + $otdatalist->total_double_hours;
+                                if(!empty($otdatalist->early_ot_hours) || !empty($otdatalist->evening_ot_hours) || !empty($otdatalist->total_double_hours)){
+                                    $objattendance->totalot=$otdatalist->early_ot_hours + $otdatalist->evening_ot_hours + $otdatalist->total_double_hours;
+                                }
+                                else{
+                                    $objattendance->totalot=0;
+                                }
                             }
                         }
 
@@ -741,6 +768,474 @@ class Report extends Controller
                         array_push($atte_arr, $objattendance);
                         $not_att_count++;
                     }
+                }
+            }
+
+            $obj=new stdClass();
+            $obj->departmentID=$department_->id;
+            $obj->attendanceinfo=$atte_arr;
+
+            array_push($data_arr, $obj);
+
+        }
+
+
+        $department_id = 0;
+
+        $html = '<div class="row mb-2"> 
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-sm btn-outline-primary excel-btn"> Download Excel 
+                        </button> 
+                         <button type="button" class="btn btn-sm btn-outline-danger pdf-btn" onclick="generatePDF();"> Download PDF 
+                        </button> 
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="mr-2">
+                            <badge class="badge badge-pill " style="border: solid 1px black"> &nbsp; </badge> : Present
+                        </label>
+                        
+                        <label class="mr-2">
+                            <badge class="badge badge-pill " style="background-color: #ffeaea"> &nbsp; </badge> : Absent
+                        </label>
+                        
+                        <label class="mr-2">
+                            <badge class="badge badge-pill " style="background-color: rgb(247, 200, 200)"> &nbsp; </badge> : Incomplete
+                        </label>
+                         <label class="mr-2">
+                            <badge class="badge badge-pill " style="background-color: rgb(247, 200, 150)"> &nbsp; </badge> : Half Day
+                        </label>
+                         
+                    </div>
+                     
+                </div>';
+        $html .= '<table class="table table-sm table-hover" id="attendance_report_table">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th>ETF No</th>';
+        $html .= '<th>Name</th>';
+        $html .= '<th>Department</th>';
+        $html .= '<th>Date</th>';
+        $html .= '<th>Check In Time</th>';
+        $html .= '<th>Check Out Time</th>';
+        // $html .= '<th>Work Hours</th>';
+        // $html .= '<th>Location</th>';
+        $html .= '<th>Early OT</th>';
+        $html .= '<th>OT</th>';
+        $html .= '<th>Total OT</th>';
+       
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $html .= '<tbody>';
+        // // print_r($data_arr);
+        foreach ($data_arr as $datalist) {
+            // print_r($datalist->departmentID);
+            //if department_id is not equal to the previous department_id
+            if($department_id != $datalist->departmentID){
+                $department_id = $datalist->departmentID;
+                $department_name = Department::query()->where('id', $department_id)->first()->name;
+                $html .= '<tr>';
+                $html .= '<td colspan="11" style="background-color: #d5dbec;"> <strong> '.$department_name.'</strong> </td>';
+                $html .= '</tr>';
+            }
+
+            foreach ($datalist->attendanceinfo as $emp_data) {
+                // print_r($emp_data);
+                // [emp_id] => 3 [emp_name_with_initial] => W.P.S.D. Perera [emp_etfno] => 03 [b_location] => Ansen Gas - Negombo [dept_name] => Office Staff [dept_id] => 22 [date] => 2022-08-03 [timestamp] => - [lasttimestamp] => - [workhours] => - [location] => Ansen Gas - Negombo
+                $tr = '<tr>';
+                // if($emp_data->workhours == '00:00:00'){
+                //     $tr = '<tr style="background-color: rgb(247, 200, 200)">';
+                // }
+                $late_times = DB::table('late_types')->where('id', 2)->first();
+                if($emp_data->lasttimestamp == '' || $emp_data->timestamp ==''){
+                    $tr = '<tr style="background-color: rgb(247, 200, 200)">';
+                }
+
+                else if($emp_data->workhours == '-' || ($emp_data->lasttimestamp == '' || $emp_data->timestamp =='')){
+                    $tr = '<tr style="background-color: #ffeaea">';
+                }
+                
+                else if($emp_data->workhours != '-' && $emp_data->timestamp < $emp_data->date . ' ' . $late_times->time_from && $emp_data->workhours < 8 ){
+                    $tr = '<tr style="background-color:rgb(247, 200, 120)">';
+                }
+
+                $html .= $tr;
+                $html .= '<td>'.$emp_data->emp_etfno.'</td>';
+                $html .= '<td>'.$emp_data->emp_name_with_initial.' - '.$emp_data->calling_name.'</td>';
+                $html .= '<td>'.$emp_data->dept_name.'</td>';
+                $html .= '<td>'.$emp_data->date.'</td>';
+                $html .= '<td>'.$emp_data->timestamp.'</td>';
+                $html .= '<td>'.$emp_data->lasttimestamp.'</td>';
+                // $html .= '<td>'.$emp_data->workhours.'</td>';
+                // $html .= '<td>'.$emp_data->location.'</td>';
+                $html .= '<td>'.$emp_data->earlyot.'</td>';
+                $html .= '<td>'.$emp_data->eveningot.'</td>';
+                $html .= '<td>'.$emp_data->totalot.'</td>';
+                $html .= '</tr>';
+                $department_id = $emp_data->dept_id;
+
+
+            }
+
+        }
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+
+        $html2='';
+        $html2 .= '<table class="table table-sm table-hover" id="dailyattendance_report_table">';
+        $html2 .= '<thead>';
+        $html2 .= '<tr>';
+        $html2 .= '<th>EMP ID</th>';
+        $html2 .= '<th>Name</th>';
+        // $html2 .= '<th>Department</th>';
+        $html2 .= '<th>Remark</th>';
+        $html2 .= '<th>In</th>';
+        $html2 .= '<th>Out</th>';
+        $html2 .= '<th>Date</th>';
+        $html2 .= '<th>Early OT</th>';
+        $html2 .= '<th>OT</th>';
+        $html2 .= '<th>Total OT</th>';
+        $html2 .= '</tr>';
+        $html2 .= '</thead>';
+        $html2 .= '<tbody>';
+        // // print_r($data_arr);
+        $all_record=0;
+        $present_count=0;
+        $absent_count=0;
+          
+          
+        foreach ($data_arr as $datalist) {
+             $department_name = Department::query()->where('id', $department_id)->first()->name;
+          
+            foreach ($datalist->attendanceinfo as $emp_data) {
+                $remark='Working';
+                $tr = '<tr>';
+                if($emp_data->lasttimestamp == '' || $emp_data->timestamp ==''){
+                    $tr = '<tr style="background-color: rgb(247, 200, 200)">';
+                }
+
+                if($emp_data->workhours == '-'){
+                    $absent_count++;
+                    $remark='Absent';
+                }
+
+                $html2 .= $tr;
+                $html2 .= '<td>'.$emp_data->emp_id.'</td>';
+                $html2 .= '<td>'.$emp_data->emp_name_with_initial.' - '.$emp_data->calling_name.'</td>';
+                // $html2 .= '<td>'.$department_name.'</td>';
+                $html2 .= '<td>'.$remark.'</td>';
+                $html2 .= '<td>'.$emp_data->timestamp.'</td>';
+                $html2 .= '<td>'.$emp_data->lasttimestamp.'</td>';
+                $html2 .= '<th>'.$emp_data->date.'</th>';
+                $html2 .= '<td>'.$emp_data->earlyot.'</td>';
+                $html2 .= '<td>'.$emp_data->eveningot.'</td>';
+                $html2 .= '<td>'.$emp_data->totalot.'</td>';
+                $html2 .= '</tr>';
+
+                $all_record++;
+            }
+
+        }
+        
+        $present_count=$all_record-$absent_count;
+
+        $html2 .= '</tbody>';
+        $html2 .= '</table>';
+
+
+        // //return json response
+        $response = [
+            'html' => $html,
+            'html2' => $html2,
+            'present_count' => $present_count,
+            'absent_count' => $absent_count
+        ];
+
+        return response()->json($response);
+        // echo $html;
+
+    }
+
+    public function get_attendance_by_employee_data_time(Request $request)
+    {
+        $company = Session::get('company_id');
+        $location = Session::get('company_branch_id');
+
+        $department = Request('department');
+        $employee = Request('employee');
+       
+        $from_datetime = Carbon::parse(Request('from_datetime'));
+        $to_datetime = Carbon::parse(Request('to_datetime'));
+
+        $from_date = $from_datetime;
+        $to_date = $to_datetime;
+
+        $from_date = $from_date->format('Y-m-d');
+        $to_date = $to_date->format('Y-m-d');
+
+        $specialatten = Request('specialatten');
+
+        $dept_sql = "SELECT * FROM departments WHERE 1 = 1 ";
+
+        if ($department != '') {
+            $dept_sql.= ' AND id = "'.$department.'" ';
+        }
+
+       
+        if($company != ''){
+            $dept_sql.= 'AND company_id = "'.$company.'" ';
+        }
+
+        $departments = DB::select($dept_sql);
+
+        $data_arr = array();
+        $not_att_count = 0;
+
+        foreach ($departments as $department_) {
+            $atte_arr = array();
+
+             $query3 = 'select   
+            employees.emp_id ,
+            employees.emp_name_with_initial ,
+            employees.calling_name, 
+            employees.emp_etfno,
+            employees.resignation_date,
+            employees.job_category_id,
+            branches.location as b_location,
+            departments.name as dept_name,
+            departments.id as dept_id,
+            shift_types.onduty_time,
+            shift_types.offduty_time,
+            shift_types.saturday_onduty_time,
+            shift_types.saturday_offduty_time,
+            shift_types.shift_name ';
+
+            $query3 .= 'from employees ';
+            $query3 .= 'left join `branches` on `employees`.`emp_location` = `branches`.`id` ';
+            $query3 .= 'left join `shift_types` on `employees`.`emp_shift` = `shift_types`.`id` ';
+            $query3 .= 'left join `departments` on `employees`.`emp_department` = `departments`.`id` ';
+            $query3 .= 'where (employees.is_resigned = 0 OR (employees.is_resigned = 1 AND employees.resignation_date >= "'.$to_date.'")) ';
+
+            $query3.= 'AND employees.deleted = 0 ';
+            $query3.= 'AND employees.status = 1 ';
+            $query3.= 'AND departments.id = "'.$department_->id .'" ';
+
+            if($employee != ''){
+                $query3.= 'AND employees.emp_id = "'.$employee.'" ';
+            }
+
+            if($specialatten == 2) {
+                $query3 .= " AND (employees.special_attendance = 'No' OR employees.special_attendance IS NULL)";
+            }
+
+            $query3.= 'order by employees.emp_id asc ';
+
+            $employees = DB::select($query3);
+
+            foreach($employees as $record){
+                $period = CarbonPeriod::create($from_date, $to_date);
+                foreach ($period as $date) {
+                    $f_date = $date->format('Y-m-d');
+                    $shift_on = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$record->onduty_time);
+                    $shift_off = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$record->offduty_time);
+
+                    $seven_am = Carbon::parse('07:00');
+                    $seven_am_time = $seven_am->format('H:i');
+                    $today_seven = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$seven_am_time);
+
+                    $eight_am = Carbon::parse('08:00');
+                    $eight_am_time = $eight_am->format('H:i');
+                    $today_eight = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$eight_am_time);
+
+                    $twelve_pm = Carbon::parse('12:00');
+                    $twelve_pm_time = $twelve_pm->format('H:i');
+                    $today_twelve = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$twelve_pm_time);
+
+                    $one_pm = Carbon::parse('13:00');
+                    $one_pm_time = $one_pm->format('H:i');
+                    $today_one = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$one_pm_time);
+
+                    $six_pm = Carbon::parse('18:00');
+                    $six_pm_time = $six_pm->format('H:i');
+                    $today_six = Carbon::parse($date->year.'-'.$date->month.'-'.$date->day.' '.$six_pm_time);
+
+                    $sql = " SELECT *, Min(attendances.timestamp) as firsttimestamp, Max(attendances.timestamp) as lasttimestamp FROM attendances WHERE uid = '".$record->emp_id."' AND deleted_at IS NULL ";
+                    $sql.= 'AND date LIKE "'.$f_date.'%" ';
+
+                    $sql.= 'GROUP BY uid, date ';
+                    $sql.= 'ORDER BY date DESC ';
+                    
+                    $attendances = DB::select($sql);
+
+                    if(!empty($attendances)) {
+                        $last_time = \Carbon\Carbon::parse($attendances[0]->lasttimestamp);
+                        $first_time = \Carbon\Carbon::parse($attendances[0]->firsttimestamp);
+                        // $to = \Carbon\Carbon::parse($attendances[0]->lasttimestamp);
+                        // $from = \Carbon\Carbon::parse($attendances[0]->firsttimestamp);
+
+                        $isBetween = $last_time->between($from_datetime, $to_datetime);
+
+                        if (!$isBetween) {
+                            continue; 
+                        }
+
+                        $from = '';
+                        if($first_time <= $shift_on) {
+                            $from = $today_eight;
+                        }
+
+                        if($first_time > $shift_on) {
+                            $from = $first_time;
+                        }
+
+                        if($first_time >=$today_twelve && $first_time < $today_one ){
+                            $from = $today_one;
+                        }
+
+                        $to = '';
+                        // if($last_time > $shift_off && $last_time < $today_six) {
+                        if($last_time > $shift_off) {
+                            $to = $shift_off;
+                        }else{
+                            $to = $last_time;
+                        }
+
+                        $to = Carbon::parse($to);
+                        $from = Carbon::parse($from); 
+
+                        if($first_time >=$today_twelve && $first_time < $today_one ){
+                        }else{
+                            $to->subHours(1);
+                        }
+
+                        //diff in minutes and convert to hours
+                        $diff_in_minutes = $to->diffInMinutes($from);
+                        $diff_in_hours = $diff_in_minutes / 60;
+                        //two decimal places
+
+                        if($first_time >=$today_twelve && $first_time < $today_one ){
+                        }else{
+                            $to->addHours(1);
+                        }
+
+                        $diff_in_hours = number_format((float)$diff_in_hours, 2, '.', '');
+                        $workhours = $diff_in_hours;
+                        $rec_date =  Carbon::parse($attendances[0]->date)->toDateString();
+                        $first_time_stamp = $attendances[0]->firsttimestamp;
+                        $last_time_stamp = '';
+
+
+                        $holiday_check = Holiday::where('date', $rec_date)
+                        ->where('work_level', '=', '2')
+                        ->first();
+
+                        $dayOfWeek = Carbon::parse($rec_date)->dayOfWeek;
+
+                        $otdatalist = DB::table('ot_approved')
+                            // ->select(
+                            //     DB::raw('SUM(hours) as total_hours'), 
+                            //     DB::raw('SUM(double_hours) as total_double_hours')
+                            // )
+                            ->select(
+                                DB::raw("SUM(CASE WHEN TIME(`from`) < '08:00:00' THEN hours ELSE 0 END) as early_ot_hours"),
+                                DB::raw("SUM(CASE WHEN TIME(`from`) >= '17:00:00' THEN hours ELSE 0 END) as evening_ot_hours"),
+                                DB::raw('SUM(double_hours) as total_double_hours'),
+                                DB::raw('SUM(hours) as total_normal_hours')
+                            )
+                            ->where('date', $date->format('Y-m-d')) 
+                            ->where('approved', 1)
+                            ->where('emp_id', $record->emp_id) 
+                            ->first();
+
+                        if($attendances[0]->firsttimestamp != $attendances[0]->lasttimestamp){
+                            $last_time_stamp = $attendances[0]->lasttimestamp;
+                        }
+                        $first_time_stamp = \Carbon\Carbon::parse($first_time_stamp)->format('H:i');
+
+                        if($last_time_stamp != ''){
+                            $last_time_stamp = \Carbon\Carbon::parse($last_time_stamp)->format('H:i');
+                        }
+
+                        if($record->dept_name == null){
+                            $record->dept_name = '-';
+                        }
+                              
+                        $objattendance=new stdClass();
+                        $objattendance->emp_id=$record->emp_id;
+                        $objattendance->emp_name_with_initial=$record->emp_name_with_initial;
+                        $objattendance->calling_name=$record->calling_name;
+                        $objattendance->emp_etfno=$record->emp_etfno;
+                        $objattendance->b_location=$record->b_location;
+                        $objattendance->dept_name=$record->dept_name;
+                        $objattendance->dept_id=$record->dept_id;
+                        $objattendance->date=$rec_date;
+                        $objattendance->timestamp=$first_time_stamp;
+                        $objattendance->lasttimestamp=$last_time_stamp;
+                        $objattendance->workhours=$workhours;
+                        $objattendance->location=$record->b_location;
+                        if(empty($otdatalist)){
+                            $objattendance->earlyot=0;
+                            $objattendance->eveningot=0;
+                            $objattendance->totalot=0;
+                        }
+                        else{
+                            if (!empty($holiday_check) || $dayOfWeek == Carbon::SATURDAY || $dayOfWeek == Carbon::SUNDAY){
+                                $objattendance->earlyot=0;
+                                $objattendance->eveningot=$otdatalist->total_normal_hours + $otdatalist->total_double_hours;
+                                $objattendance->totalot=$otdatalist->total_normal_hours + $otdatalist->total_double_hours;
+                            }
+                            else{
+                                if(!empty($otdatalist->early_ot_hours)){
+                                    $objattendance->earlyot=$otdatalist->early_ot_hours;
+                                }
+                                else{
+                                    $objattendance->earlyot=0;
+                                }
+
+                                if(!empty($otdatalist->evening_ot_hours) || !empty($otdatalist->total_double_hours)){
+                                    $objattendance->eveningot=$otdatalist->evening_ot_hours + $otdatalist->total_double_hours;
+                                }
+                                else{
+                                    $objattendance->eveningot=0;
+                                }
+                                // $objattendance->earlyot=$otdatalist->early_ot_hours;
+                                // $objattendance->eveningot=$otdatalist->evening_ot_hours + $otdatalist->total_double_hours;
+                                if(!empty($otdatalist->early_ot_hours) || !empty($otdatalist->evening_ot_hours) || !empty($otdatalist->total_double_hours)){
+                                    $objattendance->totalot=$otdatalist->early_ot_hours + $otdatalist->evening_ot_hours + $otdatalist->total_double_hours;
+                                }
+                                else{
+                                    $objattendance->totalot=0;
+                                }
+                            }
+                        }
+
+                        array_push($atte_arr, $objattendance);
+
+                    }
+                    // else{
+                    //     //attendance not found
+                    //     $objattendance=new stdClass();
+                    //     $objattendance->emp_id=$record->emp_id;
+                    //     $objattendance->emp_name_with_initial=$record->emp_name_with_initial;
+                    //     $objattendance->calling_name=$record->calling_name;
+                    //     $objattendance->emp_etfno=$record->emp_etfno;
+                    //     $objattendance->b_location=$record->b_location;
+                    //     $objattendance->dept_name=$record->dept_name;
+                    //     $objattendance->dept_id=$record->dept_id;
+                    //     $objattendance->date=$f_date;
+                    //     $objattendance->timestamp='-';
+                    //     $objattendance->lasttimestamp='-';
+                    //     $objattendance->workhours='-';
+                    //     $objattendance->location=$record->b_location;
+                    //     $objattendance->earlyot='-';
+                    //     $objattendance->eveningot='-';
+                    //     $objattendance->totalot='-';
+
+                    //     array_push($atte_arr, $objattendance);
+                    //     $not_att_count++;
+                    // }
                 }
             }
 
@@ -1072,6 +1567,292 @@ class Report extends Controller
 
                     $to = \Carbon\Carbon::parse($attendance->lasttimestamp);
                     $from = \Carbon\Carbon::parse($attendance->firsttimestamp);
+
+                    $workhours = gmdate("H:i:s", $to->diffInSeconds($from));
+                    $rec_date =  Carbon::parse($attendance->date)->toDateString();
+
+                    $first_time_stamp = $attendance->firsttimestamp;
+                    $last_time_stamp = '';
+
+                    if($attendance->firsttimestamp != $attendance->lasttimestamp){
+                        $last_time_stamp = $attendance->lasttimestamp;
+                    }
+
+                    $first_time_stamp = \Carbon\Carbon::parse($first_time_stamp)->format('H:i:s');
+
+                    if($last_time_stamp != ''){
+                        $last_time_stamp = \Carbon\Carbon::parse($last_time_stamp)->format('H:i:s');
+                    }
+
+                    if($record->dept_name == null){
+                        $record->dept_name = '-';
+                    }
+
+                    $data_arr[$department_->id][$record->emp_id][$attendance->id]['emp_id'] = $record->emp_id;
+                    $data_arr[$department_->id][$record->emp_id][$attendance->id]['emp_name_with_initial'] = $record->emp_name_with_initial;
+                    $data_arr[$department_->id][$record->emp_id][$attendance->id]['etf_no'] = $record->emp_etfno;
+                    $data_arr[$department_->id][$record->emp_id][$attendance->id]['b_location'] = $record->b_location;
+                    $data_arr[$department_->id][$record->emp_id][$attendance->id]['dept_name'] = $record->dept_name;
+                    $data_arr[$department_->id][$record->emp_id][$attendance->id]['dept_id'] = $record->dept_id;
+                    $data_arr[$department_->id][$record->emp_id][$attendance->id]['date'] = $rec_date;
+                    $data_arr[$department_->id][$record->emp_id][$attendance->id]['timestamp'] = $first_time_stamp;
+                    $data_arr[$department_->id][$record->emp_id][$attendance->id]['lasttimestamp'] = $last_time_stamp;
+                    $data_arr[$department_->id][$record->emp_id][$attendance->id]['workhours'] = $workhours;
+                    $data_arr[$department_->id][$record->emp_id][$attendance->id]['location'] = $record->b_location;
+
+                }
+
+
+            }
+
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $i = 1;
+
+        $sheet->setCellValueByColumnAndRow( 1, $i, 'Attendance Report' );
+
+        $i++;
+        $i++; // Start with the second line
+
+        $titles = array(
+            'ETF NO',
+            'Name',
+            'Department',
+            'Date',
+            'Check In Time',
+            'Check Out Time',
+            'Work Hours',
+            'Location'
+        );
+
+        foreach ($titles as $key => $value) {
+            $sheet->setCellValueByColumnAndRow($key + 1, $i, $value);
+        }
+
+        foreach ($titles as $key => $value) {
+            $sheet->setCellValueByColumnAndRow($key + 1, $i, $value);
+        }
+
+        $row = $sheet->getRowIterator($i)->current();
+        $cellIterator = $row->getCellIterator();
+        $cellIterator->setIterateOnlyExistingCells(false);
+        foreach ($cellIterator as $cell) {
+            $cell->getStyle()->getFont()->setBold(true);
+        }
+
+        $i++; // Start with the second line
+
+        //foreach $data_arr
+        $department_id = 0;
+        foreach ($data_arr as $dept_key => $department_data) {
+
+            //if department_id is not equal to the previous department_id
+            if($department_id != $dept_key){
+                $department_id = $dept_key;
+                $department_name = Department::query()->where('id', $department_id)->first()->name;
+                $i++;
+                $sheet->setCellValueByColumnAndRow(1, $i, $department_name);
+                $i++;
+            }
+
+            foreach ($department_data as $emp_data) {
+
+                foreach ($emp_data as $attendance)
+                {
+
+                    $sheet->setCellValueByColumnAndRow( 1, $i, $attendance['etf_no'] );
+                    $sheet->setCellValueByColumnAndRow( 2, $i, $attendance['emp_name_with_initial'] );
+                    $sheet->setCellValueByColumnAndRow( 3, $i, $attendance['dept_name'] );
+                    $sheet->setCellValueByColumnAndRow( 4, $i, $attendance['date'] );
+                    $sheet->setCellValueByColumnAndRow( 5, $i, $attendance['timestamp'] );
+                    $sheet->setCellValueByColumnAndRow( 6, $i, $attendance['lasttimestamp'] );
+                    $sheet->setCellValueByColumnAndRow( 7, $i, $attendance['workhours'] );
+                    $sheet->setCellValueByColumnAndRow( 8, $i, $attendance['location'] );
+
+                    $i++;
+
+                    $department_id = $attendance['dept_id'];
+
+                }
+
+            }
+
+
+        }
+
+        $writer = new Xlsx($spreadsheet);
+
+        $filename = 'Attendance_Report_'.date('Y_m_d_H_i');
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="'. $filename .'.xlsx"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output'); // download file
+
+
+
+    }
+
+    public function get_attendance_by_employee_data_excel_time(Request $request)
+    {
+
+        $department = Request('department');
+        $employee = Request('employee');
+        $location = Request('location');
+
+        $from_datetime = Carbon::parse(Request('from_datetime'));
+        $to_datetime = Carbon::parse(Request('to_datetime'));
+
+        $from_date = $from_datetime;
+        $to_date = $to_datetime;
+
+        $from_date = $from_date->format('Y-m-d');
+        $to_date = $to_date->format('Y-m-d');
+
+        //get all departments
+        $dept_sql = "SELECT * FROM departments WHERE 1 = 1 ";
+
+        if ($department != '') {
+            $dept_sql.= ' AND id = "'.$department.'" ';
+        }
+
+        if($location != ''){
+            $dept_sql.= 'AND company_id = "'.$location.'" ';
+        }
+
+        $departments = DB::select($dept_sql);
+
+        $data_arr = array();
+        $not_att_count = 0;
+
+        foreach ($departments as $department_) {
+
+            $query3 = 'select   
+            employees.emp_id ,
+            employees.emp_name_with_initial ,
+            employees.emp_etfno,
+            branches.location as b_location,
+            departments.name as dept_name,
+            departments.id as dept_id  
+              ';
+
+            $query3 .= 'from employees ';
+            $query3 .= 'left join `branches` on `employees`.`emp_location` = `branches`.`id` ';
+            $query3 .= 'left join `departments` on `employees`.`emp_department` = `departments`.`id` ';
+            $query3 .= 'where employees.is_resigned = 0 ';
+            $query3.= 'AND employees.deleted = 0 ';
+
+            $query3.= 'AND departments.id = "'.$department_->id .'" ';
+
+
+            if($employee != ''){
+                $query3.= 'AND employees.emp_id = "'.$employee.'" ';
+            }
+
+            $query3.= 'order by employees.emp_id asc ';
+
+            $employees = DB::select($query3);
+
+            foreach($employees as $record) {
+
+                //dates of the month between from and to date
+                $period = CarbonPeriod::create($from_date, $to_date);
+
+                foreach ($period as $date) {
+                    $f_date = $date->format('Y-m-d');
+
+                    $sql = " SELECT *,
+                    Min(attendances.timestamp) as firsttimestamp,
+                    Max(attendances.timestamp) as lasttimestamp
+                    FROM attendances WHERE uid = '".$record->emp_id."' AND deleted_at IS NULL ";
+
+                    $sql.= 'AND date LIKE "'.$f_date.'%" ';
+
+                    $sql.= 'GROUP BY uid, date ';
+                    $sql.= 'ORDER BY date DESC ';
+
+                    $attendances = DB::select($sql);
+
+                    if(!EMPTY($attendances)) {
+
+                        $to = \Carbon\Carbon::parse($attendances[0]->lasttimestamp);
+                        $from = \Carbon\Carbon::parse($attendances[0]->firsttimestamp);
+
+                        $isBetween = $to->between($from_datetime, $to_datetime);
+
+                        if (!$isBetween) {
+                            continue; 
+                        }
+
+                        $workhours = gmdate("H:i:s", $to->diffInSeconds($from));
+                        $rec_date =  Carbon::parse($attendances[0]->date)->toDateString();
+
+                        $first_time_stamp = $attendances[0]->firsttimestamp;
+                        $last_time_stamp = '';
+
+                        if($attendances[0]->firsttimestamp != $attendances[0]->lasttimestamp){
+                            $last_time_stamp = $attendances[0]->lasttimestamp;
+                        }
+
+                        $first_time_stamp = \Carbon\Carbon::parse($first_time_stamp)->format('H:i:s');
+
+                        if($last_time_stamp != ''){
+                            $last_time_stamp = \Carbon\Carbon::parse($last_time_stamp)->format('H:i:s');
+                        }
+
+                        if($record->dept_name == null){
+                            $record->dept_name = '-';
+                        }
+
+                        $data_arr[$department_->id][$record->emp_id][$attendances[0]->id]['emp_id'] = $record->emp_id;
+                        $data_arr[$department_->id][$record->emp_id][$attendances[0]->id]['emp_name_with_initial'] = $record->emp_name_with_initial;
+                        $data_arr[$department_->id][$record->emp_id][$attendances[0]->id]['etf_no'] = $record->emp_etfno;
+                        $data_arr[$department_->id][$record->emp_id][$attendances[0]->id]['b_location'] = $record->b_location;
+                        $data_arr[$department_->id][$record->emp_id][$attendances[0]->id]['dept_name'] = $record->dept_name;
+                        $data_arr[$department_->id][$record->emp_id][$attendances[0]->id]['dept_id'] = $record->dept_id;
+                        $data_arr[$department_->id][$record->emp_id][$attendances[0]->id]['date'] = $rec_date;
+                        $data_arr[$department_->id][$record->emp_id][$attendances[0]->id]['timestamp'] = $first_time_stamp;
+                        $data_arr[$department_->id][$record->emp_id][$attendances[0]->id]['lasttimestamp'] = $last_time_stamp;
+                        $data_arr[$department_->id][$record->emp_id][$attendances[0]->id]['workhours'] = $workhours;
+                        $data_arr[$department_->id][$record->emp_id][$attendances[0]->id]['location'] = $record->b_location;
+
+
+                    }else{
+                        //attendance not found
+                        $data_arr[$department_->id][$record->emp_id][$not_att_count]['emp_id'] = $record->emp_id;
+                        $data_arr[$department_->id][$record->emp_id][$not_att_count]['emp_name_with_initial'] = $record->emp_name_with_initial;
+                        $data_arr[$department_->id][$record->emp_id][$not_att_count]['etf_no'] = $record->emp_etfno;
+                        $data_arr[$department_->id][$record->emp_id][$not_att_count]['b_location'] = $record->b_location;
+                        $data_arr[$department_->id][$record->emp_id][$not_att_count]['dept_name'] = $record->dept_name;
+                        $data_arr[$department_->id][$record->emp_id][$not_att_count]['dept_id'] = $record->dept_id;
+                        $data_arr[$department_->id][$record->emp_id][$not_att_count]['date'] = $f_date;
+                        $data_arr[$department_->id][$record->emp_id][$not_att_count]['timestamp'] = '-';
+                        $data_arr[$department_->id][$record->emp_id][$not_att_count]['lasttimestamp'] = '-';
+                        $data_arr[$department_->id][$record->emp_id][$not_att_count]['workhours'] = '-';
+                        $data_arr[$department_->id][$record->emp_id][$not_att_count]['location'] = $record->b_location;
+
+                        $not_att_count++;
+
+                    }
+
+
+                }
+
+
+
+                foreach ($attendances as $attendance) {
+
+                    $to = \Carbon\Carbon::parse($attendance->lasttimestamp);
+                    $from = \Carbon\Carbon::parse($attendance->firsttimestamp);
+
+                    $isBetween = $to->between($from_datetime, $to_datetime);
+
+                    if (!$isBetween) {
+                        continue; 
+                    }
 
                     $workhours = gmdate("H:i:s", $to->diffInSeconds($from));
                     $rec_date =  Carbon::parse($attendance->date)->toDateString();
