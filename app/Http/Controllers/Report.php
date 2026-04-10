@@ -464,6 +464,7 @@ class Report extends Controller
             $query3.= 'AND employees.deleted = 0 ';
             $query3.= 'AND employees.status = 1 ';
             $query3.= 'AND departments.id = "'.$department_->id .'" ';
+            $query3 .= ' AND employees.emp_join_date <= "'.$to_date.'" ';
 
             if($employee != ''){
                 $query3.= 'AND employees.emp_id = "'.$employee.'" ';
