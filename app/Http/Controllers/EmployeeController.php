@@ -662,7 +662,11 @@ class EmployeeController extends Controller
         
             $offset = ($page - 1) * $resultCount;
             $breeds = DB::table('employees')
-                ->where('employees.emp_name_with_initial', 'LIKE', '%' . $request->input('term') . '%')
+                ->where(function ($query) use ($request) {
+                            $term = $request->input('term');
+                            $query->where('employees.emp_name_with_initial', 'LIKE', '%' . $term . '%')
+                                ->orWhere('employees.emp_etfno', 'LIKE', '%' . $term . '%');
+                        })
                 ->where('emp_company', $companyId)
                 ->where('emp_location', $companyBranchId)
                 ->when($request->input('department'), function ($query, $department) use ($companyId) {
@@ -683,7 +687,11 @@ class EmployeeController extends Controller
                
 
             $count = DB::table('employees')
-                ->where('employees.emp_name_with_initial', 'LIKE', '%' . $request->input('term') . '%')
+                ->where(function ($query) use ($request) {
+                            $term = $request->input('term');
+                            $query->where('employees.emp_name_with_initial', 'LIKE', '%' . $term . '%')
+                                ->orWhere('employees.emp_etfno', 'LIKE', '%' . $term . '%');
+                        })
                 ->where('emp_company', $companyId)
                 ->where('emp_location', $companyBranchId);
         
@@ -795,7 +803,11 @@ class EmployeeController extends Controller
             $offset = ($page - 1) * $resultCount;
         
             $breeds = DB::table('employees')
-                ->where('employees.emp_name_with_initial', 'LIKE', '%' . $request->input('term') . '%')
+                ->where(function ($query) use ($request) {
+                            $term = $request->input('term');
+                            $query->where('employees.emp_name_with_initial', 'LIKE', '%' . $term . '%')
+                                ->orWhere('employees.emp_etfno', 'LIKE', '%' . $term . '%');
+                        })
                 ->where('emp_company', $companyId)
                 ->where('emp_location', $companyBranchId)
                 ->whereNull('special_attendance');
@@ -811,7 +823,11 @@ class EmployeeController extends Controller
                
 
             $count = DB::table('employees')
-                ->where('employees.emp_name_with_initial', 'LIKE', '%' . $request->input('term') . '%')
+                ->where(function ($query) use ($request) {
+                            $term = $request->input('term');
+                            $query->where('employees.emp_name_with_initial', 'LIKE', '%' . $term . '%')
+                                ->orWhere('employees.emp_etfno', 'LIKE', '%' . $term . '%');
+                        })
                 ->where('emp_company', $companyId)
                 ->where('emp_location', $companyBranchId)
                 ->whereNull('special_attendance');
