@@ -1214,28 +1214,28 @@ class Report extends Controller
                         array_push($atte_arr, $objattendance);
 
                     }
-                    else{
-                        //attendance not found
-                        $objattendance=new stdClass();
-                        $objattendance->emp_id=$record->emp_id;
-                        $objattendance->emp_name_with_initial=$record->emp_name_with_initial;
-                        $objattendance->calling_name=$record->calling_name;
-                        $objattendance->emp_etfno=$record->emp_etfno;
-                        $objattendance->b_location=$record->b_location;
-                        $objattendance->dept_name=$record->dept_name;
-                        $objattendance->dept_id=$record->dept_id;
-                        $objattendance->date=$f_date;
-                        $objattendance->timestamp='-';
-                        $objattendance->lasttimestamp='-';
-                        $objattendance->workhours='-';
-                        $objattendance->location=$record->b_location;
-                        $objattendance->earlyot='-';
-                        $objattendance->eveningot='-';
-                        $objattendance->totalot='-';
+                    // else{
+                    //     //attendance not found
+                    //     $objattendance=new stdClass();
+                    //     $objattendance->emp_id=$record->emp_id;
+                    //     $objattendance->emp_name_with_initial=$record->emp_name_with_initial;
+                    //     $objattendance->calling_name=$record->calling_name;
+                    //     $objattendance->emp_etfno=$record->emp_etfno;
+                    //     $objattendance->b_location=$record->b_location;
+                    //     $objattendance->dept_name=$record->dept_name;
+                    //     $objattendance->dept_id=$record->dept_id;
+                    //     $objattendance->date=$f_date;
+                    //     $objattendance->timestamp='-';
+                    //     $objattendance->lasttimestamp='-';
+                    //     $objattendance->workhours='-';
+                    //     $objattendance->location=$record->b_location;
+                    //     $objattendance->earlyot='-';
+                    //     $objattendance->eveningot='-';
+                    //     $objattendance->totalot='-';
 
-                        array_push($atte_arr, $objattendance);
-                        $not_att_count++;
-                    }
+                    //     array_push($atte_arr, $objattendance);
+                    //     $not_att_count++;
+                    // }
                 }
             }
 

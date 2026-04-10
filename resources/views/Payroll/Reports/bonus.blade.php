@@ -215,9 +215,9 @@ function bonustablemonth(data) {
         tableHtml += '<tr>' +
             '<td>' + row.emp_etfno + '</td>' +
             '<td>' + row.emp_name + '</td>' +
-            '<td>' + row.basic_salary + '</td>' +
-            '<td>' + row.total_no_pay + '</td>' +
-            '<td>' + row.total_bonus + '</td>' +
+            '<td>' + row.basic_history + '</td>' +
+            '<td>' + row.total_no_pay_value + '</td>' +
+            '<td>' + row.bonus_amount + '</td>' +
         '</tr>';
     });
 
@@ -255,8 +255,8 @@ function bonustableweekly(data) {
         tableHtml += '<tr>' +
             '<td>' + row.emp_etfno + '</td>' +
             '<td>' + row.emp_name + '</td>' +
-            '<td>' + row.basic_salary + '</td>' +
-            '<td>' + row.total_bonus + '</td>' +
+            '<td>' + row.basic_history + '</td>' +
+            '<td>' + row.bonus_amount + '</td>' +
         '</tr>';
     });
 
