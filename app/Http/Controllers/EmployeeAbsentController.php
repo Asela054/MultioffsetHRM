@@ -54,7 +54,8 @@ class EmployeeAbsentController extends Controller
             'departments.name AS departmentname',
             'branches.location AS location',
             'employees.is_resigned',
-            'employees.resignation_date'
+            'employees.resignation_date',
+            'employees.emp_join_date'
         )
         ->where('employees.deleted', 0)
         ->where('employees.emp_company', $companyId)
@@ -65,7 +66,8 @@ class EmployeeAbsentController extends Controller
                         ->whereDate('resignation_date', '>=', $fromDate)
                         ->whereDate('resignation_date', '<=', $toDate);
                 });
-        });
+        })
+        ->whereDate('employees.emp_join_date', '<=', $toDate);
 
     // Apply department filters
     if ($department != 'All') {
@@ -93,7 +95,8 @@ class EmployeeAbsentController extends Controller
             'departmentname' => $employee->departmentname,
             'location' => $employee->location,
             'is_resigned' => $employee->is_resigned,
-            'resignation_date' => $employee->resignation_date
+            'resignation_date' => $employee->resignation_date,
+            'emp_join_date' => $employee->emp_join_date
         ];
     }
     $employeeIds = array_keys($employeeMap);
@@ -140,6 +143,10 @@ class EmployeeAbsentController extends Controller
                 $employee['resignation_date'] && 
                 $date > $employee['resignation_date']
             ) {
+                continue;
+            }
+
+            if (!empty($employee['emp_join_date']) && $date < $employee['emp_join_date']) {
                 continue;
             }
             

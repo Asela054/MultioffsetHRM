@@ -464,6 +464,7 @@ class Report extends Controller
             $query3.= 'AND employees.deleted = 0 ';
             $query3.= 'AND employees.status = 1 ';
             $query3.= 'AND departments.id = "'.$department_->id .'" ';
+            $query3 .= ' AND employees.emp_join_date <= "'.$to_date.'" ';
 
             if($employee != ''){
                 $query3.= 'AND employees.emp_id = "'.$employee.'" ';
@@ -1997,7 +1998,11 @@ class Report extends Controller
 
            
             $breeds = DB::table('employees')
-                ->where('employees.emp_name_with_initial', 'LIKE', '%' . $request->input('term') . '%')
+                ->where(function ($query) use ($request) {
+                            $term = $request->input('term');
+                            $query->where('employees.emp_name_with_initial', 'LIKE', '%' . $term . '%')
+                                ->orWhere('employees.emp_etfno', 'LIKE', '%' . $term . '%');
+                        })
                 ->where('emp_company', $companyId)
                 ->where('emp_location', $companyBranchId);
         
@@ -2015,7 +2020,11 @@ class Report extends Controller
         
 
             $count = DB::table('employees')
-                ->where('employees.emp_name_with_initial', 'LIKE', '%' . $request->input('term') . '%')
+                ->where(function ($query) use ($request) {
+                            $term = $request->input('term');
+                            $query->where('employees.emp_name_with_initial', 'LIKE', '%' . $term . '%')
+                                ->orWhere('employees.emp_etfno', 'LIKE', '%' . $term . '%');
+                        })
                 ->where('emp_company', $companyId)
                 ->where('emp_location', $companyBranchId);
         
@@ -2146,7 +2155,11 @@ class Report extends Controller
             $offset = ($page - 1) * $resultCount;
 
             $breeds = DB::query()
-                ->where('employees.emp_name_with_initial', 'LIKE',  '%' . Input::get("term"). '%')
+                ->where(function ($query) use ($request) {
+                            $term = $request->input('term');
+                            $query->where('employees.emp_name_with_initial', 'LIKE', '%' . $term . '%')
+                                ->orWhere('employees.emp_etfno', 'LIKE', '%' . $term . '%');
+                        })
                 ->where('employees.emp_company', $companyId);
                   if ($department) {
                         $breeds->where('emp_department', $department);
@@ -2163,7 +2176,11 @@ class Report extends Controller
                 ->get([DB::raw('DISTINCT employees.emp_id as id'),DB::raw('CONCAT(employees.emp_name_with_initial, " - " ,employees.calling_name) as text')]);
 
             $count = DB::query()
-                ->where('employees.emp_name_with_initial', 'LIKE',  '%' . Input::get("term"). '%')
+                ->where(function ($query) use ($request) {
+                            $term = $request->input('term');
+                            $query->where('employees.emp_name_with_initial', 'LIKE', '%' . $term . '%')
+                                ->orWhere('employees.emp_etfno', 'LIKE', '%' . $term . '%');
+                        })
                  ->where('employees.emp_company', $companyId)
                  
                 ->from('leaves')
