@@ -42,8 +42,9 @@
                                                                 <th>Basic</th>
                                                                 <th>BRA I</th>
                                                                 <th>BRA II</th>
-                                                                <th>No-pay</th>
                                                                 <th>Total Before Nopay</th>
+                                                                <th>No-pay</th>
+                                                                <th>Total After Nopay</th>
                                                                 <th class="">Arrears</th>
                                                                 <!--th class="">Total for Tax</th-->
                                                                 <th>Weekly Attendance</th><!--th>Attendance</th-->
@@ -280,8 +281,16 @@ $(document).ready(function(){
     }
 
 	var empTable=$("#emptable").DataTable({
-			"columns":[{data:'emp_epfno'}, {data:'emp_first_name'}, {data:'BASIC'}, {data:'BRA_I'}, {data:'add_bra2'}, 
-				{data:'NOPAY'}, {data:'tot_bnp'}, {data:'sal_arrears1'}, 
+			"columns":[{data:'emp_epfno'}, {data:'emp_first_name'}, {data:'BASIC'}, {data:'BRA_I'}, {data:'add_bra2'}, {data:'tot_bnp'}, 
+				{data:'NOPAY'},{
+                    "targets": -1,
+                    "className": '',
+                    "data": null,
+                    "render": function(data, type, full) {
+                        let tot_anp = (parseFloat(full['tot_bnp'])-parseFloat(full['NOPAY']));
+                        return parseFloat(tot_anp).toFixed(2);
+                    }
+                }, {data:'sal_arrears1'}, 
 				//{data:'tot_fortax'}, {data:'ATTBONUS'}, {data:'add_transport'}, 
 				{data:'ATTBONUS_W'}, {data:'INCNTV_EMP'}, {data:'INCNTV_DIR'}, 
 				//{data:'add_other'}, 
