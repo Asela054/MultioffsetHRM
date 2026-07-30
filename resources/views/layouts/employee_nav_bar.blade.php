@@ -46,6 +46,22 @@
   <a role="button" class="btn navbtncolor" href="{{ route('addEmployee') }}" id="employeeinformation">Employee Details <span class="caret"></span></a>
   @endcan
 
+  @if(auth()->user()->can('card-list')
+  || auth()->user()->can('manpower-employee-list'))
+  <div class="dropdown">
+    <a  role="button" data-toggle="dropdown" class="btn navbtncolor"  href="#" id="manpower_emp">
+        ManPower Employee <span class="caret"></span></a>
+        <ul class="dropdown-menu multi-level dropdownmenucolor" role="menu" aria-labelledby="dropdownMenu">
+          @can('card-list')
+          <li><a class="dropdown-item" href="{{ route('ManpowerCard')}}">Card</a></li>
+          @endcan
+          @can('manpower-employee-list')
+          <li><a class="dropdown-item" href="{{ route('Manpoweremployee')}}">Employee Allocation</a></li>
+          @endcan
+        </ul>
+  </div>
+  @endif
+
   @if(auth()->user()->can('pe-task-list'))
   <div class="dropdown">
     <a  role="button" data-toggle="dropdown" class="btn navbtncolor"  href="#" id="performanceinformation">
