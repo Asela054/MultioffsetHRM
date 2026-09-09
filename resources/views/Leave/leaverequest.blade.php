@@ -77,6 +77,7 @@
                                     <th>Reason</th>
                                     <th>Approve Status</th>
                                     <th>Leave Type</th>
+                                    <th>Approve Date</th>
                                     <th class="text-right">Action</th>
                                 </tr>
                                 </thead>
@@ -409,6 +410,7 @@
                                 }
                             }
                         },
+                        { data: 'approve_date', name: 'approve_date' },
                         {
                         data: 'id',
                         name: 'action',
