@@ -347,7 +347,41 @@
 									</div>
 								</div>
 							</div>
-							<div class="form-row" hidden>
+				<div class="form-row">
+					<div class="col-12 col-sm-12 col-md-3 col-lg-3">
+						<label class="small font-weight-bold text-dark">TIN Number</label>
+						<input type="text" class="form-control form-control-sm" id="tin_number" name="tin_number" value="{{$employee->tin_number}}" placeholder="TIN Number">
+					</div>
+					<div class="col-12 col-sm-12 col-md-3 col-lg-3">
+						<label class="small font-weight-bold text-dark">Blood Group</label>
+						<select id="blood_group" name="blood_group" class="form-control form-control-sm">
+							<option value="">Select</option>
+							<option value="A+" {{$employee->blood_group == 'A+'  ? 'selected' : ''}}>A+</option>
+							<option value="A-" {{$employee->blood_group == 'A-'  ? 'selected' : ''}}>A-</option>
+							<option value="B+" {{$employee->blood_group == 'B+'  ? 'selected' : ''}}>B+</option>
+							<option value="B-" {{$employee->blood_group == 'B-'  ? 'selected' : ''}}>B-</option>
+							<option value="AB+" {{$employee->blood_group == 'AB+' ? 'selected' : ''}}>AB+</option>
+							<option value="AB-" {{$employee->blood_group == 'AB-' ? 'selected' : ''}}>AB-</option>
+							<option value="O+" {{$employee->blood_group == 'O+'  ? 'selected' : ''}}>O+</option>
+							<option value="O-" {{$employee->blood_group == 'O-'  ? 'selected' : ''}}>O-</option>
+						</select>
+					</div>
+					<div class="col-12 col-sm-12 col-md-3 col-lg-3">
+						<label class="small font-weight-bold text-dark">Weight (kg)</label>
+						<input type="number" step="0.01" min="0" class="form-control form-control-sm" id="weight" name="weight" value="{{$employee->weight}}" placeholder="Weight">
+					</div>
+					<div class="col-12 col-sm-12 col-md-3 col-lg-3">
+						<label class="small font-weight-bold text-dark">Height (cm)</label>
+						<input type="number" step="0.01" min="0" class="form-control form-control-sm" id="height" name="height" value="{{$employee->height}}" placeholder="Height">
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="col-12 col-sm-12 col-md-3 col-lg-3">
+						<label class="small font-weight-bold text-dark">Fixed Allowance</label>
+						<input type="number" step="0.01" min="0" class="form-control form-control-sm" id="fixed_allowance" name="fixed_allowance" value="{{$employee->fixed_allowance}}" placeholder="Fixed Allowance">
+					</div>
+				</div>
+				<div class="form-row" hidden>
 								<div class="col">
 									<label class="small font-weight-bold text-dark">No of Casual Leaves</label>
 									<input type="text" min="0" class="form-control form-control-sm num" id="no_of_casual_leaves" name="no_of_casual_leaves" value="{{$employee->no_of_casual_leaves}}"

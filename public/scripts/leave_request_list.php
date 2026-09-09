@@ -18,6 +18,7 @@ $primaryKey = 'id';
         array('db' => '`u`.`approvestatus`', 'dt' => 'approvestatus', 'field' => 'approvestatus'),
         array('db' => '`u`.`leave_category`', 'dt' => 'leave_category', 'field' => 'leave_category'),
         array('db' => '`u`.`reason`', 'dt' => 'reason', 'field' => 'reason'),
+        array('db' => '`u`.`approve_date`', 'dt' => 'approve_date', 'field' => 'approve_date'),
     );
 
 // SQL server connection information
@@ -43,7 +44,8 @@ require('ssp.customized.class.php');
     `leaves`.`status`,
     `leave_request`.`request_approve_status` AS `approvestatus`,
     `leave_request`.`leave_category`,
-    `leave_request`.`reason`
+    `leave_request`.`reason`,
+    CASE WHEN `leaves`.`status` = 'Approved' THEN `leaves`.`updated_at` ELSE NULL END AS `approve_date`
     FROM `leave_request`
     JOIN `employees` AS `emp` ON `leave_request`.`emp_id` = `emp`.`emp_id`
     LEFT JOIN `departments` ON `emp`.`emp_department` = `departments`.`id`

@@ -201,8 +201,85 @@ class HomeController extends Controller
 
         $events = array_merge($birthdayEvents, $holidayEvents);
 
+        // ---- Manpower attendance counts ----
+        // Get all manpower card emp_nos
+        $manpowerEmpNos = DB::table('manpower_cards')->where('status', 1)->pluck('emp_no')->toArray();
 
-        return view('home',compact('empcount','todaycount','todaylatecount','yesterdaycount','yesterdaylatecount','todayBirthdayCount','thisweekBirthdayCount','thismonthBirthdayCount', 'leavedatalist', 'events'));
+        // Manpower Today Attendance count: manpower emp_nos that have attendance today
+        $manpowerTodayCount = DB::table('attendances')
+            ->whereIn('uid', $manpowerEmpNos)
+            ->where('date', $today)
+            ->where('deleted_at', null)
+            ->distinct('uid')
+            ->count('uid');
+
+        // Manpower Today Absent count: manpower_employee_details for today not in attendances
+        $manpowerTodayAllocatedCardIds = DB::table('manpower_employee_details')
+            ->where('date', $today)
+            ->where('status', '!=', 3)
+            ->pluck('card_id')
+            ->toArray();
+
+        $manpowerTodayAllocatedEmpNos = DB::table('manpower_cards')
+            ->whereIn('id', $manpowerTodayAllocatedCardIds)
+            ->where('status', 1)
+            ->pluck('emp_no')
+            ->toArray();
+
+        $manpowerTodayPresentEmpNos = DB::table('attendances')
+            ->whereIn('uid', $manpowerTodayAllocatedEmpNos)
+            ->where('date', $today)
+            ->where('deleted_at', null)
+            ->distinct('uid')
+            ->pluck('uid')
+            ->toArray();
+
+        $manpowerTodayAbsentCount = count(array_diff($manpowerTodayAllocatedEmpNos, $manpowerTodayPresentEmpNos));
+
+        // Manpower Today Total = Attendance + Absent
+        $manpowerTodayTotal = $manpowerTodayCount + $manpowerTodayAbsentCount;
+
+        // Manpower Yesterday Attendance count
+        $manpowerYesterdayCount = DB::table('attendances')
+            ->whereIn('uid', $manpowerEmpNos)
+            ->where('date', $yesterdayDate)
+            ->where('deleted_at', null)
+            ->distinct('uid')
+            ->count('uid');
+
+        // Manpower Yesterday Absent count
+        $manpowerYesterdayAllocatedCardIds = DB::table('manpower_employee_details')
+            ->where('date', $yesterdayDate)
+            ->where('status', '!=', 3)
+            ->pluck('card_id')
+            ->toArray();
+
+        $manpowerYesterdayAllocatedEmpNos = DB::table('manpower_cards')
+            ->whereIn('id', $manpowerYesterdayAllocatedCardIds)
+            ->where('status', 1)
+            ->pluck('emp_no')
+            ->toArray();
+
+        $manpowerYesterdayPresentEmpNos = DB::table('attendances')
+            ->whereIn('uid', $manpowerYesterdayAllocatedEmpNos)
+            ->where('date', $yesterdayDate)
+            ->where('deleted_at', null)
+            ->distinct('uid')
+            ->pluck('uid')
+            ->toArray();
+
+        $manpowerYesterdayAbsentCount = count(array_diff($manpowerYesterdayAllocatedEmpNos, $manpowerYesterdayPresentEmpNos));
+
+        // Manpower Yesterday Total = Attendance + Absent
+        $manpowerYesterdayTotal = $manpowerYesterdayCount + $manpowerYesterdayAbsentCount;
+
+        return view('home',compact(
+            'empcount','todaycount','todaylatecount','yesterdaycount','yesterdaylatecount',
+            'todayBirthdayCount','thisweekBirthdayCount','thismonthBirthdayCount',
+            'leavedatalist', 'events',
+            'manpowerTodayCount','manpowerTodayAbsentCount','manpowerTodayTotal',
+            'manpowerYesterdayCount','manpowerYesterdayAbsentCount','manpowerYesterdayTotal'
+        ));
     }
 
     public function department_attendance(){
@@ -797,6 +874,299 @@ class HomeController extends Controller
         
         return response() ->json(['result'=>  $htmlTables]);
 
+    }
+
+    //----------------------------------------------------------------------------------
+    // MANPOWER ATTENDANCE DASHBOARD METHODS
+    //----------------------------------------------------------------------------------
+    private function getManpowerAttendanceSub($date, array $empNos)
+    {
+        if (empty($empNos)) {
+            return collect();
+        }
+
+        return DB::table(DB::raw('(
+            SELECT `at1`.`uid`, `at1`.`date`,
+                   MIN(`at1`.`timestamp`) AS `first_time_stamp`,
+                   CASE
+                       WHEN MIN(`at1`.`timestamp`) = MAX(`at1`.`timestamp`) THEN NULL
+                       ELSE MAX(`at1`.`timestamp`)
+                   END AS `last_time_stamp`
+            FROM `attendances` AS `at1`
+            WHERE `at1`.`deleted_at` IS NULL
+            GROUP BY `at1`.`uid`, `at1`.`date`
+        ) AS `sub`'))
+        ->whereIn('sub.uid', $empNos)
+        ->where('sub.date', $date)
+        ->get()
+        ->keyBy('uid');
+    }
+
+    public function manpower_today_attendance()
+    {
+        $today     = Carbon::now()->format('Y-m-d');
+        $yesterday = Carbon::now()->subDay()->format('Y-m-d');
+
+        // All active manpower cards indexed by emp_no
+        $cards = DB::table('manpower_cards')->where('status', 1)->get()->keyBy('emp_no');
+        $empNos = $cards->keys()->toArray();
+
+        // Attendance subquery for today
+        $attendanceSub = $this->getManpowerAttendanceSub($today, $empNos);
+
+        // manpower_employee_details for today, keyed by card_id
+        $detailsToday = DB::table('manpower_employee_details')
+            ->where('date', $today)
+            ->where('status', '!=', 3)
+            ->get()
+            ->keyBy('card_id');
+
+        // manpower_employee_details for yesterday with off_next_day=1, keyed by card_id
+        $detailsYesterday = DB::table('manpower_employee_details')
+            ->where('date', $yesterday)
+            ->where('off_next_day', 1)
+            ->where('status', '!=', 3)
+            ->get()
+            ->keyBy('card_id');
+
+        // Previous-day attendance for off_next_day cards (out time = yesterday last_time_stamp)
+        $prevAttendanceSub = $this->getManpowerAttendanceSub($yesterday, $empNos);
+
+        $rows = [];
+        foreach ($attendanceSub as $empNo => $att) {
+            // Find card
+            $card = $cards->get($empNo);
+            if (!$card) continue;
+
+            $cardId   = $card->id;
+            $cardNo   = $card->card_no;
+            $employee = isset($detailsToday[$cardId]) ? $detailsToday[$cardId]->employee : '-';
+
+            // In time: check off_next_day for previous day
+            if (isset($detailsYesterday[$cardId])) {
+                // In time = out time of previous day attendance (with yesterday's date)
+                $prevAtt = $prevAttendanceSub->get($empNo);
+                if ($prevAtt && $prevAtt->last_time_stamp) {
+                    $inTime = date('Y-m-d H:i', strtotime($prevAtt->last_time_stamp));
+                } else {
+                    $inTime = $att->first_time_stamp ? date('Y-m-d H:i', strtotime($att->first_time_stamp)) : '-';
+                }
+            } else {
+                $inTime = $att->first_time_stamp ? date('Y-m-d H:i', strtotime($att->first_time_stamp)) : '-';
+            }
+
+            $outTime = $att->last_time_stamp ? date('Y-m-d H:i', strtotime($att->last_time_stamp)) : '-';
+
+            $rows[] = [
+                'card_no'  => $cardNo,
+                'employee' => $employee,
+                'in_time'  => $inTime,
+                'out_time' => $outTime,
+            ];
+        }
+
+        $html = '';
+        if (count($rows) > 0) {
+            $html .= '<table class="table table-striped table-bordered table-sm small">';
+            $html .= '<thead><tr><th>#</th><th>Card No</th><th>Employee</th><th>In Time</th><th>Out Time</th></tr></thead><tbody>';
+            foreach ($rows as $i => $row) {
+                $html .= '<tr>';
+                $html .= '<td>' . ($i + 1) . '</td>';
+                $html .= '<td>' . e($row['card_no']) . '</td>';
+                $html .= '<td>' . e($row['employee']) . '</td>';
+                $html .= '<td>' . e($row['in_time']) . '</td>';
+                $html .= '<td>' . e($row['out_time']) . '</td>';
+                $html .= '</tr>';
+            }
+            $html .= '</tbody></table>';
+        } else {
+            $html = '<p>No manpower attendance records found for today.</p>';
+        }
+
+        return response()->json(['result' => $html]);
+    }
+
+    public function manpower_today_absent()
+    {
+        $today  = Carbon::now()->format('Y-m-d');
+        $empNos = DB::table('manpower_cards')->where('status', 1)->pluck('emp_no')->toArray();
+
+        // Cards allocated for today via manpower_employee_details
+        $allocations = DB::table('manpower_employee_details')
+            ->where('date', $today)
+            ->where('status', '!=', 3)
+            ->get();
+
+        // emp_nos present today
+        $presentEmpNos = DB::table('attendances')
+            ->whereIn('uid', $empNos)
+            ->where('date', $today)
+            ->where('deleted_at', null)
+            ->distinct('uid')
+            ->pluck('uid')
+            ->toArray();
+
+        // Index cards by id
+        $cardsById = DB::table('manpower_cards')->where('status', 1)->get()->keyBy('id');
+
+        $rows = [];
+        foreach ($allocations as $detail) {
+            $card = $cardsById->get($detail->card_id);
+            if (!$card) continue;
+            // Absent = not in present list
+            if (!in_array($card->emp_no, $presentEmpNos)) {
+                $rows[] = [
+                    'card_no'  => $card->card_no,
+                    'employee' => $detail->employee,
+                ];
+            }
+        }
+
+        $html = '';
+        if (count($rows) > 0) {
+            $html .= '<table class="table table-striped table-bordered table-sm small">';
+            $html .= '<thead><tr><th>#</th><th>Card No</th><th>Employee</th></tr></thead><tbody>';
+            foreach ($rows as $i => $row) {
+                $html .= '<tr>';
+                $html .= '<td>' . ($i + 1) . '</td>';
+                $html .= '<td>' . e($row['card_no']) . '</td>';
+                $html .= '<td>' . e($row['employee']) . '</td>';
+                $html .= '</tr>';
+            }
+            $html .= '</tbody></table>';
+        } else {
+            $html = '<p>No manpower absent records found for today.</p>';
+        }
+
+        return response()->json(['result' => $html]);
+    }
+
+    public function manpower_yesterday_attendance()
+    {
+        $yesterday    = Carbon::now()->subDay()->format('Y-m-d');
+        $dayBefore    = Carbon::now()->subDays(2)->format('Y-m-d');
+
+        $cards = DB::table('manpower_cards')->where('status', 1)->get()->keyBy('emp_no');
+        $empNos = $cards->keys()->toArray();
+
+        $attendanceSub = $this->getManpowerAttendanceSub($yesterday, $empNos);
+
+        $detailsYesterday = DB::table('manpower_employee_details')
+            ->where('date', $yesterday)
+            ->where('status', '!=', 3)
+            ->get()
+            ->keyBy('card_id');
+
+        $detailsDayBefore = DB::table('manpower_employee_details')
+            ->where('date', $dayBefore)
+            ->where('off_next_day', 1)
+            ->where('status', '!=', 3)
+            ->get()
+            ->keyBy('card_id');
+
+        $prevAttendanceSub = $this->getManpowerAttendanceSub($dayBefore, $empNos);
+
+        $rows = [];
+        foreach ($attendanceSub as $empNo => $att) {
+            $card = $cards->get($empNo);
+            if (!$card) continue;
+
+            $cardId   = $card->id;
+            $cardNo   = $card->card_no;
+            $employee = isset($detailsYesterday[$cardId]) ? $detailsYesterday[$cardId]->employee : '-';
+
+            if (isset($detailsDayBefore[$cardId])) {
+                // In time = out time of day-before attendance (with day-before's date)
+                $prevAtt = $prevAttendanceSub->get($empNo);
+                if ($prevAtt && $prevAtt->last_time_stamp) {
+                    $inTime = date('Y-m-d H:i', strtotime($prevAtt->last_time_stamp));
+                } else {
+                    $inTime = $att->first_time_stamp ? date('Y-m-d H:i', strtotime($att->first_time_stamp)) : '-';
+                }
+            } else {
+                $inTime = $att->first_time_stamp ? date('Y-m-d H:i', strtotime($att->first_time_stamp)) : '-';
+            }
+
+            $outTime = $att->last_time_stamp ? date('Y-m-d H:i', strtotime($att->last_time_stamp)) : '-';
+
+            $rows[] = [
+                'card_no'  => $cardNo,
+                'employee' => $employee,
+                'in_time'  => $inTime,
+                'out_time' => $outTime,
+            ];
+        }
+
+        $html = '';
+        if (count($rows) > 0) {
+            $html .= '<table class="table table-striped table-bordered table-sm small">';
+            $html .= '<thead><tr><th>#</th><th>Card No</th><th>Employee</th><th>In Time</th><th>Out Time</th></tr></thead><tbody>';
+            foreach ($rows as $i => $row) {
+                $html .= '<tr>';
+                $html .= '<td>' . ($i + 1) . '</td>';
+                $html .= '<td>' . e($row['card_no']) . '</td>';
+                $html .= '<td>' . e($row['employee']) . '</td>';
+                $html .= '<td>' . e($row['in_time']) . '</td>';
+                $html .= '<td>' . e($row['out_time']) . '</td>';
+                $html .= '</tr>';
+            }
+            $html .= '</tbody></table>';
+        } else {
+            $html = '<p>No manpower attendance records found for yesterday.</p>';
+        }
+
+        return response()->json(['result' => $html]);
+    }
+
+    public function manpower_yesterday_absent()
+    {
+        $yesterday = Carbon::now()->subDay()->format('Y-m-d');
+        $empNos    = DB::table('manpower_cards')->where('status', 1)->pluck('emp_no')->toArray();
+
+        $allocations = DB::table('manpower_employee_details')
+            ->where('date', $yesterday)
+            ->where('status', '!=', 3)
+            ->get();
+
+        $presentEmpNos = DB::table('attendances')
+            ->whereIn('uid', $empNos)
+            ->where('date', $yesterday)
+            ->where('deleted_at', null)
+            ->distinct('uid')
+            ->pluck('uid')
+            ->toArray();
+
+        $cardsById = DB::table('manpower_cards')->where('status', 1)->get()->keyBy('id');
+
+        $rows = [];
+        foreach ($allocations as $detail) {
+            $card = $cardsById->get($detail->card_id);
+            if (!$card) continue;
+            if (!in_array($card->emp_no, $presentEmpNos)) {
+                $rows[] = [
+                    'card_no'  => $card->card_no,
+                    'employee' => $detail->employee,
+                ];
+            }
+        }
+
+        $html = '';
+        if (count($rows) > 0) {
+            $html .= '<table class="table table-striped table-bordered table-sm small">';
+            $html .= '<thead><tr><th>#</th><th>Card No</th><th>Employee</th></tr></thead><tbody>';
+            foreach ($rows as $i => $row) {
+                $html .= '<tr>';
+                $html .= '<td>' . ($i + 1) . '</td>';
+                $html .= '<td>' . e($row['card_no']) . '</td>';
+                $html .= '<td>' . e($row['employee']) . '</td>';
+                $html .= '</tr>';
+            }
+            $html .= '</tbody></table>';
+        } else {
+            $html = '<p>No manpower absent records found for yesterday.</p>';
+        }
+
+        return response()->json(['result' => $html]);
     }
 
     //----------------------------------------------------------------------------------

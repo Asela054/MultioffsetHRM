@@ -419,6 +419,11 @@ class EmployeeController extends Controller
         $leave_approve_person = $request->leave_approve_person;
         $emergency_contact_person = $request->emergency_contact_person;
         $emergency_contact_tp = $request->emergency_contact_tp;
+        $tin_number = $request->tin_number;
+        $blood_group = $request->blood_group;
+        $weight = $request->weight;
+        $height = $request->height;
+        $fixed_allowance = $request->fixed_allowance;
 
         $employee = Employee::find($id);
 
@@ -485,6 +490,11 @@ class EmployeeController extends Controller
         $employee->epfetf_applicable = $request->input('eptetf');
         $employee->special_attendance = $request->input('specialattendance');
         $employee->emp_etf_name = $request->input('emp_etfname');
+        $employee->tin_number = $tin_number;
+        $employee->blood_group = $blood_group;
+        $employee->weight = $weight;
+        $employee->height = $height;
+        $employee->fixed_allowance = $fixed_allowance;
         $employee->save();
 
         $epfcontribution = $request->input('eptetf');

@@ -40,6 +40,27 @@
                             </div> -->
                         </div>
                     </div>
+                    <!-- Manpower Attendance Card -->
+                    <div class="col-sm-12 col-md-12 col-lg-3 col-xl-3">
+                        <div class="card border h-100 p-3">
+                            <h5 class="title-style"><span>MANPOWER TODAY ATTENDANCE</span></h5>
+                            <div class="card mt-3">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-primary"><i class="fa-light fa-users mr-2"></i>TOTAL EMPLOYEE <span class="ml-auto">{{$manpowerTodayTotal}}</span></li>
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-success pointer" id="manpowerTodayAttendancebtn"><i class="fa-light fa-id-card mr-2"></i>ATTENDANCE <span class="ml-auto">{{$manpowerTodayCount}}</span></li>
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-danger pointer" id="manpowerTodayAbsentbtn"><i class="fa-light fa-calendar-xmark mr-2"></i>ABSENT <span class="ml-auto">{{$manpowerTodayAbsentCount}}</span></li>
+                                </ul>
+                            </div>
+                            <h5 class="title-style my-3"><span>MANPOWER YESTERDAY ATTENDANCE</span></h5>
+                            <div class="card mt-3">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-primary"><i class="fa-light fa-users mr-2"></i>TOTAL EMPLOYEE <span class="ml-auto">{{$manpowerYesterdayTotal}}</span></li>
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-success pointer" id="manpowerYesterdayAttendancebtn"><i class="fa-light fa-id-card mr-2"></i>ATTENDANCE <span class="ml-auto">{{$manpowerYesterdayCount}}</span></li>
+                                    <li class="list-group-item d-flex bd-highlight list-group-item-danger pointer" id="manpowerYesterdayAbsentbtn"><i class="fa-light fa-calendar-xmark mr-2"></i>ABSENT <span class="ml-auto">{{$manpowerYesterdayAbsentCount}}</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-sm-12 col-md-auto">
                         <div class="h-100 mt-sm-0 mt-3">
                             <div class="calendar border h-100">
@@ -323,7 +344,93 @@
     </div>
 </div>
 
+<!-- Manpower Today Attendance Modal -->
+<div class="modal fade" id="manpowerTodayAttendanceModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title" id="staticBackdropLabel">Manpower Attendance (<?php echo date('Y-m-d') ?>)</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="max-height: 40rem; overflow-y: auto;">
+                <div class="row">
+                    <div class="col">
+                        <div id="manpowerTodayAttendanceTable"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Manpower Today Absent Modal -->
+<div class="modal fade" id="manpowerTodayAbsentModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title" id="staticBackdropLabel">Manpower Absent (<?php echo date('Y-m-d') ?>)</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="max-height: 40rem; overflow-y: auto;">
+                <div class="row">
+                    <div class="col">
+                        <div id="manpowerTodayAbsentTable"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Manpower Yesterday Attendance Modal -->
+<div class="modal fade" id="manpowerYesterdayAttendanceModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title" id="staticBackdropLabel">Manpower Yesterday Attendance (<?php echo date('Y-m-d', strtotime('-1 day')); ?>)</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="max-height: 40rem; overflow-y: auto;">
+                <div class="row">
+                    <div class="col">
+                        <div id="manpowerYesterdayAttendanceTable"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Manpower Yesterday Absent Modal -->
+<div class="modal fade" id="manpowerYesterdayAbsentModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header p-2">
+                <h5 class="modal-title" id="staticBackdropLabel">Manpower Yesterday Absent (<?php echo date('Y-m-d', strtotime('-1 day')); ?>)</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="max-height: 40rem; overflow-y: auto;">
+                <div class="row">
+                    <div class="col">
+                        <div id="manpowerYesterdayAbsentTable"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 
@@ -741,7 +848,7 @@ $(document).ready( function () {
         $('#yesterdaylateattendanceformModal').modal('show');
     });
 
-    $('#yesterdayabsentbtn').click(function(){
+        $('#yesterdayabsentbtn').click(function(){
         $.ajax({
             url: "{{ route('getdashboard_department_yesterdayabsent') }}",
             method: "GET",
@@ -754,6 +861,58 @@ $(document).ready( function () {
         });
 
         $('#yesterdayabsentformModal').modal('show');
+    });
+
+    // Manpower Today Attendance
+    $('#manpowerTodayAttendancebtn').click(function(){
+        $.ajax({
+            url: "{{ route('getdashboard_manpower_today_attendance') }}",
+            method: "GET",
+            dataType: "json",
+            success: function (data) {
+               $('#manpowerTodayAttendanceTable').html(data.result);
+            }
+        });
+        $('#manpowerTodayAttendanceModal').modal('show');
+    });
+
+    // Manpower Today Absent
+    $('#manpowerTodayAbsentbtn').click(function(){
+        $.ajax({
+            url: "{{ route('getdashboard_manpower_today_absent') }}",
+            method: "GET",
+            dataType: "json",
+            success: function (data) {
+               $('#manpowerTodayAbsentTable').html(data.result);
+            }
+        });
+        $('#manpowerTodayAbsentModal').modal('show');
+    });
+
+    // Manpower Yesterday Attendance
+    $('#manpowerYesterdayAttendancebtn').click(function(){
+        $.ajax({
+            url: "{{ route('getdashboard_manpower_yesterday_attendance') }}",
+            method: "GET",
+            dataType: "json",
+            success: function (data) {
+               $('#manpowerYesterdayAttendanceTable').html(data.result);
+            }
+        });
+        $('#manpowerYesterdayAttendanceModal').modal('show');
+    });
+
+    // Manpower Yesterday Absent
+    $('#manpowerYesterdayAbsentbtn').click(function(){
+        $.ajax({
+            url: "{{ route('getdashboard_manpower_yesterday_absent') }}",
+            method: "GET",
+            dataType: "json",
+            success: function (data) {
+               $('#manpowerYesterdayAbsentTable').html(data.result);
+            }
+        });
+        $('#manpowerYesterdayAbsentModal').modal('show');
     });
 
      // birthday part

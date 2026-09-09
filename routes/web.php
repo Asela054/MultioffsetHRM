@@ -36,6 +36,12 @@ Route::get('/getdashboard_department_absent', 'HomeController@department_absent'
 
 Route::get('/getdashboard_AttendentChart', 'HomeController@getAttendentChart')->name('getdashboard_AttendentChart');
 
+/* Manpower Attendance Dashboard */
+Route::get('/getdashboard_manpower_today_attendance', 'HomeController@manpower_today_attendance')->name('getdashboard_manpower_today_attendance');
+Route::get('/getdashboard_manpower_today_absent', 'HomeController@manpower_today_absent')->name('getdashboard_manpower_today_absent');
+Route::get('/getdashboard_manpower_yesterday_attendance', 'HomeController@manpower_yesterday_attendance')->name('getdashboard_manpower_yesterday_attendance');
+Route::get('/getdashboard_manpower_yesterday_absent', 'HomeController@manpower_yesterday_absent')->name('getdashboard_manpower_yesterday_absent');
+
 
 Route::resource('FingerprintDevice', 'FingerprintDeviceController');
 //Route::post('addFingerprintDevice',['uses' => 'FingerprintDeviceController@store', 'as' => 'addFingerprintDevice']); 
@@ -938,6 +944,20 @@ Route::post('get_employee_department', 'SpecialNoteController@getEmployeeDepartm
 Route::get('/loanReport', 'LoanReportController@loanReport')->name('loanReport'); 
 Route::get('/loanInstallmentReport', 'LoanReportController@loanInstallmentReport')->name('loanInstallmentReport'); 
 /*-- End loan report----*/
+
+/*-- ManPower Employee----*/
+/*-- Card details ----*/
+Route::resource('ManpowerCard', 'ManPowerEmployee\CardDetailController');
+Route::get('ManpowerCard',['uses' => 'ManPowerEmployee\CardDetailController@index', 'as' => 'ManpowerCard']); 
+Route::post('addManpowerCard',['uses' => 'ManPowerEmployee\CardDetailController@store', 'as' => 'addManpowerCard']); 
+Route::post('ManpowerCard/update', 'ManPowerEmployee\CardDetailController@update')->name('ManpowerCard.update');
+Route::get('ManpowerCard/destroy/{id}', 'ManPowerEmployee\CardDetailController@destroy');
+/*-- Card details ----*/
+/*-- Employee details ----*/
+Route::get('/Manpoweremployee' ,'ManPowerEmployee\EmployeeAllocationController@index')->name('Manpoweremployee');
+Route::post('/Manpoweremployeeinsert' ,'ManPowerEmployee\EmployeeAllocationController@insert')->name('Manpoweremployee.insert');
+Route::post('/Manpoweremployeedelete' ,'ManPowerEmployee\EmployeeAllocationController@delete')->name('Manpoweremployee.delete');
+/*-- Employee details ----*/
 
 Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
